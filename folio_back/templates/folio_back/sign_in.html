@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %} Sign In {% endblock %}
+
+{% block content %}
+    <div class="sign-up sign-in-bg">
+
+        <form class="sign-up-form" role="form" action="" method="post">
+            <h2>Welcome back</h2>
+            {% if form.errors %}
+                <div class="form-errors">
+                    {% for error in form.non_field_errors %}
+                        <p >{{error}}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% csrf_token %}
+            {% for field in form %}
+                {{ field }}
+            {% endfor %}
+
+            <input class="sign-up-submit" type="submit" value="Log In">
+            <p class="bottom-txt">New here?</p>
+            <a href="{% url 'sign_up'%}">
+                <input type="button" value="Sign Up">
+            </a>
+        </form>
+        {% block oauth2 %}
+            {% include "oauth2_block.html" %}
+        {% endblock %}
+    </div>
+{% endblock %}

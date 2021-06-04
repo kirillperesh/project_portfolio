@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+
+{% block title %} Add new tile {% endblock %}
+
+{% block content %}
+<div class="">
+    <form role="form" action="" method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                {{ field }}
+            </div>
+        {% endfor %}
+        <input type="submit" value="Save">
+    </form>
+</div>
+
+{% endblock %}

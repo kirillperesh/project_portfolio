@@ -1,0 +1,3 @@
+coverage run --source='.' --omit=*/env/*,*/migrations/* manage.py test -v 2
+coverage html
+python manage.py runserver

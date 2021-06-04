@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %} All tiles {% endblock %}
+
+{% block content %}
+<div class="card-group">
+    {% for tile in tiles %}
+        <div>
+            <div class="card orage-bg transparent m-1 {% if not tile.is_active %}deleted-bg{% endif %}">
+                <a href="{% url 'edit_tile' slug=tile.slug %}">
+                    {% if tile.bg_is_img %}
+                    <img class="card-img-top" src="{{tile.background_link}}"></img>
+                    {% else %}
+                    <iframe class="card-img-top" src="{{tile.background_link}}"></iframe>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{tile.title|linebreaks|truncatechars:80}}</h5>
+                        <div class="card-text-container">
+                            <p class="card-text">{{tile.post|wordwrap:80|linebreaks|truncatechars:310}}</p>
+                        </div>
+                    </div>
+                </a>
+                <small class="text-muted">
+                    {% block tile-footer %}
+                        <span>
+                            {% if tile.time_created == tile.last_modified %}
+                            Created on {{tile.time_created}}
+                            {% else %}
+                            Edited on {{tile.last_modified}}
+                            {% endif %} by <a href="{% url 'profile_tiles' username=tile.author %}">{{tile.author}}</a>
+                        </span>
+                        <span class="tile-btn-group tile-btn-group-bottom">
+                            {% if tile.perm_edit %}<a href="{% url 'edit_tile' slug=tile.slug %}">
+                                <button type="button" class="btn btn-small">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </a>{% endif %}
+                            {% if tile.perm_del %}<a href="{% url 'delete_tile' %}?slug={{tile.slug}}">
+                            <button type="button" class="btn btn-small">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            </a>{% endif %}
+                        </span>
+                    {% endblock %}
+                </small>
+            </div>
+        </div>
+
+    {% endfor %}
+</div>
+<nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center">
+    <li class="page-item">
+        <a class="page-link" href="?page=1" aria-label="First">
+        <span aria-hidden="true">&laquo;</span>
+        <span class="sr-only">First page</span>
+        </a>
+    </li>
+    {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">{{page_obj.previous_page_number}}</a>
+        <span class="sr-only">Previous page</span></li>
+    {% endif %}
+        <li class="page-item active"><a class="page-link" href="">{{page_obj.number}}</a>
+        <span class="sr-only">Current page</span></li>
+    {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number  }}">{{page_obj.next_page_number}}</a>
+        <span class="sr-only">Next page</span></li>
+    {% endif %}
+    <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+        <span aria-hidden="true">&raquo;</span>
+        <span class="sr-only">Last page</span>
+        </a>
+    </li>
+    </ul>
+</nav>
+
+{% endblock %}
