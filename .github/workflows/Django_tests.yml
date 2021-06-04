@@ -51,8 +51,9 @@ jobs:
         python manage.py makemigrations
         python manage.py migrate
 
-    # Runs tests, checks coverage and print out a report
-    # - name: Run tests and coverage
-    #   run: |
+    Runs tests # and uncomment to check coverage and print out a report
+    - name: Run tests and coverage
+      run: |
+        manage.py test lmae
     #     coverage run --source='.' --omit=*/venv/*,*/migrations/* manage.py test lmae
     #     coverage report
