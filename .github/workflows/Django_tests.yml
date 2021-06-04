@@ -54,6 +54,6 @@ jobs:
     # Runs tests (and optionally) uncomment to check coverage and print out a report
     - name: Run tests and coverage
       run: |
-        manage.py test lmae
+        python manage.py test
     #     coverage run --source='.' --omit=*/venv/*,*/migrations/* manage.py test lmae
     #     coverage report
