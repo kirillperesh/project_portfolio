@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.vk',
 
+    'taggit',
+
     'folio_back',
     'glyke_back',
 ]
@@ -137,6 +139,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
 
 LOGIN_URL = 'sign_in'
 LOGOUT_URL = 'logout'
@@ -144,3 +149,5 @@ LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'sign_in'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+TAGGIT_CASE_INSENSITIVE = True
