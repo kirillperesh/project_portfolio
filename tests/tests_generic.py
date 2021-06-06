@@ -1,10 +1,11 @@
-from django.test import TestCase, SimpleTestCase, Client, TransactionTestCase
+from django.test import TestCase, SimpleTestCase, Client, TransactionTestCase, tag
 from django.urls import reverse, resolvers
 from django.conf import settings
 import importlib
 import types, os
 
 
+@tag('gitignore')
 class AllUrlsTest(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -43,7 +44,7 @@ class AllUrlsTest(TestCase):
         for url, name in self.urls_to_test.items():
             self.assertIsNotNone(name, f'\nPattern {url} has no name')
 
-    def test_responses(self, allowed_http_codes=[200, 302, 405], logout_url=reverse('logout'), default_kwargs={}, quiet=False):
+    def test_responses(self, allowed_http_codes=[200, 302, 405], logout_url=reverse('logout'), default_kwargs={}, quiet=True):
         """
         Test all pattern in root urlconf and included ones (including allauth urls).
         Do GET requests only.
@@ -88,3 +89,13 @@ class AllUrlsTest(TestCase):
             status = "" if response.status_code == 200 else str(response.status_code)
             if not quiet:
                 print(status + ' ' + url)
+
+class BasicUrlsTest(TestCase):
+    def test_basic_urls(self, allowed_http_codes=[200, 302, 405], quiet=True):
+        named_urls = ['home', 'sign_in', 'sign_up', 'logout']
+        for named_url in named_urls:
+            response = self.client.get(reverse(named_url))
+            self.assertIn(response.status_code, allowed_http_codes)
+            if not quiet:
+                status = "" if response.status_code == 200 else str(response.status_code)
+                print(status + ' ' + named_url)
