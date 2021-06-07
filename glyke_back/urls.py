@@ -4,6 +4,7 @@ from folio_back import views
 from django.contrib.auth.views import LogoutView
 
 
+
 urlpatterns = [
     path("", views.Home.as_view(), name="home"),
     path("sign_up", views.SignUpView.as_view(), name="sign_up"),
