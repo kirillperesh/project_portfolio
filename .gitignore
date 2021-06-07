@@ -79,9 +79,6 @@ celerybeat-schedule
 # SageMath parsed files
 *.sage.py
 
-# dotenv
-.env
-
 # virtualenv
 .venv
 venv/
@@ -110,8 +107,8 @@ ENV/
 *~
 
 # static and media files
-/static
-/media
+# /static
+*/media
 
 # Ignore Django Migrations in Development if you are working on team
 
