@@ -35,4 +35,5 @@ if settings.DEBUG: urlpatterns += static(settings.MEDIA_URL, document_root=setti
 urlpatterns += [
     path('accounts/', include('allauth.socialaccount.providers.google.urls')),
     path('accounts/', include('allauth.socialaccount.providers.vk.urls')),
-    ]
+    path('photologue/', include('photologue.urls', namespace='photologue')),
+]

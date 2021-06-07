@@ -10,7 +10,10 @@ defusedxml==0.7.1
 Django==3.2.4
 django-allauth==0.44.0
 django-model-utils==4.1.1
+django-photologue==3.13
+django-sortedm2m==3.0.2
 django-taggit==1.4.0
+ExifRead==2.3.2
 idna==2.10
 isort==5.8.0
 lazy-object-proxy==1.6.0
