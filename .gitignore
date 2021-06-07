@@ -107,7 +107,7 @@ ENV/
 *~
 
 # static and media files
-*/static
+# /static
 */media
 
 # Ignore Django Migrations in Development if you are working on team
