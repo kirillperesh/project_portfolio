@@ -45,7 +45,9 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.vk',
 
-    'taggit',
+    'taggit', # tags app
+    'photologue', # an to assign multiple photos to a model instance
+    'sortedm2m', # for photologue
 
     'folio_back',
     'glyke_back',

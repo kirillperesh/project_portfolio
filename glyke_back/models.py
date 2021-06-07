@@ -8,6 +8,9 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from taggit.managers import TaggableManager
 from django.contrib.auth.models import User
 
+from photologue import models as photo_models
+
+# TODO ADD READABLE NAME IN EVERY FIELD
 
 def get_deleted_instance(model):
     global get_deleted_instance_decorated
@@ -39,6 +42,9 @@ class Category(TimeStampedModel):
     is_active = models.BooleanField(default=True)
     picture = models.ImageField(default = f'category/no_image.png', upload_to = get_upload_dir('category'), max_length = 255)
 
+    class Meta:
+        verbose_name_plural = "categories"
+
     def __str__(self) -> str:
         return self.name
 
@@ -59,8 +65,7 @@ class Product(Price, TimeStampedModel):
     category = models.ForeignKey(Category, on_delete=models.SET(get_deleted_instance(Category)), related_name='products', blank=False)
     tags = TaggableManager()
     stock = models.IntegerField(validators=[MinValueValidator(0)], default=0)
-
-    # TODO pictures
+    photos = models.OneToOneField(photo_models.Gallery, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self) -> str:
         return self.name
