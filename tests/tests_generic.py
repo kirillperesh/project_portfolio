@@ -12,17 +12,16 @@ class AllUrlsTest(TestCase):
         """Excludes all Virtual Env urls and native django urls
         Tests if all the patterns have names"""
         cls.urls_module = importlib.import_module(settings.ROOT_URLCONF)
-        cls.env_path = os.environ['VIRTUAL_ENV']
+        cls.env_path = os.environ['VIRTUAL_ENV'].lower()
         cls.urls_to_test = dict() # pattern - fullname pairs
         cls.patterns_to_test = list()
-
 
         for pattern in cls.urls_module.urlpatterns:
             if isinstance(pattern, resolvers.URLPattern):
                 cls.patterns_to_test.append(pattern)
                 continue
             if hasattr(pattern, 'urlconf_module'):
-                if isinstance(pattern.urlconf_module, types.ModuleType) and not cls.env_path in pattern.urlconf_module.__file__:
+                if isinstance(pattern.urlconf_module, types.ModuleType) and not cls.env_path in pattern.urlconf_module.__file__.lower():
                     cls.patterns_to_test.append(pattern)
 
         def check_urls_names(urlpatterns, prefix=''):
@@ -46,7 +45,7 @@ class AllUrlsTest(TestCase):
 
     def test_responses(self, allowed_http_codes=[200, 302, 405], logout_url=reverse('logout'), default_kwargs={}, quiet=True):
         """
-        Test all pattern in root urlconf and included ones (including allauth urls).
+        Test all patterns in root urlconf and included ones.
         Do GET requests only.
         A pattern is skipped if any of the conditions applies:
             - pattern has no name in urlconf
@@ -91,8 +90,11 @@ class AllUrlsTest(TestCase):
                 print(status + ' ' + url)
 
 class BasicUrlsTest(TestCase):
-    def test_basic_urls(self, allowed_http_codes=[200, 302, 405], quiet=True):
-        named_urls = ['home', 'sign_in', 'sign_up', 'logout']
+    """
+    Tests a list of URLs
+    If @quiet=False, print all the urls checked. If status code of the response is not 200, print the status code.
+    """
+    def test_basic_urls(self, allowed_http_codes=[200, 302, 405], named_urls = ['home', 'sign_in', 'sign_up', 'logout'], quiet=True):
         for named_url in named_urls:
             response = self.client.get(reverse(named_url))
             self.assertIn(response.status_code, allowed_http_codes)
