@@ -107,11 +107,12 @@ ENV/
 *~
 
 # static and media files
-# /static
+# **/static/
 */media
 media/
-# Ignore Django Migrations in Development if you are working on team
 
-# Only for Development only
+# Ignore Django Migrations in Development if you are working on team
+# For Development only
 */migrations/
 */migrations
+

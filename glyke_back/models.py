@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models.deletion import SET_NULL
+from django.db.models.expressions import F
 from django.utils import timezone, dateformat
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -82,6 +83,7 @@ class Product(Price, TimeStampedModel):
                                  related_name='products',
                                  blank=True,
                                  null=True)
+    is_active = models.BooleanField(_('is active'), default=True)
     tags = TaggableManager()
     stock = models.IntegerField(_('stock'), validators=[MinValueValidator(0)], default=0)
     photos = models.OneToOneField(photo_models.Gallery,
@@ -106,12 +108,14 @@ class Check(Price, TimeStampedModel):
         ordering = ['-created']
 
     def __str__(self):
-        return f'{self.created} | {self.buyer.username}'
+        name = self.customer.username if self.customer else 'no_name'
+        return f'{self.created} | {name}'
 
     def save(self, *args, **kwargs):
         if not self.pk:
             time_stamp = dateformat.format(timezone.localtime(timezone.now()), 'His_dmy')
-            self.number = f'{self.buyer.username[:5]}_{time_stamp}'
+            prefix = self.customer.username[:5] if self.customer else 'no_name'
+            self.number = f'{prefix}_{time_stamp}'
         super(Check, self).save(*args, **kwargs)
 
 
