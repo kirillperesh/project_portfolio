@@ -9,7 +9,8 @@ import types, os
 class AllUrlsTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        """Excludes all Virtual Env urls and native django urls
+        """Collects all URLs from URLCONF
+        Excludes all Virtual Env urls and native django urls
         Tests if all the patterns have names"""
         cls.urls_module = importlib.import_module(settings.ROOT_URLCONF)
         cls.env_path = os.environ['VIRTUAL_ENV'].lower()
