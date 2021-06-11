@@ -10,8 +10,6 @@ from django.contrib.auth.models import User
 
 from photologue import models as photo_models
 
-# TODO ADD READABLE NAME IN EVERY FIELD
-
 def get_deleted_instance(model):
     global get_deleted_instance_decorated
     def get_deleted_instance_decorated():
@@ -34,13 +32,19 @@ def get_upload_dir(base_dir):
 
 
 class Category(TimeStampedModel):
-    name = models.CharField(max_length=255, unique=True)
-    description = models.TextField(max_length=1000, blank=True)
-
-    # TODO and post_delete signal for this thing to switch category to next parent or unknown one https://stackoverflow.com/questions/43857902/django-set-foreign-key-to-parent-value-on-delete
-    parent = models.ForeignKey('self', on_delete=models.SET_NULL, related_name='child_categories', blank=True, null=True)
-    is_active = models.BooleanField(default=True)
-    picture = models.ImageField(default = f'category/no_image.png', upload_to = get_upload_dir('category'), max_length = 255)
+    name = models.CharField(_('name'), max_length=255, unique=True)
+    description = models.TextField(_('description'), max_length=1000, blank=True)
+    parent = models.ForeignKey('self',
+                               on_delete=models.DO_NOTHING, # switches to category's parent or null. handled via Category's pre_delete signal
+                               verbose_name=_('parent'),
+                               related_name='child_categories',
+                               blank=True,
+                               null=True)
+    is_active = models.BooleanField(_('is active'), default=True)
+    picture = models.ImageField(_('picture'),
+                                default = f'category/no_image.png',
+                                upload_to = get_upload_dir('category'),
+                                max_length = 255)
 
     class Meta:
         verbose_name_plural = "categories"
@@ -48,31 +52,55 @@ class Category(TimeStampedModel):
     def __str__(self) -> str:
         return self.name
 
+
 class Price(models.Model):
-    cost_price = models.DecimalField(max_digits=6, decimal_places=2, validators=[MinValueValidator(0)], default=0)
-    selling_price = models.DecimalField(max_digits=6, decimal_places=2, validators=[MinValueValidator(0)], default=0)
-    discount_percent = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(80)], default=0)
-    profit = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    cost_price = models.DecimalField(_('cost price'),
+                                     max_digits=6,
+                                     decimal_places=2,
+                                     validators=[MinValueValidator(0)],
+                                     default=0)
+    selling_price = models.DecimalField(_('selling price'),
+                                        max_digits=6,
+                                        decimal_places=2,
+                                        validators=[MinValueValidator(0)],
+                                        default=0)
+    discount_percent = models.IntegerField(_('discount, %'),
+                                           validators=[MinValueValidator(0),
+                                           MaxValueValidator(80)],
+                                           default=0)
+    profit = models.DecimalField(_('profit'), max_digits=6, decimal_places=2, default=0)
 
     class Meta:
         abstract = True
 
 class Product(Price, TimeStampedModel):
-    name = models.CharField(max_length=255, unique=True)
-    description = models.TextField(max_length=3000, blank=True)
-
-    # TODO and post_delete signal for this thing to switch category to next parent or unknown one https://stackoverflow.com/questions/43857902/django-set-foreign-key-to-parent-value-on-delete
-    category = models.ForeignKey(Category, on_delete=models.SET(get_deleted_instance(Category)), related_name='products', blank=False)
+    name = models.CharField(_('name'), max_length=255, unique=True)
+    description = models.TextField(_('description'), max_length=3000, blank=True)
+    category = models.ForeignKey(Category,
+                                 on_delete=models.DO_NOTHING, # switches to category's parent or null. handled via Category's pre_delete signal
+                                 verbose_name=_('category'),
+                                 related_name='products',
+                                 blank=True,
+                                 null=True)
     tags = TaggableManager()
-    stock = models.IntegerField(validators=[MinValueValidator(0)], default=0)
-    photos = models.OneToOneField(photo_models.Gallery, on_delete=models.SET_NULL, blank=True, null=True)
+    stock = models.IntegerField(_('stock'), validators=[MinValueValidator(0)], default=0)
+    photos = models.OneToOneField(photo_models.Gallery,
+                                  on_delete=models.SET_NULL,
+                                  verbose_name=_('photos'),
+                                  blank=True,
+                                  null=True)
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.name
 
 class Check(Price, TimeStampedModel):
-    number = models.CharField(max_length=100, blank=True)
-    buyer = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='checks', blank=False, null=True)
+    number = models.CharField(_('number'), max_length=100, blank=True)
+    customer = models.ForeignKey(User,
+                              on_delete=models.SET_NULL,
+                              verbose_name=_('customer'),
+                              related_name='checks',
+                              blank=False,
+                              null=True)
 
     class Meta:
         ordering = ['-created']
@@ -88,10 +116,18 @@ class Check(Price, TimeStampedModel):
 
 
 class CheckLine(Price):
-    parent_check = models.ForeignKey(Check, on_delete=models.CASCADE, related_name='check_lines', blank=False)
-    line_number = models.PositiveIntegerField(blank=True)
-    product = models.ForeignKey(Product, on_delete=models.SET(get_deleted_instance(Product)), related_name='check_lines', blank=False)
-    quantity = models.PositiveIntegerField(default=1)
+    parent_check = models.ForeignKey(Check,
+                                     on_delete=models.CASCADE,
+                                     verbose_name=_('check'),
+                                     related_name='check_lines',
+                                     blank=False)
+    line_number = models.PositiveIntegerField(_('line number'), blank=True)
+    product = models.ForeignKey(Product,
+                                on_delete=models.SET(get_deleted_instance(Product)),
+                                verbose_name=_('product'),
+                                related_name='check_lines',
+                                blank=False)
+    quantity = models.PositiveIntegerField(_('quantity'), default=1)
 
     def __str__(self):
         return f'{self.parent_check} | Line: {self.line_number}'
