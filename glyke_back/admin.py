@@ -14,3 +14,5 @@ for model in models:
         admin.site.register(model, TempAdmin)
     except admin.sites.AlreadyRegistered:
         pass
+
+
