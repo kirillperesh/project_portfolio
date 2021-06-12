@@ -1,15 +1,18 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from unittest.mock import MagicMock
 from django.apps import apps
 from django.utils.crypto import get_random_string
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
+import tempfile, shutil # temp dir to test filefields (test_auto_upload_dir_method)
 
 from glyke_back.models import *
 from glyke_back import signals
 
 
 
+MEDIA_ROOT = tempfile.mkdtemp() # temp dir to test filefields (test_auto_upload_dir_method)
+@override_settings(MEDIA_ROOT=MEDIA_ROOT) # temp dir to test filefields (test_auto_upload_dir_method)
 class ModelsTest(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -24,7 +27,10 @@ class ModelsTest(TestCase):
         cls.check = Check.objects.get_or_create(number=1, customer=None)[0]
         cls.check_line = CheckLine.objects.get_or_create(parent_check=cls.check, product=cls.product_child)[0]
 
-
+    @classmethod
+    def tearDownClass(cls):  # delete temp dir on teardown
+        shutil.rmtree(MEDIA_ROOT, ignore_errors=True)
+        super().tearDownClass()
 
     def test_pre_delete_signals(self, instance_list=[]):
         """Assert pre_delete signals are sent with proper arguments"""
@@ -98,48 +104,15 @@ class ModelsTest(TestCase):
         checkline_2 = CheckLine.objects.create(parent_check=check_no_user, product=self.product_child)
         self.assertEqual(checkline_2.line_number, check_no_user.check_lines.count())
 
-    # def test_auto_upload_dir_method(self):
-    #     import tempfile
-    #     self.assertEqual(str(self.parent_cat.picture), 'category/no_image.png')
-    #     rnd_str = get_random_string(length=10)
-    #     print(self.parent_cat.picture)
-    #     self.parent_cat.picture = tempfile.NamedTemporaryFile(suffix=".jpg").name
-    #     print(self.parent_cat.picture)
-    #     self.parent_cat.save()
-    #     print(self.parent_cat.picture)
-    #     # self.parent_cat.picture = SimpleUploadedFile(name=rnd_str, content=open('./media', 'rb').read(), content_type='image/jpeg')
+    def test_auto_upload_dir_method(self):
+        """Assert models.get_upload_dir function works properly"""
+        # case: category w/o picture
+        self.assertEqual(str(self.parent_cat.picture), 'category/no_image.png')
 
-    #     from django.core.files import File
-    #     file_mock = MagicMock(spec=File)
-    #     self.parent_cat.picture = file_mock
+        # case: category w/ temporary random picture
+        rnd_file_name = get_random_string(length=10) + '.jpg'
+        self.parent_cat.picture = SimpleUploadedFile(rnd_file_name, b"these are the file contents") # temporary byte file for testing purposes
+        self.parent_cat.save()
+        cat_name_slug = slugify(self.parent_cat.name.lower())
+        self.assertEqual(str(self.parent_cat.picture), f'category/{cat_name_slug}/{rnd_file_name}')
 
-
-
-    #     print(self.parent_cat.picture)
-
-
-
-
-
-
-
-
-
-
-
-#  def test_on_delete_signals(self):
-#         """Assert signal is sent with proper arguments"""
-
-#         # Create handler
-#         handler = MagicMock()
-#         signals.pre_delete.connect(handler, sender=Category)
-
-#         # Post the form or do what it takes to send the signal
-#         # signals.pre_delete.send(sender=Category, instance = self.parent_cat, using='default')
-
-#         self.parent_cat.delete()
-
-#         # Assert the signal was called only once with the args
-#         handler.assert_called_once_with(signal=signals.pre_delete, sender=Category, instance = self.parent_cat, using='default')
-
-#         self.assertIsNone(self.sub_parent_cat.parent)

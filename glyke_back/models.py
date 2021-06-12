@@ -12,6 +12,10 @@ from django.contrib.auth.models import User
 from photologue import models as photo_models
 
 def get_deleted_instance(model):
+    """Returns a callable to get a deleted instance of given model.
+    Meant to be used as an argument for on_delete.SET().
+    example: on_delete=models.SET(get_deleted_instance(Product))
+    Also adds a description and a tag if the model has such attributes."""
     global get_deleted_instance_decorated
     def get_deleted_instance_decorated():
         deleted_instance, created = model.objects.get_or_create(name='_deleted_')
@@ -24,8 +28,13 @@ def get_deleted_instance(model):
         return deleted_instance
     return get_deleted_instance_decorated
 
-def get_upload_dir(base_dir, no_image_name=''):
-    if no_image_name: return f'{base_dir.lower()}/{no_image_name}'
+def get_upload_dir(base_dir, no_file_name=''):
+    """Returns a callable to get a file path, using base_dir as root.
+    Meant to be used as an upload_to argument of models.FileField.
+    Returns file path of no_file_name if provided.
+    example: default = get_upload_dir('category', no_file_name='no_image.png'),
+             upload_to = get_upload_dir('category')"""
+    if no_file_name: return f'{base_dir.lower()}/{no_file_name}'
     global get_upload_dir_decorated
     def get_upload_dir_decorated(instance, filename):
         name = slugify(instance.name.lower())
@@ -44,7 +53,7 @@ class Category(TimeStampedModel):
                                null=True)
     is_active = models.BooleanField(_('is active'), default=True)
     picture = models.ImageField(_('picture'),
-                                default = get_upload_dir('category', 'no_image.png'),
+                                default = get_upload_dir('category', no_file_name='no_image.png'),
                                 upload_to = get_upload_dir('category'),
                                 max_length = 255)
 
