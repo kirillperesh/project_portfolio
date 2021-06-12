@@ -24,7 +24,8 @@ def get_deleted_instance(model):
         return deleted_instance
     return get_deleted_instance_decorated
 
-def get_upload_dir(base_dir):
+def get_upload_dir(base_dir, no_image_name=''):
+    if no_image_name: return f'{base_dir.lower()}/{no_image_name}'
     global get_upload_dir_decorated
     def get_upload_dir_decorated(instance, filename):
         name = slugify(instance.name.lower())
@@ -43,14 +44,14 @@ class Category(TimeStampedModel):
                                null=True)
     is_active = models.BooleanField(_('is active'), default=True)
     picture = models.ImageField(_('picture'),
-                                default = f'category/no_image.png',
+                                default = get_upload_dir('category', 'no_image.png'),
                                 upload_to = get_upload_dir('category'),
                                 max_length = 255)
 
     class Meta:
         verbose_name_plural = "categories"
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.name
 
 
@@ -109,7 +110,7 @@ class Check(Price, TimeStampedModel):
 
     def __str__(self):
         name = self.customer.username if self.customer else 'no_name'
-        return f'{self.created} | {name}'
+        return f"{self.created.strftime('%H:%M:%S %d.%m.%y')} | {name}"
 
     def save(self, *args, **kwargs):
         if not self.pk:
