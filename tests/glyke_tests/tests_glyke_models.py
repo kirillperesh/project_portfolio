@@ -105,7 +105,7 @@ class ModelsTest(TestCase):
         self.assertEqual(checkline_2.line_number, check_no_user.check_lines.count())
 
     def test_auto_upload_dir_method(self):
-        """Assert get_upload_dir function works properly"""
+        """Assert models.get_upload_dir function works properly"""
         # case: category w/o picture
         self.assertEqual(str(self.parent_cat.picture), 'category/no_image.png')
 
@@ -115,6 +115,5 @@ class ModelsTest(TestCase):
         self.parent_cat.save()
         cat_name_slug = slugify(self.parent_cat.name.lower())
         self.assertEqual(str(self.parent_cat.picture), f'category/{cat_name_slug}/{rnd_file_name}')
-
 
 
