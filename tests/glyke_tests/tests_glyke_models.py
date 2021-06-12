@@ -114,8 +114,5 @@ class ModelsTest(TestCase):
         self.parent_cat.picture = SimpleUploadedFile(rnd_file_name, b"these are the file contents") # temporary byte file for testing purposes
         self.parent_cat.save()
         cat_name_slug = slugify(self.parent_cat.name.lower())
-        self.assertEqual(str(self.parent_cat.picture), f'category/{cat_name_slug}/{rnd_file_name}')
-        
-        print(MEDIA_ROOT)
-
+        self.assertEqual(str(self.parent_cat.picture), f'category/{cat_name_slug}/{rnd_file_name}')       
 
