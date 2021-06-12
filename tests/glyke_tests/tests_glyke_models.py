@@ -116,4 +116,3 @@ class ModelsTest(TestCase):
         cat_name_slug = slugify(self.parent_cat.name.lower())
         self.assertEqual(str(self.parent_cat.picture), f'category/{cat_name_slug}/{rnd_file_name}')
 
-
