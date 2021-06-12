@@ -12,6 +12,7 @@ from django.contrib.auth.models import User
 from photologue import models as photo_models
 
 def get_deleted_instance(model):
+    """ADD"""
     global get_deleted_instance_decorated
     def get_deleted_instance_decorated():
         deleted_instance, created = model.objects.get_or_create(name='_deleted_')
@@ -25,6 +26,7 @@ def get_deleted_instance(model):
     return get_deleted_instance_decorated
 
 def get_upload_dir(base_dir, no_image_name=''):
+    """ADD"""
     if no_image_name: return f'{base_dir.lower()}/{no_image_name}'
     global get_upload_dir_decorated
     def get_upload_dir_decorated(instance, filename):
