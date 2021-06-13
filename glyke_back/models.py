@@ -56,6 +56,9 @@ class Category(TimeStampedModel):
                                 default = get_upload_dir('category', no_file_name='no_image.png'),
                                 upload_to = get_upload_dir('category'),
                                 max_length = 255)
+    filters = TaggableManager(verbose_name=_('filters'),
+                              help_text=_("A comma-separated list of atrributes"),
+                              blank=True)
 
     class Meta:
         verbose_name_plural = "categories"
@@ -101,6 +104,7 @@ class Product(Price, TimeStampedModel):
                                   verbose_name=_('photos'),
                                   blank=True,
                                   null=True)
+    attributes = models.JSONField(_('attributes'), blank = True, null=True)
 
     def __str__(self):
         return self.name
