@@ -8,22 +8,24 @@ from .models import Category, Product
 class AddProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['name', 'description', 'tags', 'stock', 'photos']
+        exclude = ['is_active', 'photos', 'category', 'attributes', 'profit']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control',}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': '3'}),
             'tags': forms.TextInput(attrs={'class': 'form-control',}),
             'stock': forms.NumberInput(attrs={'class': 'form-control', 'min': 0,}),
-            # 'post': forms.Textarea(attrs={
-            #     'placeholder': _('Your post goes here'),
-            #     'style': 'width: 53em; height: 15em; text-align: center;',
-            #     }),
-            # 'background_link': forms.URLInput(attrs={
-            #     'placeholder':
-            #     _('Enter a valid URL for background picture or YOUTUBE video'),
-            #     'size': '100%',
-            #     'style': 'text-align: center;',
-            #     }),
+            'cost_price': forms.NumberInput(attrs={'class': 'form-control', 'min': 0,}),
+            'selling_price': forms.NumberInput(attrs={'class': 'form-control', 'min': 0,}),
+            'discount_percent': forms.NumberInput(attrs={'class': 'form-control', 'min': 0,}),
+        }
+        labels = {
+            'name': _('Name'),
+            'description': _('Description'),
+            'tags': _('Tags'),
+            'stock': _('Stock'),
+            'cost_price': _('Cost price, $'),
+            'selling_price': _('Selling price, $'),
+            'discount_percent': _('Discount, %'),
         }
 
 class SelectCategoryProductForm(forms.Form):

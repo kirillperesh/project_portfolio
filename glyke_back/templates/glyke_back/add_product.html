@@ -17,13 +17,12 @@
                 <form role="form" action="" method="post" class="tm-edit-product-form" id="category_form">
                     {% csrf_token %}
                     <div class="row">
-                        <div class="form-group mb-3 col-xs-12 col-sm-6">
-                            <label for="category">Категория</label>
+                        <div class="form-group mb-3 col-xs-12 col-sm-66">
+                            <label for="{{category_form.category.name}}">{{category_form.category.label}}</label>
                             {{category_form.category}}
-
                         </div>
-                        <div class="form-group mb-3 col-xs-12 col-sm-6">
-                            <input type="submit" value="Update category" class="form-control">
+                        <div class="form-group mb-3 mt-35p col-xs-12 col-sm-33">
+                            <input type="submit" value="Update" class="form-control btn btn-primary btn-block text-uppercase">
                         </div>
                     </div>
                 </form>
@@ -31,49 +30,57 @@
                     {% csrf_token %}
                     {% for field in filter_form %}
                         <div class="form-group mb-3">
-                            <label for="{{field.name}}">{{field.name}}</label>
+                            <label for="{{field.name}}">{{field.label}}</label>
                             {{field}}
                         </div>
                     {% endfor %}
 
-                <h3>{{request.POST}}</h3>
             </div>
-                            <div class="col-xl-6 col-lg-6 col-md-12 mx-auto mb-4">
-                                <div class="tm-product-img-dummy mx-auto">
-                                <i class="fas fa-cloud-upload-alt tm-upload-icon" onclick="document.getElementById('fileInput').click();"></i>
-                                </div>
-                                <div class="custom-file mt-3 mb-3">
-                                <input id="fileInput" type="file" style="display:none;">
-                                <input type="button" class="btn btn-primary btn-block mx-auto" value="UPLOAD PRODUCT IMAGE" onclick="document.getElementById('fileInput').click();">
-                                </div>
-
-
-                {% csrf_token %}
+            <div class="col-xl-6 col-lg-6 col-md-12 mx-auto mb-4">
+                <div class="tm-product-img-dummy mx-auto">
+                    <i class="fas fa-cloud-upload-alt tm-upload-icon" onclick="document.getElementById('fileInput').click();"></i>
+                </div>
+                <div class="custom-file mt-3 mb-3">
+                    <input id="fileInput" type="file" style="display:none;">
+                    <input type="button" class="btn btn-primary btn-block mx-auto" value="UPLOAD PRODUCT IMAGE" onclick="document.getElementById('fileInput').click();">
+                </div>
                 <div class="form-group mb-3">
-                    <label for="name">Название</label>
+                    <label for="{{product_form.name.name}}">{{product_form.name.label}}</label>
                     {{product_form.name}}
                 </div>
                 <div class="form-group mb-3">
-                    <label for="description">Описание</label>
+                    <label for="{{product_form.description.name}}">{{product_form.description.label}}</label>
                     {{product_form.description}}
                 </div>
-
                 <div class="row">
-                    <div class="form-group mb-3 col-xs-12 col-sm-6">
-                        <label for="tags">Тэги</label>
+                    <div class="form-group mb-3 col-xs-12 col-sm-66">
+                        <label for="{{product_form.tags.name}}">{{product_form.tags.label}}</label>
                         {{product_form.tags}}
                     </div>
-                    <div class="form-group mb-3 col-xs-12 col-sm-6">
-                        <label for="stock">Остаток</label>
+                    <div class="form-group mb-3 col-xs-12 col-sm-33">
+                        <label for="{{product_form.stock.name}}">{{product_form.stock.label}}</label>
                         {{product_form.stock}}
                     </div>
                 </div>
+                <div class="row">
+                    <div class="form-group mb-3 col-xs-12 col-sm-33">
+                        <label for="{{product_form.cost_price.name}}">{{product_form.cost_price.label}}</label>
+                        {{product_form.cost_price}}
+                    </div>
+                    <div class="form-group mb-3 col-xs-12 col-sm-33">
+                        <label for="{{product_form.selling_price.name}}">{{product_form.selling_price.label}}</label>
+                        {{product_form.selling_price}}
+                    </div>
+                    <div class="form-group mb-3 col-xs-12 col-sm-33">
+                        <label for="{{product_form.discount_percent.name}}">{{product_form.discount_percent.label}}</label>
+                        {{product_form.discount_percent}}
+                    </div>
+                </div>
 
-
-          </div>
-          <div class="col-12">
-            <input type="submit" value="Add Product Now" class="btn btn-primary btn-block text-uppercase"></input>
-          </div>
+            </div>
+            <div class="col-12">
+                <input type="submit" value="Add Product Now" class="btn btn-primary btn-block text-uppercase"></input>
+            </div>
         </form>
 
         </div>

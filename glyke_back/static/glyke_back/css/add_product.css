@@ -18,10 +18,12 @@ textarea{overflow:auto !important; resize:vertical !important;}
 h2{margin-bottom:.5rem;font-family:inherit;font-weight:500;line-height:1.2;color:inherit;}
 h2{font-size:2rem;}
 .row{display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap;margin-right:-15px;margin-left:-15px;}
-.col-12,.col-lg-10,.col-lg-6,.col-md-12,.col-sm-12,.col-sm-6,.col-xl-6,.col-xl-9{position:relative;width:100%;min-height:1px;padding-right:15px;padding-left:15px;}
+.col-12,.col-lg-10,.col-lg-6,.col-md-12,.col-sm-12,.col-sm-33,.col-sm-50,.col-sm-66,.col-xl-6,.col-xl-9{position:relative;width:100%;min-height:1px;padding-right:15px;padding-left:15px;}
 .col-12{-ms-flex:0 0 100%;flex:0 0 100%;max-width:100%;}
 @media (min-width:576px){
-.col-sm-6{-ms-flex:0 0 50%;flex:0 0 50%;max-width:50%;}
+.col-sm-33{-ms-flex:0 0 33.33%;flex:0 0 33.33%;max-width:33.33%;}
+.col-sm-50{-ms-flex:0 0 50%;flex:0 0 50%;max-width:50%;}
+.col-sm-66{-ms-flex:0 0 66.66%;flex:0 0 66.66%;max-width:66.66%;}
 .col-sm-12{-ms-flex:0 0 100%;flex:0 0 100%;max-width:100%;}
 }
 @media (min-width:768px){
@@ -72,6 +74,7 @@ input[type=button].btn-block{width:100%;}
 .custom-select{transition:none;}
 }
 .d-inline-block{display:inline-block!important;}
+.mt-35p{margin-top:35px!important;}
 .mt-3{margin-top:1rem!important;}
 .mb-3{margin-bottom:1rem!important;}
 .mb-4{margin-bottom:1.5rem!important;}
@@ -100,7 +103,7 @@ button:focus{outline:0;}
 .custom-select{width:100%;border:none;color:#acc6de;height:50px;-webkit-appearance:none;-moz-appearance:none;-ms-appearance:none;-o-appearance:none;appearance:none;-webkit-border-radius:0;-moz-border-radius:0;-ms-border-radius:0;-o-border-radius:0;border-radius:0;padding:15px;background:url(https://technext.github.io/product-admin/img/arrow-down.png) 98% no-repeat #50657b;}
 .custom-select:focus{outline:0;}
 .custom-select{height:50px;border-radius:0;}
-.tm-product-img-dummy{max-width:100%;height:240px;display:flex;align-items:center;justify-content:center;color:#fff;background:#aaa;}
+.tm-product-img-dummy{max-width:100%;height:220px;display:flex;align-items:center;justify-content:center;color:#fff;background:#aaa;}
 .tm-upload-icon{background:#455c71;width:55px;height:55px;border-radius:50%;text-align:center;padding-top:15px;font-size:22px;}
 ::-webkit-scrollbar{width:8px;height:8px;}
 ::-webkit-scrollbar-track{background:#394f62;}
