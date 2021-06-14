@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+
+{% block title %} Add new Product {% endblock %}
+
+{% block content %}
+<div class="">
+    <form role="form" action="" method="post">
+        {% csrf_token %}
+        {% for field in category_form %}
+            <div class="form-group">
+                {{ field.name }}
+                {{ field }}
+            </div>
+        {% endfor %}
+        <input type="submit" value="Save">
+    </form>
+    <form role="form" action="" method="post">
+        {% csrf_token %}
+        {% for field in product_form %}
+            <div class="form-group">
+                {{ field.name }}
+                {{ field }}
+            </div>
+        {% endfor %}
+        <input type="submit" value="Save">
+    </form>
+    <form role="form" action="" method="post">
+        {% csrf_token %}
+        {% for field in filter_form %}
+            <div class="form-group">
+                {{ field.name }}
+                {{ field }}
+            </div>
+        {% endfor %}
+        <input type="submit" value="Save">
+    </form>
+</div>
+
+{% endblock %}
