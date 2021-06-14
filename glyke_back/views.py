@@ -21,7 +21,9 @@ def add_product_dynamic(request):
             category = Category.objects.get(id=category_id)
 
             for filter in category.filters.all():
-                category_fields[str(filter)] = forms.CharField(max_length=100)
+                category_fields[str(filter)] = forms.CharField(widget=forms.TextInput(attrs={
+                'class': 'form-control', 
+                }))
 
             CategoryFiltersForm = type('CategoryFiltersForm',
                                        (forms.Form,),
