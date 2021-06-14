@@ -72,6 +72,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
           os.path.join(BASE_DIR, 'folio_back/templates/folio_back'),
+          os.path.join(BASE_DIR, 'glyke_back/templates/glyke_back'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
