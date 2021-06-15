@@ -3,6 +3,8 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.utils.translation import gettext_lazy as _
 
+from photologue import models as photo_models
+
 from .models import Category, Product
 
 class AddProductForm(forms.ModelForm):
@@ -32,3 +34,13 @@ class SelectCategoryProductForm(forms.Form):
     category = forms.ModelChoiceField(queryset=Category.objects.filter(is_active=True),
                                       empty_label='..',
                                       widget=forms.Select(attrs={'class': 'custom-select',}))
+
+
+
+class PhotosForm(forms.Form):
+    photos = forms.ImageField(widget=forms.ClearableFileInput(attrs={'multiple': True,
+                                                                     'accept': "image/*",
+                                                                     'id': "photosInput",
+                                                                     'name': "photos",
+                                                                     'type': "file",
+                                                                     'style': "display:none;"}))
