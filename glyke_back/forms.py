@@ -38,7 +38,8 @@ class SelectCategoryProductForm(forms.Form):
 
 
 class PhotosForm(forms.Form):
-    photos = forms.ImageField(widget=forms.ClearableFileInput(attrs={'multiple': True,
+    photos = forms.ImageField(required=False,
+                              widget=forms.ClearableFileInput(attrs={'multiple': True,
                                                                      'accept': "image/*",
                                                                      'id': "photosInput",
                                                                      'name': "photos",

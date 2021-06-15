@@ -20,24 +20,6 @@ def add_product_dynamic_view(request):
 
     context = {}
     if request.method == 'POST':
-        # photo_models.Photo.objects.all().delete()
-        # img = request.FILES['photos']
-        # print(request.FILES['photos'])
-        # print(type(request.FILES['photos']))
-        # print(img.name)
-        # photo_models.Photo.objects.get_or_create(image=img, title=img.name, slug=slugify(img.name))
-
-        # photos_form = PhotosForm(request.POST, request.FILES)
-        # context['photos_form'] = photos_form
-        # if photos_form.is_valid():
-        #     gallery = photo_models.Gallery.objects.get(title='test')
-
-        #     for img in request.FILES.getlist('photos'):
-        #         if not photo_models.Photo.objects.filter(title=img.name).exists():
-        #             print('gets here')
-        #             photo = photo_models.Photo.objects.create(image=img, title=img.name, slug=slugify(img.name))
-        #             gallery.photos.add(photo)
-
         if 'category' in request.POST:
             category_fields = {}
             context['category'] = request.POST['category']
@@ -61,7 +43,7 @@ def add_product_dynamic_view(request):
                                                  category=category,
                                                  # tags,
                                                  stock=product_form.cleaned_data['stock'],
-                                                 # photos='placeholder',
+                                                 # photos='placeholder', !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                                                  attributes=filters_form.cleaned_data,
                                                  cost_price=product_form.cleaned_data['cost_price'],
                                                  selling_price=product_form.cleaned_data['selling_price'],
@@ -70,16 +52,31 @@ def add_product_dynamic_view(request):
             new_product.tags.add(*product_form.cleaned_data['tags']) # using list as multiple positional arguments
 
             # photos block
-            gallery_title = product_form.cleaned_data['name'] + _("'s gallery")
+            gallery_title = product_form.cleaned_data['name'] + _("_gallery")
             gallery_slug = slugify(gallery_title)
             gallery = photo_models.Gallery.objects.create(title=gallery_title, slug=gallery_slug)
 
-
+            photos_form = PhotosForm(request.POST, request.FILES)
+            context['photos_form'] = photos_form
+            if photos_form.is_valid():
+                for image in request.FILES.getlist('photos'):
+                    image_name = image.name + f'_{new_product.name}'
+                    if photo_models.Photo.objects.filter(title=image_name).exists():
+                        image_name += f'_{photo_models.Photo.objects.filter(title=image_name).count()}'
+                    # TODO add any photologue filters here
+                    photo = photo_models.Photo.objects.create(image=image, title=image_name, slug=slugify(image_name))
+                    gallery.photos.add(photo)
+            else:
+                # TODO
+                print('photos invalid')
+                pass
 
             # TODO add redirect on success
         else:
+            # print(request.FILES.getlist('photos'))
             context['category_form'] = SelectCategoryProductForm(request.POST or None)
             context['filter_form'] = CategoryFiltersForm(request.POST or None)
+            context['photos_form'] = PhotosForm()
             context['product_form'] = AddProductForm(request.POST or None) if 'name' in request.POST else AddProductForm() # makes sure "required" errors don't show before any input
             return render(request, "add_product.html", context)
 
@@ -87,7 +84,14 @@ def add_product_dynamic_view(request):
 
     # context['photos_form'] = PhotosForm(request.POST, request.FILES)
 
-
+    temp_product = Product.objects.get(name='56j6j56545')
+    # print(temp_product.photos.all())
+    temp_photos = temp_product
+    temp_gallery = photo_models.Gallery.objects.get(title="56j6j56545's gallery")
+    print(temp_gallery.photos.all())
+    # temp_photos = temp_product.photos.photos.all()
+    # print(temp_photos)
+    context['temp_photos'] = temp_photos
 
     context['category_form'] = SelectCategoryProductForm()
     context['product_form'] = AddProductForm()

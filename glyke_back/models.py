@@ -103,7 +103,7 @@ class Product(Price, TimeStampedModel):
     stock = models.IntegerField(_('stock'), validators=[MinValueValidator(0)], default=0)
     photos = models.OneToOneField(photo_models.Gallery,
                                   on_delete=models.SET_NULL,
-                                  verbose_name=_('photos'),
+                                  verbose_name=_('product_photos'),
                                   blank=True,
                                   null=True)
     attributes = models.JSONField(_('attributes'), blank = True, null=True)
