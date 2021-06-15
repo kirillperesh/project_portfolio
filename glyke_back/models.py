@@ -8,6 +8,7 @@ from model_utils.models import TimeStampedModel
 from django.core.validators import MinValueValidator, MaxValueValidator
 from taggit.managers import TaggableManager
 from django.contrib.auth.models import User
+from decimal import Decimal
 
 from photologue import models as photo_models
 
@@ -90,6 +91,7 @@ class Price(models.Model):
 class Product(Price, TimeStampedModel):
     name = models.CharField(_('name'), max_length=255, unique=True)
     description = models.TextField(_('description'), max_length=3000, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     category = models.ForeignKey(Category,
                                  on_delete=models.DO_NOTHING, # switches to category's parent or null. handled via Category's pre_delete signal
                                  verbose_name=_('category'),
@@ -108,6 +110,11 @@ class Product(Price, TimeStampedModel):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        self.profit = self.selling_price * Decimal(1 - self.discount_percent * .01) - self.cost_price
+        super(Product, self).save(*args, **kwargs)
+
 
 class Check(Price, TimeStampedModel):
     number = models.CharField(_('number'), max_length=100, blank=True)

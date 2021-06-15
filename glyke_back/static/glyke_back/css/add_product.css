@@ -51,19 +51,19 @@ h2{font-size:2rem;}
 .form-control:disabled{background-color:#e9ecef;opacity:1;}
 textarea.form-control{height:auto;}
 .form-group{margin-bottom:1rem;}
-.btn{display:inline-block;font-weight:400;text-align:center;white-space:nowrap;vertical-align:middle;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;border:1px solid transparent;padding:.375rem .75rem;font-size:1rem;line-height:1.5;border-radius:.25rem;transition:color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;}
+.btn-add{display:inline-block;font-weight:400;text-align:center;white-space:nowrap;vertical-align:middle;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;border:1px solid transparent;padding:.375rem .75rem;font-size:1rem;line-height:1.5;border-radius:.25rem;transition:color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;}
 @media screen and (prefers-reduced-motion:reduce){
-.btn{transition:none;}
+.btn-add{transition:none;}
 }
-.btn:focus,.btn:hover{text-decoration:none;}
-.btn:focus{outline:0;box-shadow:0 0 0 .2rem rgba(0,123,255,.25);}
-.btn:disabled{opacity:.65;}
-.btn-primary{color:#fff;background-color:#007bff;border-color:#007bff;}
-.btn-primary:hover{color:#fff;background-color:#0069d9;border-color:#0062cc;}
-.btn-primary:focus{box-shadow:0 0 0 .2rem rgba(0,123,255,.5);}
-.btn-primary:disabled{color:#fff;background-color:#007bff;border-color:#007bff;}
-.btn-block{display:block;width:100%;}
-input[type=button].btn-block{width:100%;}
+.btn-add:focus,.btn-add:hover{text-decoration:none;}
+.btn-add:focus{outline:0;box-shadow:0 0 0 .2rem rgba(0,123,255,.25);}
+.btn-add:disabled{opacity:.65;}
+.btn-add-primary{color:#fff;background-color:#007bff;border-color:#007bff;}
+.btn-add-primary:hover{color:#fff;background-color:#0069d9;border-color:#0062cc;}
+.btn-add-primary:focus{box-shadow:0 0 0 .2rem rgba(0,123,255,.5);}
+.btn-add-primary:disabled{color:#fff;background-color:#0069d99f;border-color:#0069d9;}
+.btn-add-block{display:block;width:100%;}
+input[type=button].btn-add-block{width:100%;}
 .custom-select{display:inline-block;width:100%;height:calc(2.25rem + 2px);padding:.375rem 1.75rem .375rem .75rem;line-height:1.5;color:#495057;vertical-align:middle;background:#fff url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3E%3C/svg%3E") no-repeat right .75rem center;background-size:8px 10px;border:1px solid #ced4da;border-radius:.25rem;-webkit-appearance:none;-moz-appearance:none;appearance:none;}
 .custom-select:focus{border-color:#80bdff;outline:0;box-shadow:0 0 0 .2rem rgba(128,189,255,.5);}
 .custom-select:disabled{color:#6c757d;background-color:#e9ecef;}
@@ -96,9 +96,9 @@ button:focus{outline:0;}
 .form-group label{color:#fff;margin-bottom:10px;}
 .form-control{padding:19px 18px;border-radius:0;height:50px;}
 .form-group{margin-bottom:15px;}
-.btn{border-radius:0;padding:13px 28px;transition:all 0.2s ease;max-width:100%;}
-.btn-primary{color:#fff;background-color:#f5a623;border:2px solid #f5a623;font-size:90%;font-weight:600;}
-.btn-primary:active,.btn-primary:hover{color:#f5a623;background-color:transparent;border:2px solid #f5a623;}
+.btn-add{border-radius:0;padding:13px 28px;transition:all 0.2s ease;max-width:100%;}
+.btn-add-primary{color:#fff;background-color:#f5a623;border:2px solid #f5a623;font-size:90%;font-weight:600;}
+.btn-add-primary:active,.btn-primary:hover{color:#f5a623;background-color:transparent;border:2px solid #f5a623;}
 .tm-bg-primary-dark{background-color:#435c70;}
 .custom-select{width:100%;border:none;color:#acc6de;height:50px;-webkit-appearance:none;-moz-appearance:none;-ms-appearance:none;-o-appearance:none;appearance:none;-webkit-border-radius:0;-moz-border-radius:0;-ms-border-radius:0;-o-border-radius:0;border-radius:0;padding:15px;background:url(https://technext.github.io/product-admin/img/arrow-down.png) 98% no-repeat #50657b;}
 .custom-select:focus{outline:0;}
@@ -118,3 +118,21 @@ button:focus{outline:0;}
 /*! CSS Used fontfaces */
 @font-face{font-family:"Font Awesome 5 Free";font-style:normal;font-weight:400;src:url(https://technext.github.io/product-admin/webfonts/fa-regular-400.eot);src:url(https://technext.github.io/product-admin/webfonts/fa-regular-400.eot#iefix) format("embedded-opentype"),url(https://technext.github.io/product-admin/webfonts/fa-regular-400.woff2) format("woff2"),url(https://technext.github.io/product-admin/webfonts/fa-regular-400.woff) format("woff"),url(https://technext.github.io/product-admin/webfonts/fa-regular-400.ttf) format("truetype"),url(https://technext.github.io/product-admin/webfonts/fa-regular-400.svg#fontawesome) format("svg");}
 @font-face{font-family:"Font Awesome 5 Free";font-style:normal;font-weight:900;src:url(https://technext.github.io/product-admin/webfonts/fa-solid-900.eot);src:url(https://technext.github.io/product-admin/webfonts/fa-solid-900.eot#iefix) format("embedded-opentype"),url(https://technext.github.io/product-admin/webfonts/fa-solid-900.woff2) format("woff2"),url(https://technext.github.io/product-admin/webfonts/fa-solid-900.woff) format("woff"),url(https://technext.github.io/product-admin/webfonts/fa-solid-900.ttf) format("truetype"),url(https://technext.github.io/product-admin/webfonts/fa-solid-900.svg#fontawesome) format("svg");}
+
+.errorlist{
+    color: lightcoral;
+    list-style-type: none;
+    text-align: center;
+    padding: 0;
+    background-color: #60738e;
+    border-top-style: solid;
+    border-top-width: 1px;
+    border-top-color: lightcoral;
+}
+
+.errorlist > li {
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-bottom-color: lightcoral;
+}
+
