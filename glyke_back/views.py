@@ -19,12 +19,17 @@ def create_gallery(*, title):
     return photo_models.Gallery.objects.create(title=gallery_title, slug=gallery_slug)
 
 
-
 # TODO Devide into several functions and add comment and docstr
 # TODO add 404 if not staff
 @require_http_methods(["GET", "POST"])
 def add_product_dynamic_view(request):
-    if not Category.objects.filter(is_active=True): return HttpResponse(_('No active categories'))
+    """ If all the input is valid creates Product instance, photologue.Gallery instance (title=Product.name + _gallery),
+    associates it with product created, and, if provided, associates uploaded images with the gallery.
+    Passes selected 'category' as a parameter to the template so it's not lost when submitting main form
+    (category selecting is done via separate form).
+    """
+    # not sure if there may be no categories at any moment
+    # if not Category.objects.filter(is_active=True): return HttpResponse(_('No active categories'))
 
     photos_form = PhotosForm(request.POST, request.FILES)
     product_form = AddProductForm(request.POST or None) if 'name' in request.POST else AddProductForm()
@@ -39,10 +44,11 @@ def add_product_dynamic_view(request):
             context['category'] = request.POST['category']
             category = Category.objects.get(id=context['category'])
 
-            for filter in category.filters.all():
+            for filter in category.filters.all(): # these are django-taggit objects
                 # TODO Add some king of validation here to select the right input field
-                category_fields[str(filter)] = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',},), label=_(str(filter).capitalize()))
-
+                category_fields[str(filter)] = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',},),
+                                                                                      label=_(str(filter).capitalize()))
+        # creates a class (inherits from forms.Form class) with category_fields as attributes (form fields)
         CategoryFiltersForm = type('CategoryFiltersForm', (forms.Form,), category_fields)
         filters_form = CategoryFiltersForm(request.POST or None)
         context['filter_form'] = filters_form
@@ -50,9 +56,9 @@ def add_product_dynamic_view(request):
         if all([filters_form.is_valid(), product_form.is_valid(),]):
             new_product = Product.objects.create(name=product_form.cleaned_data['name'],
                                                  description=product_form.cleaned_data['description'],
-                                                 created_by = request.user,
+                                                 created_by = request.user, # default django user, probably will be switched to custom class later
                                                  category=category,
-                                                 # tags,
+                                                 # tags, (added later in this view)
                                                  stock=product_form.cleaned_data['stock'],
                                                  photos=create_gallery(title=product_form.cleaned_data['name']),
                                                  attributes=filters_form.cleaned_data,
@@ -66,16 +72,19 @@ def add_product_dynamic_view(request):
             # photos block
             if photos_form.is_valid():
                 for image in request.FILES.getlist('photos'):
-                    image_name = image.name + f'_{new_product.name}'
-                    if photo_models.Photo.objects.filter(title=image_name).exists():
-                        image_name += f'_{photo_models.Photo.objects.filter(title=image_name).count()}'
-                    # TODO add any photologue filters here
-                    photo = photo_models.Photo.objects.create(image=image, title=image_name, slug=slugify(image_name))
+                    image_name = image.name + f'_{new_product.name}' # product's name is appended for later filtering purposes
+
+                    # this block wil be used in update view, not needed here
+                    if new_product.photos.photos.filter(title=image_name).exists(): # can't use get_or_create and have to specify slug because of some photologue bug
+                        image_name += f'_{photo_models.Photo.objects.filter(title=image_name).count() + 1}'
+                    # this block wil be used in update view, not needed here
+
+                    # TODO add any photologue filters down here
+                    photo = photo_models.Photo.objects.create(image=image, title=image_name, slug=slugify(image_name)) #
                     new_product.photos.photos.add(photo)
             else:
                 # TODO add this url and view
-                return redirect(reverse('smth_went_wrong'), error_suffix='photos')
+                return redirect(reverse('smth_went_wrong'), error_suffix='photos (or photos form)')
 
             # TODO add redirect on success
     return render(request, "add_product.html", context)
-
