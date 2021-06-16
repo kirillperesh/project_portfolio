@@ -16,13 +16,13 @@
             <div class="col-xl-6 col-lg-6 col-md-12">
                 <form role="form" action="" method="post" class="tm-edit-product-form" id="category_form" enctype="multipart/form-data">
                     {% csrf_token %}
+                    <label for="{{category_form.category.name}}">{{category_form.category.label}}</label>
                     <div class="row">
                         <div class="form-group mb-3 col-xs-12 col-sm-66">
-                            <label for="{{category_form.category.name}}">{{category_form.category.label}}</label>
                             {{category_form.category}}
                             {{category_form.category.errors}}
                         </div>
-                        <div class="form-group mb-3 mt-35p col-xs-12 col-sm-33">
+                        <div class="form-group mb-3 col-xs-12 col-sm-33">
                             <input type="submit" value="Update" class="form-control btn-add btn-add-primary btn-add-block text-uppercase">
                         </div>
                     </div>
@@ -35,9 +35,6 @@
                             {{field}}
                         </div>
                     {% endfor %}
-
-
-            {{temp_photos}}
             </div>
             <div class="col-xl-6 col-lg-6 col-md-12 mx-auto mb-4">
                 <div class="tm-product-img-dummy mx-auto">
