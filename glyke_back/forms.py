@@ -44,4 +44,5 @@ class PhotosForm(forms.Form):
                                                                      'id': "photosInput",
                                                                      'name': "photos",
                                                                      'type': "file",
-                                                                     'style': "display:none;"}))
+                                                                     'style': "display:none;",
+                                                                     'onchange': "previewImages(event)"}))

@@ -37,16 +37,17 @@
                     {% endfor %}
             </div>
             <div class="col-xl-6 col-lg-6 col-md-12 mx-auto mb-4">
-                <div class="tm-product-img-dummy mx-auto">
-                    {{photos_form.photos.errors}}
-                    <!-- <i class="fas fa-cloud-upload-alt tm-upload-icon" onclick="document.getElementById('photosInput').click();"></i> -->
+                <label for="{{photos_form.photos.name}}">{{photos_form.photos.label}}</label>
+                <div class="img-preview-background">
+                    <div id="img-preview-container">Uploaded images preview will apper here</div>
                 </div>
-                <div class="custom-file mt-3 mb-3">
+                {{photos_form.photos.errors}}
+                <div class="mb-12p custom-file">
                     {{photos_form.photos}}
-                    <input type="button" class="btn-add btn-add-primary btn-add-block mx-auto" value="UPLOAD PRODUCT IMAGES" onclick="document.getElementById('photosInput').click();" {% if not request.POST.category %}disabled{% endif %}>
+                    <input type="button" class="btn-add btn-add-primary btn-add-block mx-auto form-control text-uppercase" value="UPLOAD PRODUCT IMAGES" onclick="document.getElementById('photosInput').click();" {% if not request.POST.category %}disabled{% endif %}>
                 </div>
                 {{product_form.non_field_errors}}
-                <div class="form-group mb-3">
+                <div class="form-group mb-3 mt-3">
                     <label for="{{product_form.name.name}}">{{product_form.name.label}}</label>
                     {{product_form.name}}
                     {{product_form.name.errors}}
@@ -85,7 +86,6 @@
                         {{product_form.discount_percent.errors}}
                     </div>
                 </div>
-
             </div>
             <div class="col-12">
                 <input type="submit" value="Add Product Now" class="btn-add btn-add-primary btn-add-block text-uppercase"
@@ -99,14 +99,18 @@
     </div>
   </div>
 
-<p><input type="file"  accept="image/*" name="image" id="file"  onchange="loadFile(event)" style="display: none;"></p>
-<p><label for="file" style="cursor: pointer;">Upload Image</label></p>
-<p><img id="output" width="200" /></p>
+
 
 <script>
-var loadFile = function(event) {
-	var image = document.getElementById('output');
-	image.src = URL.createObjectURL(event.target.files[0]);
+var previewImages = function(event) {
+	var image_list = document.getElementById('img-preview-container');
+    image_list.removeChild(image_list.firstChild)
+    for (var i = 0; i < event.target.files.length; i++) {
+        var elem = document.createElement("img");
+        elem.src = URL.createObjectURL(event.target.files[i])
+        elem.className = "img-preview"
+        image_list.appendChild(elem)
+        }
 };
 </script>
 {% endblock %}
