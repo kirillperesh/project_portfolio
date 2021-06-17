@@ -1,14 +1,15 @@
-from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_http_methods
+# from django.contrib.auth.decorators import user_passes_test
 from django.utils.text import slugify
 
+from photologue import models as photo_models
 from .forms import AddProductForm, PhotosForm, SelectCategoryProductForm
 from .models import Category, Product
-from photologue import models as photo_models
+from .glyke_decorators import user_is_staff_or_404
 
 
 def create_gallery(*, title):
@@ -19,8 +20,7 @@ def create_gallery(*, title):
     return photo_models.Gallery.objects.create(title=gallery_title, slug=gallery_slug)
 
 
-# TODO Devide into several functions and add comment and docstr
-# TODO add 404 if not staff
+@user_is_staff_or_404()
 @require_http_methods(["GET", "POST"])
 def add_product_dynamic_view(request):
     """ If all the input is valid creates Product instance, photologue.Gallery instance (title=Product.name + _gallery),
@@ -74,10 +74,10 @@ def add_product_dynamic_view(request):
                 for image in request.FILES.getlist('photos'):
                     image_name = image.name + f'_{new_product.name}' # product's name is appended for later filtering purposes
 
-                    # this block wil be used in update view, not needed here
-                    if new_product.photos.photos.filter(title=image_name).exists(): # can't use get_or_create and have to specify slug because of some photologue bug
-                        image_name += f'_{photo_models.Photo.objects.filter(title=image_name).count() + 1}'
-                    # this block wil be used in update view, not needed here
+                    # # this block wil be used in update view, not needed here
+                    # if new_product.photos.photos.filter(title=image_name).exists(): # can't use get_or_create and have to specify slug because of some photologue bug
+                    #     image_name += f'_{photo_models.Photo.objects.filter(title=image_name).count() + 1}'
+                    # # this block wil be used in update view, not needed here
 
                     # TODO add any photologue filters down here
                     photo = photo_models.Photo.objects.create(image=image, title=image_name, slug=slugify(image_name)) #
@@ -88,3 +88,4 @@ def add_product_dynamic_view(request):
 
             # TODO add redirect on success
     return render(request, "add_product.html", context)
+

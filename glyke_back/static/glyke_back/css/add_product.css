@@ -61,7 +61,7 @@ textarea.form-control{height:auto;}
 .btn-add-primary{color:#fff;background-color:#007bff;border-color:#007bff;}
 .btn-add-primary:hover{color:#fff;background-color:#0069d9;border-color:#0062cc;}
 .btn-add-primary:focus{box-shadow:0 0 0 .2rem rgba(0,123,255,.5);}
-.btn-add-primary:disabled{color:#fff;background-color:#0069d99f;border-color:#0069d9;}
+.btn-add-primary:disabled{color:#fff;background-color:#0069d99f;border-color:#0069d9; cursor: default;}
 .btn-add-block{display:block;width:100%;}
 input[type=button].btn-add-block{width:100%;}
 .custom-select{display:inline-block;width:100%;height:calc(2.25rem + 2px);padding:.375rem 1.75rem .375rem .75rem;line-height:1.5;color:#495057;vertical-align:middle;background:#fff url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3E%3C/svg%3E") no-repeat right .75rem center;background-size:8px 10px;border:1px solid #ced4da;border-radius:.25rem;-webkit-appearance:none;-moz-appearance:none;appearance:none;}
@@ -76,8 +76,10 @@ input[type=button].btn-add-block{width:100%;}
 .d-inline-block{display:inline-block!important;}
 .mt-35p{margin-top:35px!important;}
 .mt-3{margin-top:1rem!important;}
+.mb-12p{margin-bottom:12px!important;}
 .mb-3{margin-bottom:1rem!important;}
 .mb-4{margin-bottom:1.5rem!important;}
+.mb-6{margin-bottom:2rem!important;}
 .mx-auto{margin-right:auto!important;}
 .mx-auto{margin-left:auto!important;}
 .text-uppercase{text-transform:uppercase!important;}
@@ -94,7 +96,7 @@ button:focus{outline:0;}
 .form-control{background-color:#54657d;color:#fff;border:0;}
 .form-control:focus{background-color:#60738e;color:#fff;border-color:transparent;box-shadow:0 0 0 0.1rem rgb(180, 206, 233, 0.5);}
 .form-group label{color:#fff;margin-bottom:10px;}
-form label{color:#fff;margin-bottom:10px;}
+label{color:#fff;margin-bottom:10px;}
 .form-control{padding:19px 18px;border-radius:0;height:50px;}
 .form-group{margin-bottom:15px;}
 .btn-add{border-radius:0;padding:13px 28px;transition:all 0.2s ease;max-width:100%;}
@@ -104,7 +106,7 @@ form label{color:#fff;margin-bottom:10px;}
 .custom-select{width:100%;border:none;color:#acc6de;height:50px;-webkit-appearance:none;-moz-appearance:none;-ms-appearance:none;-o-appearance:none;appearance:none;-webkit-border-radius:0;-moz-border-radius:0;-ms-border-radius:0;-o-border-radius:0;border-radius:0;padding:15px;background:url(https://technext.github.io/product-admin/img/arrow-down.png) 98% no-repeat #50657b;}
 .custom-select:focus{outline:0;}
 .custom-select{height:50px;border-radius:0;}
-.tm-product-img-dummy{max-width:100%;height:220px;display:flex;align-items:center;justify-content:center;color:#fff;background:#aaa;}
+
 .tm-upload-icon{background:#455c71;width:55px;height:55px;border-radius:50%;text-align:center;padding-top:15px;font-size:22px;}
 ::-webkit-scrollbar{width:8px;height:8px;}
 ::-webkit-scrollbar-track{background:#394f62;}
@@ -137,3 +139,27 @@ form label{color:#fff;margin-bottom:10px;}
     border-bottom-color: lightcoral;
 }
 
+.img-preview-background{
+    max-width:100%;
+    min-height:101px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color: #acc6de;
+    background:rgba(170, 170, 170, 0.70);
+}
+
+#img-preview-container{
+    align-items:center;
+    justify-content:center;
+    align-content: center;
+    margin-top: 8px !important;
+}
+
+.img-preview {
+    height: 121px;
+    width: 121px;
+    object-fit: cover;
+    border-radius: 5px;
+    margin: 0px 4px 0 4px !important;
+}

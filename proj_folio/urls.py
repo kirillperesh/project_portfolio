@@ -19,8 +19,6 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.conf import settings
 from django.conf.urls.static import static
 
-from folio_back import views
-
 
 urlpatterns = [
     path("folio/", include("folio_back.urls")),
@@ -37,3 +35,6 @@ urlpatterns += [
     path('accounts/', include('allauth.socialaccount.providers.vk.urls')),
     path('photologue/', include('photologue.urls', namespace='photologue')),
 ]
+
+
+handler404 = 'proj_folio.views.custom_404_view'
