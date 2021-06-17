@@ -14,3 +14,4 @@ urlpatterns = [
 
     path("add_product", views.add_product_dynamic_view, name="add_product")
 ]
+
