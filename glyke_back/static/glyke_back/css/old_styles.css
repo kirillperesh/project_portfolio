@@ -20,6 +20,7 @@ textarea{overflow:auto;resize:vertical!important;}
 h1,h2{margin-bottom:0.5rem;font-weight:500;line-height:1.2;}
 h1{font-size:2.5rem;}
 h2{font-size:2rem;}
+button,input[type=button],input[type=submit]{cursor: pointer;}
 .list-unstyled{padding-left:0;list-style:none;}
 .row{display:-webkit-box;display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap;margin-right:-15px;margin-left:-15px;}
 .col-12,.col-sm-6,.col-sm-12,.col-md-12,.col-lg-6,.col-lg-10,.col-xl-6,.col-xl-9{position:relative;width:100%;padding-right:15px;padding-left:15px;}
