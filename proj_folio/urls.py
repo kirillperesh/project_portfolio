@@ -19,12 +19,17 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.conf import settings
 from django.conf.urls.static import static
 
+from .views import SmthWentWrong
+
 
 urlpatterns = [
     path("folio/", include("folio_back.urls")),
     path("glyke/", include("glyke_back.urls")),
     path('admin/', admin.site.urls),
+
+    path("oops/", SmthWentWrong.as_view(), name="smth_went_wrong"),
 ]
+
 
 urlpatterns += staticfiles_urlpatterns() # add static
 

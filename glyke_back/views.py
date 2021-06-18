@@ -31,6 +31,10 @@ def add_product_dynamic_view(request):
     # not sure if there may be no categories at any moment
     # if not Category.objects.filter(is_active=True): return HttpResponse(_('No active categories'))
 
+    from django.http import HttpResponse, HttpResponseRedirect
+    return HttpResponseRedirect('%s?%s' % (reverse('smth_went_wrong'), {'error_suffix':'photos (or photos form)'}))
+    return redirect('smth_went_wrong', error_suffix='photos (or photos form)')
+
     photos_form = PhotosForm(request.POST, request.FILES)
     product_form = AddProductForm(request.POST or None) if 'name' in request.POST else AddProductForm()
     context = {
@@ -84,7 +88,7 @@ def add_product_dynamic_view(request):
                     new_product.photos.photos.add(photo)
             else:
                 # TODO add this url and view
-                return redirect(reverse('smth_went_wrong'), error_suffix='photos (or photos form)')
+                return redirect('smth_went_wrong', error_suffix='photos (or photos form)')
 
             # TODO add redirect on success
     return render(request, "add_product.html", context)
