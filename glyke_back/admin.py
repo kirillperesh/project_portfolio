@@ -1,3 +1,4 @@
+from glyke_back.models import Product
 from django.contrib import admin
 from django.apps import apps
 
@@ -15,6 +16,16 @@ for model in models:
     except admin.sites.AlreadyRegistered:
         pass
 
+
+
+
+# import random
+# import decimal
+
+# for product in Product.objects.filter(photos__isnull=False):
+#     rnd_num = decimal.Decimal(random.randrange(1, 9999))/100
+#     product.selling_price = rnd_num
+#     # product.save()
 # from .models import Category, Product
 # test_parent_1 = Category.objects.get_or_create(name='test parent 1')[0]
 # test_parent_2 = Category.objects.get_or_create(name='test parent 2')[0]

@@ -60,6 +60,10 @@ class Category(TimeStampedModel):
     filters = TaggableManager(verbose_name=_('filters'),
                               help_text=_("A comma-separated list of atrributes"),
                               blank=True)
+    bg_color = models.CharField(_('background color'),
+                                max_length=50,
+                                blank=True,
+                                null=True)
 
     class Meta:
         verbose_name_plural = "categories"
@@ -106,12 +110,19 @@ class Product(Price, TimeStampedModel):
                                   verbose_name=_('photos'),
                                   blank=True,
                                   null=True)
+    main_photo = models.OneToOneField(photo_models.Photo,
+                                      on_delete=models.SET_NULL,
+                                      verbose_name=_('main photo'),
+                                      blank=True,
+                                      null=True)
     attributes = models.JSONField(_('attributes'), blank = True, null=True)
 
     def __str__(self):
         return self.name
 
     def save(self, *args, **kwargs):
+        if not self.pk:
+            self.main_photo = self.photos.photos.all().first()
         self.profit = self.selling_price * Decimal(1 - self.discount_percent * .01) - self.cost_price
         super(Product, self).save(*args, **kwargs)
 

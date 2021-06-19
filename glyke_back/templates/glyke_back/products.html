@@ -1,0 +1,65 @@
+{% extends 'glyke_base.html' %}
+
+{% block additional_head %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/products.css' %}"/>
+{% endblock %}
+
+{% block title %} Products {% endblock %}
+
+{% block content %}
+    <section class="u-align-center u-clearfix u-palette-5-dark-3 u-section-2" id="sec-76b6">
+      <div class="u-clearfix u-sheet u-valign-middle u-sheet-1">
+        <h1 class="u-text u-text-default u-text-1">Ice Cream Menu</h1>
+        <h5 class="u-text u-text-default u-text-2">All of our ice cream is made from scratch on premises!</h5>
+        <div class="u-list u-repeater u-list-1">
+
+          {% for product in products %}
+            <div class="u-align-center-md u-align-center-sm u-align-center-xl u-align-center-xs u-container-style u-list-item u-repeater-item u-video-cover u-list-item-1">
+              <div class="u-container-layout u-similar-container u-container-layout-1">
+                <img src="{{ product.main_photo.get_display_url }}" alt="{{ product.main_photo.name }}" class="u-expanded-width u-image u-image-1">
+                <div class="u-align-center u-container-style u-group u-opacity u-opacity-85 u-group-1 bg-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
+                  <div class="u-container-layout u-valign-middle u-container-layout-2">
+                    <h2 class="u-align-center u-custom-font u-text u-text-3">{{ product.name }}</h2>
+                  </div>
+                </div>
+                <!-- <h3 style="position: absolute; top: 300px;">erger</h3> -->
+                <p class="u-align-center-lg u-text u-text-default u-text-4">{{ product.description }}</p>
+                <h3 class="u-align-center-lg u-custom-font u-text u-text-default u-text-5">$ {{product.selling_price}}</h3>
+                <a href="https://nicepage.com" class="u-btn u-button-style u-palette-5-dark-2 u-btn-1">add to cart</a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+        <li class="page-item">
+            <a class="page-link" href="?page=1" aria-label="First">
+            <span aria-hidden="true">&laquo;</span>
+            <span class="sr-only">First page</span>
+            </a>
+        </li>
+        {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">{{page_obj.previous_page_number}}</a>
+            <span class="sr-only">Previous page</span></li>
+        {% endif %}
+            <li class="page-item active"><a class="page-link" href="">{{page_obj.number}}</a>
+            <span class="sr-only">Current page</span></li>
+        {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number  }}">{{page_obj.next_page_number}}</a>
+            <span class="sr-only">Next page</span></li>
+        {% endif %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+            <span aria-hidden="true">&raquo;</span>
+            <span class="sr-only">Last page</span>
+            </a>
+        </li>
+        </ul>
+    </nav>
+
+{% endblock %}
+
+

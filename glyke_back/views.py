@@ -3,8 +3,9 @@ from django.urls import reverse
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_http_methods
-# from django.contrib.auth.decorators import user_passes_test
 from django.utils.text import slugify
+from urllib.parse import urlencode
+from django.views.generic import ListView
 
 from photologue import models as photo_models
 from .forms import AddProductForm, PhotosForm, SelectCategoryProductForm
@@ -30,10 +31,6 @@ def add_product_dynamic_view(request):
     """
     # not sure if there may be no categories at any moment
     # if not Category.objects.filter(is_active=True): return HttpResponse(_('No active categories'))
-
-    from django.http import HttpResponse, HttpResponseRedirect
-    return HttpResponseRedirect('%s?%s' % (reverse('smth_went_wrong'), {'error_suffix':'photos (or photos form)'}))
-    return redirect('smth_went_wrong', error_suffix='photos (or photos form)')
 
     photos_form = PhotosForm(request.POST, request.FILES)
     product_form = AddProductForm(request.POST or None) if 'name' in request.POST else AddProductForm()
@@ -87,9 +84,25 @@ def add_product_dynamic_view(request):
                     photo = photo_models.Photo.objects.create(image=image, title=image_name, slug=slugify(image_name)) #
                     new_product.photos.photos.add(photo)
             else:
-                # TODO add this url and view
-                return redirect('smth_went_wrong', error_suffix='photos (or photos form)')
-
+                return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'photos (or photos form)'})}")
             # TODO add redirect on success
     return render(request, "add_product.html", context)
+
+
+class ProductsView(ListView):
+    http_method_names = ['get', ]
+    model = Product
+    queryset = model.objects.filter(is_active=True)
+    ordering = '-modified'
+    paginate_by = 8
+    template_name = 'products.html'
+    context_object_name = 'products'
+
+    # def get_context_data(self, **kwargs):
+    #     context = super(ProductsView, self).get_context_data(**kwargs)
+    #     for tile in context['products']:
+    #         if self.request.user.is_staff or self.request.user == tile.author:
+    #            tile.perm_edit = True
+    #            tile.perm_del = True
+    #     return context
 
