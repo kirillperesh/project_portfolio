@@ -19,9 +19,11 @@
         <div class="error">
             <h1>OOPS..</h1>
             <h2>bip-bop something went wrong</h2>
-            <p>probably with the {{request.GET.error_suffix}}</p>
-            <p>{{ple}}</p>
-            <p>{{request.GET}}</p>
+            {% if request.GET.error_suffix %}
+                <p>probably with the {{request.GET.error_suffix}}</p>
+            {% else %}
+                <p>no idea what have caused it..</p>
+            {% endif %}
         </div>
         <div class="stack-container">
             <div class="card-container">
