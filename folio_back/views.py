@@ -6,6 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.models import User
 from django.urls import reverse
+from urllib.parse import urlencode
 from django.shortcuts import get_object_or_404, get_list_or_404
 
 
@@ -92,6 +93,8 @@ class DeleteTileView(LoginRequiredMixin, RedirectView):
     pattern_name = 'tiles'
 
     def get_redirect_url(self, *args, **kwargs):
+        if 'slug' not in self.request.GET:
+            return f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'tile to delete'})}"
         tile_to_delete = get_object_or_404(Tile, slug=self.request.GET['slug'])
         if self.request.user.is_staff or self.request.user == tile_to_delete.author:
             tile_to_delete.is_active = True if self.request.GET.__contains__('recover') else False

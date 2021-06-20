@@ -20,11 +20,10 @@
                 <img src="{{ product.main_photo.get_display_url }}" alt="{{ product.main_photo.name }}" class="u-expanded-width u-image u-image-1">
                 <div class="u-align-center u-container-style u-group u-opacity u-opacity-85 u-group-1 bg-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
                   <div class="u-container-layout u-valign-middle u-container-layout-2">
-                    <h2 class="u-align-center u-custom-font u-text u-text-3">{{ product.name }}</h2>
+                    <h2 class="u-align-center u-custom-font u-text u-text-3 product-name">{{ product.name }}</h2>
                   </div>
                 </div>
-                <!-- <h3 style="position: absolute; top: 300px;">erger</h3> -->
-                <p class="u-align-center-lg u-text u-text-default u-text-4">{{ product.description }}</p>
+                <p class="u-align-center-lg u-text u-text-default u-text-4 test">{{ product.description }}</p>
                 <h3 class="u-align-center-lg u-custom-font u-text u-text-default u-text-5">$ {{product.selling_price}}</h3>
                 <a href="https://nicepage.com" class="u-btn u-button-style u-palette-5-dark-2 u-btn-1">add to cart</a>
               </div>

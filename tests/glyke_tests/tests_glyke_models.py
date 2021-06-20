@@ -1,3 +1,4 @@
+from django.db.models.signals import pre_delete
 from django.test import TestCase, override_settings
 from unittest.mock import MagicMock
 from django.apps import apps
@@ -5,9 +6,21 @@ from django.utils.crypto import get_random_string
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 import tempfile, shutil # temp dir to test filefields (test_auto_upload_dir_method)
+from django.utils.text import slugify
+import random
+import decimal
 
+from photologue import models as photo_models
 from glyke_back.models import *
+from glyke_back.views import create_gallery
 from glyke_back import signals
+
+
+def get_random_temp_file(extension):
+    """"Creates a temporary byte file for testing purposes of given extension.
+    Returns a tuple of (random file, name)"""
+    rnd_file_name = f'{get_random_string(length=10)}.{str(extension)}'
+    return (SimpleUploadedFile(rnd_file_name, b"these are the file contents"), rnd_file_name)
 
 
 
@@ -108,11 +121,62 @@ class ModelsTest(TestCase):
         """Assert models.get_upload_dir function works properly"""
         # case: category w/o picture
         self.assertEqual(str(self.parent_cat.picture), 'category/no_image.png')
-
         # case: category w/ temporary random picture
-        rnd_file_name = get_random_string(length=10) + '.jpg'
-        self.parent_cat.picture = SimpleUploadedFile(rnd_file_name, b"these are the file contents") # temporary byte file for testing purposes
+        rnd_temp_file, rnd_temp_file_name = get_random_temp_file('jpg')
+        self.parent_cat.picture = rnd_temp_file
         self.parent_cat.save()
         cat_name_slug = slugify(self.parent_cat.name.lower())
-        self.assertEqual(str(self.parent_cat.picture), f'category/{cat_name_slug}/{rnd_file_name}')
+        self.assertEqual(str(self.parent_cat.picture), f'category/{cat_name_slug}/{rnd_temp_file_name}')
+
+    def test_product_create_assign_photo(self):
+        """Assert product save method assigns the main_photo attr on creation"""
+        rnd_product_name = get_random_string(length=20)
+        gallery = create_gallery(title=rnd_product_name)
+        img_file, img_file_name = get_random_temp_file('jpg')
+        photo = photo_models.Photo.objects.create(image=img_file, title=img_file_name, slug=slugify(img_file_name))
+        gallery.photos.add(photo)
+        product = Product.objects.create(name=rnd_product_name, photos=gallery)
+        self.assertIsNotNone(product.photos)
+        self.assertEqual(gallery.slug, slugify(product.name + "_gallery"))
+        self.assertEqual(product.main_photo, photo)
+
+    def test_product_save_profit_update(self):
+        """Assert product save method updates profit attr"""
+        # case: all 0
+        product = Product.objects.create(name='test_product')
+        self.assertEqual(product.profit, 0)
+        # case: profit > 0, no discount
+        rnd_cost_price = decimal.Decimal(random.randrange(1, 9999))/100
+        rnd_selling_price = decimal.Decimal(random.randrange((rnd_cost_price*100)-1, 9999))/100
+        product.cost_price = rnd_cost_price
+        product.selling_price = rnd_selling_price
+        product.discount_percent = 0
+        product.save()
+        self.assertGreaterEqual(product.profit, 0)
+        self.assertEqual(product.profit, rnd_selling_price-rnd_cost_price)
+        # case: profit > 0, w/ discount
+        rnd_discount = random.randint(1, 80)
+        product.discount_percent = rnd_discount
+        product.save()
+        test_profit = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)-rnd_cost_price).quantize(Decimal('0.01'))
+        self.assertEqual(product.profit, test_profit)
+        # case: profit < 0, no discount
+        rnd_selling_price = decimal.Decimal(random.randrange(1, 9999))/100
+        rnd_cost_price = decimal.Decimal(random.randrange((rnd_selling_price*100)-1, 9999))/100
+        product.cost_price = rnd_cost_price
+        product.selling_price = rnd_selling_price
+        product.discount_percent = 0
+        product.save()
+        self.assertLessEqual(product.profit, 0)
+        self.assertEqual(product.profit, rnd_selling_price-rnd_cost_price)
+        # case: profit < 0, w/ discount
+        rnd_discount = random.randint(1, 80)
+        product.discount_percent = rnd_discount
+        product.save()
+        test_profit = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)-rnd_cost_price).quantize(Decimal('0.01'))
+        self.assertEqual(product.profit, test_profit)
+
+
+
+
 

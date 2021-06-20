@@ -121,9 +121,11 @@ class Product(Price, TimeStampedModel):
         return self.name
 
     def save(self, *args, **kwargs):
-        if not self.pk:
+        if not self.pk and self.photos:
             self.main_photo = self.photos.photos.all().first()
-        self.profit = self.selling_price * Decimal(1 - self.discount_percent * .01) - self.cost_price
+        #TODO add else with some default pic
+        self.profit = self.selling_price * Decimal(1 - self.discount_percent / 100) - self.cost_price
+        self.profit = Decimal(self.profit).quantize(Decimal('0.01'))
         super(Product, self).save(*args, **kwargs)
 
 

@@ -1,8 +1,12 @@
-from django.test import TestCase, SimpleTestCase, Client, TransactionTestCase, tag
+from django import test
+from django.db.models.expressions import F
+from django.test import TestCase, SimpleTestCase, Client, TransactionTestCase, client, tag
 from django.urls import reverse, resolvers
 from django.conf import settings
 import importlib
 import types, os
+from django.contrib.auth.models import User
+
 
 
 @tag('gitignore')
@@ -16,6 +20,8 @@ class AllUrlsTest(TestCase):
         cls.env_path = os.environ['VIRTUAL_ENV'].lower()
         cls.urls_to_test = dict() # pattern - fullname pairs
         cls.patterns_to_test = list()
+
+        cls.test_user_staff = User.objects.get_or_create(username='test_user_staff', is_staff=True)[0]
 
         for pattern in cls.urls_module.urlpatterns:
             if isinstance(pattern, resolvers.URLPattern):
@@ -53,8 +59,6 @@ class AllUrlsTest(TestCase):
             - pattern expects any positinal parameters
             - pattern expects keyword parameters that are not specified in @default_kwargs
         If response code is not in @allowed_http_codes, fail the test.
-        if @credentials dict is specified (e.g. username and password),
-            login before run tests.
         If @logout_url is specified, then check if we accidentally logged out
             the client while testing, and login again
         Specify @default_kwargs to be used for patterns that expect keyword parameters,
@@ -66,6 +70,7 @@ class AllUrlsTest(TestCase):
         """
 
         for pattern, name in self.urls_to_test.items():
+            self.client.force_login(self.test_user_staff)
             params = {}
             regex = pattern.pattern.regex
             if regex.groups > 0:
