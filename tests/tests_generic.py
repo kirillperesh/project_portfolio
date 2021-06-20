@@ -50,7 +50,7 @@ class AllUrlsTest(TestCase):
         for url, name in self.urls_to_test.items():
             self.assertIsNotNone(name, f'\nPattern {url} has no name')
 
-    def test_responses(self, allowed_http_codes=[200, 302, 405], logout_url=reverse('logout'), default_kwargs={}, quiet=False):
+    def test_responses(self, allowed_http_codes=[200, 302, 405], logout_url=reverse('logout'), default_kwargs={}, quiet=True):
         """
         Test all patterns in root urlconf and included ones.
         Do GET requests only.
