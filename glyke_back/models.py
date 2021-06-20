@@ -121,7 +121,7 @@ class Product(Price, TimeStampedModel):
         return self.name
 
     def save(self, *args, **kwargs):
-        if not self.pk:
+        if not self.pk and self.photos:
             self.main_photo = self.photos.photos.all().first()
         self.profit = self.selling_price * Decimal(1 - self.discount_percent * .01) - self.cost_price
         super(Product, self).save(*args, **kwargs)
