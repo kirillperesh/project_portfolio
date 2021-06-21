@@ -1,5 +1,5 @@
-from django.db.models.signals import pre_delete
 from django.test import TestCase, override_settings
+from django.db.models.signals import pre_delete
 from unittest.mock import MagicMock
 from django.apps import apps
 from django.utils.crypto import get_random_string
@@ -29,16 +29,16 @@ MEDIA_ROOT = tempfile.mkdtemp() # temp dir to test filefields (test_auto_upload_
 class ModelsTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user_not_staff = User.objects.get_or_create(username='user_not_staff', password='password')[0]
+        cls.user_not_staff = User.objects.create(username='user_not_staff', password='password')
 
-        cls.parent_cat = Category.objects.get_or_create(name='Parent cat')[0]
-        cls.sub_parent_cat = Category.objects.get_or_create(name='Sub-parent cat', parent = cls.parent_cat)[0]
-        cls.child_cat = Category.objects.get_or_create(name='Child cat', parent = cls.sub_parent_cat)[0]
-        cls.product_sub_parent = Product.objects.get_or_create(name='Product of sub-parent cat', category = cls.sub_parent_cat)[0]
-        cls.product_child = Product.objects.get_or_create(name='Product of child cat', category = cls.child_cat)[0]
+        cls.parent_cat = Category.objects.create(name='Parent cat')
+        cls.sub_parent_cat = Category.objects.create(name='Sub-parent cat', parent = cls.parent_cat)
+        cls.child_cat = Category.objects.create(name='Child cat', parent = cls.sub_parent_cat)
+        cls.product_sub_parent = Product.objects.create(name='Product of sub-parent cat', category = cls.sub_parent_cat)
+        cls.product_child = Product.objects.create(name='Product of child cat', category = cls.child_cat)
 
-        cls.check = Check.objects.get_or_create(number=1, customer=None)[0]
-        cls.check_line = CheckLine.objects.get_or_create(parent_check=cls.check, product=cls.product_child)[0]
+        cls.check = Check.objects.create(number=1, customer=None)
+        cls.check_line = CheckLine.objects.create(parent_check=cls.check, product=cls.product_child)
 
     @classmethod
     def tearDownClass(cls):  # delete temp dir on teardown
@@ -50,7 +50,7 @@ class ModelsTest(TestCase):
         instance_list = [self.parent_cat, self.sub_parent_cat, self.child_cat, self.product_sub_parent, self.product_child]
         for instance in reversed(instance_list):
             handler = MagicMock() # Create handler
-            signals.pre_delete.connect(handler, sender=instance.__class__)
+            pre_delete.connect(handler, sender=instance.__class__)
             instance.delete()
             instance.save()
             # Assert the signal was called only once with the args
