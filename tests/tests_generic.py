@@ -21,7 +21,8 @@ class AllUrlsTest(TestCase):
         cls.urls_to_test = dict() # pattern - fullname pairs
         cls.patterns_to_test = list()
 
-        cls.test_user_staff = User.objects.get_or_create(username='test_user_staff', is_staff=True)[0]
+        cls.test_user_staff = User.objects.create(username='test_user_staff', is_staff=True)
+        cls.test_user_superuser = User.objects.create(username='test_user_superuser', is_staff=True, is_superuser=True)
 
         for pattern in cls.urls_module.urlpatterns:
             if isinstance(pattern, resolvers.URLPattern):
@@ -70,7 +71,6 @@ class AllUrlsTest(TestCase):
         """
 
         for pattern, name in self.urls_to_test.items():
-            self.client.force_login(self.test_user_staff)
             params = {}
             regex = pattern.pattern.regex
             if regex.groups > 0:
@@ -89,6 +89,15 @@ class AllUrlsTest(TestCase):
                         params[key] = default_kwargs[key]
             url = reverse(name, kwargs=params)
             response = self.client.get(url)
+            if response.status_code in [403, 404, 500]: # check staff only permission
+                self.client.force_login(self.test_user_staff)
+                response = self.client.get(url)
+                if not quiet and response.status_code in allowed_http_codes: print("STAFF ONLY" + regex.pattern + " " + name)
+                if response.status_code in [403, 404, 500]: # check superuser only permission
+                    self.client.force_login(self.test_user_superuser)
+                    response = self.client.get(url)
+                    if not quiet and response.status_code in allowed_http_codes: print("SUPERUSER ONLY" + regex.pattern + " " + name)
+
             self.assertIn(response.status_code, allowed_http_codes)
             # print status code if it is not 200
             status = "" if response.status_code == 200 else str(response.status_code)

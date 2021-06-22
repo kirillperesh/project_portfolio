@@ -20,3 +20,8 @@ def user_passes_test_or_404(test_func):
 def user_is_staff_or_404():
     """Decorator for views that checks that the user is_staff,redirecting to 404 if not."""
     return user_passes_test_or_404(lambda user: user.is_staff)
+
+def user_is_superuser_or_404():
+    """Decorator for views that checks that the user is_superuser,redirecting to 404 if not."""
+    return user_passes_test_or_404(lambda user: user.is_superuser)
+
