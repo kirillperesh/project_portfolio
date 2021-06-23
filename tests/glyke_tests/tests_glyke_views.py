@@ -2,9 +2,11 @@ from django.test import TestCase
 from django.urls import reverse
 from urllib.parse import urlencode
 from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from glyke_back.models import *
 from glyke_back.forms import *
+
 
 
 class AddProductViewTest(TestCase):
@@ -54,8 +56,8 @@ class AddProductViewTest(TestCase):
             response = self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
             self.assertListEqual(list(response.context['filter_form'].fields.keys()), filters_list)
 
-    def test_category_form(self):
-        """Checks if the product is created correctly"""
+    def test_product_attributes_creation(self):
+        """Checks if the product is created correctly with given attributes"""
         self.assertEqual(Product.objects.all().count(), 0)
         for category_id, filters_list in self.category_id_filters_dict.items():
             context_data = urlencode({'category': category_id,
@@ -68,6 +70,27 @@ class AddProductViewTest(TestCase):
             product = Product.objects.get(name=f'product_{category_id}')
             self.assertEqual(list(product.attributes.keys()), filters_list)
             self.assertEqual(list(product.attributes.values()), filters_list)
+
+
+    def test_product_gallery_creation(self):
+        """Checks the error redirection on non-image upload file
+        Checks if gallery of the product is created correctly"""
+        self.assertEqual(Product.objects.all().count(), 0)
+        test_file = SimpleUploadedFile("file.jpg", b"file_content")
+
+        context_data = {'category': self.category_0_filters.id, # using category w/o filters here
+                                    'name': f'product_{self.category_0_filters.id}',
+                                    'cost_price': '0','selling_price': '0', 'discount_percent': '0', 'tags': 'test_tag', 'stock': '1',
+                                    'photos': [test_file,]}
+        response = self.client.post(self.basic_url, context_data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, r'/oops/?error_suffix=photos+%28or+photos+form%29')
+        self.assertEqual(Product.objects.all().count(), 1)
+        product = Product.objects.get(name=f'product_{self.category_0_filters.id}')
+        self.assertEqual(product.photos.title, f'product_{self.category_0_filters.id}_gallery')
+
+
+
 
 
 

@@ -38,10 +38,10 @@ def add_product_dynamic_view(request):
         'category_form': SelectCategoryProductForm(request.POST or None),
         'photos_form': photos_form,
         'product_form': product_form,}
+    category_fields = {}
 
     if request.method == 'POST':
         if 'category' in request.POST:
-            category_fields = {}
             context['category'] = request.POST['category']
             category = Category.objects.get(id=context['category'])
 

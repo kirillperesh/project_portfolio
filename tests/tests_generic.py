@@ -1,5 +1,3 @@
-from django import test
-from django.db.models.expressions import F
 from django.test import TestCase, SimpleTestCase, Client, TransactionTestCase, client, tag
 from django.urls import reverse, resolvers
 from django.conf import settings
