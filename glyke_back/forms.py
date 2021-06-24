@@ -31,7 +31,8 @@ class AddProductForm(forms.ModelForm):
         }
 
 class SelectCategoryProductForm(forms.Form):
-    category = forms.ModelChoiceField(queryset=Category.objects.filter(is_active=True),
+    category = forms.ModelChoiceField(required=True,
+                                      queryset=Category.objects.filter(is_active=True),
                                       empty_label='..',
                                       widget=forms.Select(attrs={'class': 'custom-select',}))
 
