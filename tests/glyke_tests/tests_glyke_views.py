@@ -28,7 +28,7 @@ class AddProductViewTest(TestCase):
                                         cls.category_2_filters.id: list(cls.category_2_filters.filters.names()),} # case: category w/ 2 filters
 
     def setUp(self):
-        self.client.force_login(self.test_user_staff)
+        self.client.force_login(self.test_user_staff) # force_login before making requests because this is a staff-only view
 
     def test_permissins(self):
         """If is_staff==False return 404"""
