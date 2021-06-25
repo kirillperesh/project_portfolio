@@ -13,6 +13,7 @@ urlpatterns = [
     path("logout", LogoutView.as_view(), name="logout"),
 
     path("add_product", views.add_product_dynamic_view, name="add_product"),
+    path("edit_product/<int:id>", views.edit_product_dynamic_view, name="edit_product"),
     path("products", views.ProductsView.as_view(), name="products"),
 ]
 

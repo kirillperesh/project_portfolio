@@ -1,0 +1,119 @@
+{% extends 'glyke_base.html' %}
+
+
+{% block title %} Edit {{ product.name }} {% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-xl-9 col-lg-10 col-md-12 col-sm-12 mx-auto">
+      <div class="tm-bg-primary-dark tm-block tm-block-h-auto">
+        <div class="row">
+          <div class="col-12">
+            <h2 class="tm-block-title d-inline-block">Редактировать {{ product.name }}</h2>
+          </div>
+        </div>
+        <div class="row tm-edit-product-row">
+            <div class="col-xl-6 col-lg-6 col-md-12">
+                <form role="form" action="" method="post" class="tm-edit-product-form" id="category_form" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <label for="{{category_form.category.name}}">{{category_form.category.label}}</label>
+                    <div class="row">
+                        <div class="form-group mb-3 col-xs-12 col-sm-66">
+                            {{category_form.category}}
+                            {{category_form.category.errors}}
+                        </div>
+                        <div class="form-group mb-3 col-xs-12 col-sm-33">
+                            <input type="submit" value="Update" class="form-control btn-add btn-add-primary btn-add-block text-uppercase">
+                        </div>
+                    </div>
+                </form>
+                <form role="form" action="" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% for field in filter_form %}
+                        <div class="form-group mb-3">
+                            <label for="{{field.name}}">{{field.label}}</label>
+                            {{field}}
+                        </div>
+                    {% endfor %}
+            </div>
+            <div class="col-xl-6 col-lg-6 col-md-12 mx-auto mb-4">
+                <label for="{{photos_form.photos.name}}">{{photos_form.photos.label}}</label>
+                <div class="img-preview-background">
+                    <div id="img-preview-container">
+                        {% for img_src in photos_thumbnail_urls %}
+                            <img src="{{img_src}}" class='img-preview'>
+                        {% endfor %}
+                    </div>
+                </div>
+                {{photos_form.photos.errors}}
+                <div class="mb-12p custom-file">
+                    {{photos_form.photos}}
+                    <input type="button" class="btn-add btn-add-primary btn-add-block mx-auto form-control text-uppercase" value="ADD PRODUCT IMAGES" onclick="document.getElementById('photosInput').click();">
+                </div>
+                {{product_form.non_field_errors}}
+                <div class="form-group mb-3 mt-3">
+                    <label for="{{product_form.name.name}}">{{product_form.name.label}}</label>
+                    {{product_form.name}}
+                    {{product_form.name.errors}}
+                </div>
+                <div class="form-group mb-3">
+                    <label for="{{product_form.description.name}}">{{product_form.description.label}}</label>
+                    {{product_form.description}}
+                    {{product_form.description.errors}}
+                </div>
+                <div class="row">
+                    <div class="form-group mb-3 col-xs-12 col-sm-66">
+                        <label for="{{product_form.tags.name}}">{{product_form.tags.label}}</label>
+                        {{product_form.tags}}
+                        {{product_form.tags.errors}}
+                    </div>
+                    <div class="form-group mb-3 col-xs-12 col-sm-33">
+                        <label for="{{product_form.stock.name}}">{{product_form.stock.label}}</label>
+                        {{product_form.stock}}
+                        {{product_form.stock.errors}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group mb-3 col-xs-12 col-sm-33">
+                        <label for="{{product_form.cost_price.name}}">{{product_form.cost_price.label}}</label>
+                        {{product_form.cost_price}}
+                        {{product_form.cost_price.errors}}
+                    </div>
+                    <div class="form-group mb-3 col-xs-12 col-sm-33">
+                        <label for="{{product_form.selling_price.name}}">{{product_form.selling_price.label}}</label>
+                        {{product_form.selling_price}}
+                        {{product_form.selling_price.errors}}
+                    </div>
+                    <div class="form-group mb-3 col-xs-12 col-sm-33">
+                        <label for="{{product_form.discount_percent.name}}">{{product_form.discount_percent.label}}</label>
+                        {{product_form.discount_percent}}
+                        {{product_form.discount_percent.errors}}
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <input type="submit" value="Add Product Now" class="btn-add btn-add-primary btn-add-block text-uppercase"></input>
+            </div>
+            <input type="hidden" name="category" value="{{category}}"></input>
+        </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+<!-- <script>
+var previewImages = function(event) {
+	var image_list = document.getElementById('img-preview-container');
+    image_list.removeChild(image_list.firstChild)
+    for (var i = 0; i < event.target.files.length; i++) {
+        var elem = document.createElement("img");
+        elem.src = URL.createObjectURL(event.target.files[i])
+        elem.className = "img-preview"
+        image_list.appendChild(elem)
+        }
+};
+</script> -->
+{% endblock %}
