@@ -26,7 +26,6 @@ class AddProductViewTest(TestCase):
         cls.category_id_filters_dict = {cls.category_0_filters.id: list(cls.category_0_filters.filters.names()),  # case: category w/o filters
                                         cls.category_1_filters.id: list(cls.category_1_filters.filters.names()),  # case: category w/ 1 filter
                                         cls.category_2_filters.id: list(cls.category_2_filters.filters.names()),} # case: category w/ 2 filters
-
     def setUp(self):
         self.client.force_login(self.test_user_staff) # force_login before making requests because this is a staff-only view
 
