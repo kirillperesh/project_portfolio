@@ -91,7 +91,7 @@ def add_product_dynamic_view(request):
                     new_product.photos.photos.add(photo)
             else:
                 return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'photos (or photos form)'})}")
-            # TODO add redirect on success
+            return redirect('add_product')
     return render(request, "add_product.html", context)
 
 @user_is_staff_or_404()
@@ -114,14 +114,11 @@ def edit_product_dynamic_view(request, id):
                              'discount_percent': product_instance.discount_percent,}
     category_fields = get_category_fields(category=current_category)
 
-    photos_thumbnail_urls = []
-    for photo in product_instance.photos.photos.all():
-        photos_thumbnail_urls.append(photo.get_thumbnail_url())
-
+    photos_thumbnail_urls = [ photo.get_thumbnail_url() for photo in product_instance.photos.photos.all() ]
     photos_form = PhotosForm(request.POST, request.FILES)
-    product_form = AddProductForm(initial=product_instance_data, data=request.POST or None)
+    product_form = AddProductForm(initial=product_instance_data)
     CategoryFiltersForm = type('CategoryFiltersForm', (forms.Form,), category_fields) # creates a class (inherits from forms.Form class) with category_fields as attributes (form fields)
-    filters_form = CategoryFiltersForm(initial=product_instance.attributes, data=request.POST or None)
+    filters_form = CategoryFiltersForm(initial=product_instance.attributes)
     context = {
         'category_form': SelectCategoryProductForm(initial={'category': current_category}),
         'photos_form': photos_form,
@@ -133,43 +130,40 @@ def edit_product_dynamic_view(request, id):
         }
 
     if request.method == 'POST':
-        print(filters_form.is_valid())
-        print(filters_form.errors)
-        print(product_form.is_valid())
-        print(product_form.errors)
-        # if all([filters_form.is_valid(), product_form.is_valid(),]):
-        #     Product.objects.filter(id=id).update(name=product_form.cleaned_data['name'],
-        #                                          description=product_form.cleaned_data['description'],
-        #                                          category=current_category,
-        #                                          # tags, (added later in this view)
-        #                                          stock=product_form.cleaned_data['stock'],
-        #                                         #  photos=create_gallery(title=product_form.cleaned_data['name']),
-        #                                          attributes=filters_form.cleaned_data,
-        #                                          cost_price=product_form.cleaned_data['cost_price'],
-        #                                          selling_price=product_form.cleaned_data['selling_price'],
-        #                                          discount_percent=product_form.cleaned_data['discount_percent'],
-        #                                         )
-        #     # tags block
-        #     product_instance.tags.clear()
-        #     product_instance.tags.add(*product_form.cleaned_data['tags']) # using list as multiple positional arguments
-        #     # product_instance.save()
+        if len(request.POST) > 2:
+            product_form = AddProductForm(request.POST or None)
+            filters_form = CategoryFiltersForm(request.POST or None)
 
-            # # photos block
-            # if photos_form.is_valid():
-            #     for image in request.FILES.getlist('photos'):
-            #         image_name = image.name + f'_{new_product.name}' # product's name is appended for later filtering purposes
+        if all([filters_form.is_valid(), product_form.is_valid_check_same_name(current_name=product_instance.name),]):
+            Product.objects.filter(id=id).update(name=product_form.cleaned_data['name'],
+                                                 description=product_form.cleaned_data['description'],
+                                                 category=current_category,
+                                                 # tags, (added later in this view)
+                                                 stock=product_form.cleaned_data['stock'],
+                                                 # TODO rename gallery if renamed product
+                                                 # photos=create_gallery(title=product_form.cleaned_data['name']),
+                                                 attributes=filters_form.cleaned_data,
+                                                 cost_price=product_form.cleaned_data['cost_price'],
+                                                 selling_price=product_form.cleaned_data['selling_price'],
+                                                 discount_percent=product_form.cleaned_data['discount_percent'],
+                                                )
+            # tags block
+            product_instance.tags.clear()
+            product_instance.tags.add(*product_form.cleaned_data['tags']) # using list as multiple positional arguments
 
-            #         # # this block wil be used in update view, not needed here
-            #         # if new_product.photos.photos.filter(title=image_name).exists(): # can't use get_or_create and have to specify slug because of some photologue bug
-            #         #     image_name += f'_{photo_models.Photo.objects.filter(title=image_name).count() + 1}'
-            #         # # this block wil be used in update view, not needed here
+            # photos block
+            if photos_form.is_valid():
+                for image in request.FILES.getlist('photos'):
+                    image_name = image.name + f'_{product_instance.name}' # product's name is appended for later filtering purposes
+                    if product_instance.photos.photos.filter(title=image_name).exists(): # can't use get_or_create and have to specify slug because of some photologue bug
+                        image_name += f'_{photo_models.Photo.objects.filter(title__startswith=image_name).count() + 1}'
+                    # TODO add any photologue filters down here
+                    photo = photo_models.Photo.objects.create(image=image, title=image_name, slug=slugify(image_name)) #
+                    product_instance.photos.photos.add(photo)
+            else:
+                return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'photos (or photos form)'})}")
 
-            #         # TODO add any photologue filters down here
-            #         photo = photo_models.Photo.objects.create(image=image, title=image_name, slug=slugify(image_name)) #
-            #         new_product.photos.photos.add(photo)
-            # else:
-            #     return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'photos (or photos form)'})}")
-            # # TODO add redirect on success
+            return redirect('edit_product', id=product_instance.id)
     return render(request, "edit_product.html", context)
 
 class ProductsView(ListView):
@@ -181,3 +175,5 @@ class ProductsView(ListView):
     template_name = 'products.html'
     context_object_name = 'products'
 
+# TODO make previewImages script separate
+# TODO add remove photo button

@@ -38,12 +38,15 @@
             </div>
             <div class="col-xl-6 col-lg-6 col-md-12 mx-auto mb-4">
                 <label for="{{photos_form.photos.name}}">{{photos_form.photos.label}}</label>
-                <div class="img-preview-background">
-                    <div id="img-preview-container">
+                <div class="img-preview-background" style="background-color: #acc6de;">
+                    <div class="mt-8p">
                         {% for img_src in photos_thumbnail_urls %}
                             <img src="{{img_src}}" class='img-preview'>
                         {% endfor %}
                     </div>
+                </div>
+                <div class="img-preview-background mt-8p">
+                    <div id="img-preview-container">Uploaded images preview will apper here</div>
                 </div>
                 {{photos_form.photos.errors}}
                 <div class="mb-12p custom-file">
@@ -92,7 +95,7 @@
                 </div>
             </div>
             <div class="col-12">
-                <input type="submit" value="Add Product Now" class="btn-add btn-add-primary btn-add-block text-uppercase"></input>
+                <input type="submit" value="Edit Product" class="btn-add btn-add-primary btn-add-block text-uppercase"></input>
             </div>
             <input type="hidden" name="category" value="{{category}}"></input>
         </form>
@@ -104,16 +107,20 @@
 
 
 
-<!-- <script>
+<script>
 var previewImages = function(event) {
 	var image_list = document.getElementById('img-preview-container');
-    image_list.removeChild(image_list.firstChild)
-    for (var i = 0; i < event.target.files.length; i++) {
+    if (image_list.firstChild.textContent == 'Uploaded images preview will apper here') {image_list.removeChild(image_list.firstChild)};
+    main_loop:
+    for (file of event.target.files) {
+        for (div_img of image_list.children) {
+            if (file.name == div_img.alt) {continue main_loop;}};
         var elem = document.createElement("img");
-        elem.src = URL.createObjectURL(event.target.files[i])
-        elem.className = "img-preview"
+        elem.src = URL.createObjectURL(file);
+        elem.className = "img-preview";
+        elem.alt = file.name;
         image_list.appendChild(elem)
-        }
+    };
 };
-</script> -->
+</script>
 {% endblock %}
