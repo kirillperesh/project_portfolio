@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.urls.base import is_valid_path
 from django.utils.translation import gettext_lazy as _
 
 from photologue import models as photo_models
@@ -29,6 +30,19 @@ class AddProductForm(forms.ModelForm):
             'selling_price': _('Selling price, $'),
             'discount_percent': _('Discount, %'),
         }
+
+    def is_valid_check_same_name(self, *, current_name):
+        """Calls self.is_valid().
+        Returns True if the ['Product with this Name already exists.'] error was caused by not changing the initial name. Removes this error if it's the only one."""
+        form_is_valid = self.is_valid()
+        if not form_is_valid:
+            # the order here is important
+            if 'name' in list(self.errors.keys()) and ['Product with this Name already exists.'] == self.errors['name'] and self.data['name'] == current_name:
+                self.cleaned_data['name'] = current_name
+                if ['name'] == list(self.errors.keys()): form_is_valid = True
+                self.errors.pop('name')
+        return form_is_valid
+        
 
 class SelectCategoryProductForm(forms.Form):
     category = forms.ModelChoiceField(required=True,
