@@ -27,7 +27,7 @@
                         </div>
                     </div>
                 </form>
-                <form role="form" action="" method="post" enctype="multipart/form-data">
+                <form id="main_product_form" role="form" action="" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     {% for field in filter_form %}
                         <div class="form-group mb-3">
@@ -41,7 +41,8 @@
                 <div class="img-preview-background" style="background-color: #acc6de;">
                     <div class="mt-8p">
                         {% for img_src in photos_thumbnail_urls %}
-                            <img src="{{img_src}}" class='img-preview'>
+                        <img src="{{img_src}}" class='img-preview' id="{{img_src}}">
+                        <a onclick="toggleRemoveCurrentImg(event)"><span id="{{img_src}}_span" class="fas fa-times trans02s remove-photo-toggle"></span></a>
                         {% endfor %}
                     </div>
                 </div>
@@ -98,6 +99,7 @@
                 <input type="submit" value="Edit Product" class="btn-add btn-add-primary btn-add-block text-uppercase"></input>
             </div>
             <input type="hidden" name="category" value="{{category}}"></input>
+            <input id="photos_to_delete_input" type="hidden" name="photos_to_delete"></input>
         </form>
 
         </div>
@@ -106,21 +108,6 @@
   </div>
 
 
-
-<script>
-var previewImages = function(event) {
-	var image_list = document.getElementById('img-preview-container');
-    if (image_list.firstChild.textContent == 'Uploaded images preview will apper here') {image_list.removeChild(image_list.firstChild)};
-    main_loop:
-    for (file of event.target.files) {
-        for (div_img of image_list.children) {
-            if (file.name == div_img.alt) {continue main_loop;}};
-        var elem = document.createElement("img");
-        elem.src = URL.createObjectURL(file);
-        elem.className = "img-preview";
-        elem.alt = file.name;
-        image_list.appendChild(elem)
-    };
-};
-</script>
+{% load static %}
+<script src="{% static 'glyke_back/js/product_add_edit.js' %}"></script>
 {% endblock %}

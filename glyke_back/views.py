@@ -103,6 +103,8 @@ def edit_product_dynamic_view(request, id):
     # (category selecting is done via separate form).
     # """
 
+    print(request.POST)
+
     product_instance = Product.objects.get(id=id)
     current_category = Category.objects.get(id=request.POST['category']) if request.method == 'POST' else product_instance.category
     product_instance_data = {'name': product_instance.name,
