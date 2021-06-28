@@ -76,7 +76,7 @@ def add_product_dynamic_view(request):
             # tags block
             new_product.tags.add(*product_form.cleaned_data['tags']) # using list as multiple positional arguments
 
-            # photos block
+            # new photos block
             if photos_form.is_valid():
                 for image in request.FILES.getlist('photos'):
                     image_name = image.name + f'_{new_product.name}' # product's name is appended for later filtering purposes
@@ -103,9 +103,20 @@ def edit_product_dynamic_view(request, id):
     # (category selecting is done via separate form).
     # """
 
-    print(request.POST)
-
     product_instance = Product.objects.get(id=id)
+
+    # TODO add comments and docstr
+    for param_name in request.POST:
+        if param_name.startswith('to_del_photo_'):
+            to_del_photo_image = str(param_name).replace('_thumbnail', '').split('/')[-1]
+            to_del_photo = product_instance.photos.photos.filter(image__endswith = to_del_photo_image)
+            print(to_del_photo)
+            to_del_photo.delete()
+            # TODO this here deletes only model instance but not the files
+            # but admin delete button deletes the files
+
+
+
     current_category = Category.objects.get(id=request.POST['category']) if request.method == 'POST' else product_instance.category
     product_instance_data = {'name': product_instance.name,
                              'description': product_instance.description,
@@ -153,7 +164,7 @@ def edit_product_dynamic_view(request, id):
             product_instance.tags.clear()
             product_instance.tags.add(*product_form.cleaned_data['tags']) # using list as multiple positional arguments
 
-            # photos block
+            # new photos block
             if photos_form.is_valid():
                 for image in request.FILES.getlist('photos'):
                     image_name = image.name + f'_{product_instance.name}' # product's name is appended for later filtering purposes
