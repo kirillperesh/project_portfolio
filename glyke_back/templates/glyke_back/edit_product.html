@@ -27,78 +27,79 @@
                         </div>
                     </div>
                 </form>
-                <form role="form" action="" method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {% for field in filter_form %}
-                        <div class="form-group mb-3">
-                            <label for="{{field.name}}">{{field.label}}</label>
-                            {{field}}
-                        </div>
-                    {% endfor %}
-            </div>
-            <div class="col-xl-6 col-lg-6 col-md-12 mx-auto mb-4">
-                <label for="{{photos_form.photos.name}}">{{photos_form.photos.label}}</label>
-                <div class="img-preview-background" style="background-color: #acc6de;">
-                    <div class="mt-8p">
-                        {% for img_src in photos_thumbnail_urls %}
-                            <img src="{{img_src}}" class='img-preview'>
+                    <form id="main_product_form" role="form" action="" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% for field in filter_form %}
+                            <div class="form-group mb-3">
+                                <label for="{{field.name}}">{{field.label}}</label>
+                                {{field}}
+                            </div>
                         {% endfor %}
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 mx-auto mb-4">
+                    <label for="{{photos_form.photos.name}}">{{photos_form.photos.label}}</label>
+                    <div class="img-preview-background" style="background-color: #acc6de;">
+                        <div class="mt-8p">
+                            {% for img_src in photos_thumbnail_urls %}
+                            <img src="{{img_src}}" class='img-preview' id="{{img_src}}">
+                            <a onclick="toggleRemoveCurrentImg(event)"><span id="{{img_src}}_span" class="fas fa-times trans02s remove-photo-toggle"></span></a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="img-preview-background mt-8p">
+                        <div id="img-preview-container">Uploaded images preview will apper here</div>
+                    </div>
+                    {{photos_form.photos.errors}}
+                    <div class="mb-12p custom-file">
+                        {{photos_form.photos}}
+                        <input type="button" class="btn-add btn-add-primary btn-add-block mx-auto form-control text-uppercase" value="ADD PRODUCT IMAGES" onclick="document.getElementById('photosInput').click();">
+                    </div>
+                    {{product_form.non_field_errors}}
+                    <div class="form-group mb-3 mt-3">
+                        <label for="{{product_form.name.name}}">{{product_form.name.label}}</label>
+                        {{product_form.name}}
+                        {{product_form.name.errors}}
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="{{product_form.description.name}}">{{product_form.description.label}}</label>
+                        {{product_form.description}}
+                        {{product_form.description.errors}}
+                    </div>
+                    <div class="row">
+                        <div class="form-group mb-3 col-xs-12 col-sm-66">
+                            <label for="{{product_form.tags.name}}">{{product_form.tags.label}}</label>
+                            {{product_form.tags}}
+                            {{product_form.tags.errors}}
+                        </div>
+                        <div class="form-group mb-3 col-xs-12 col-sm-33">
+                            <label for="{{product_form.stock.name}}">{{product_form.stock.label}}</label>
+                            {{product_form.stock}}
+                            {{product_form.stock.errors}}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group mb-3 col-xs-12 col-sm-33">
+                            <label for="{{product_form.cost_price.name}}">{{product_form.cost_price.label}}</label>
+                            {{product_form.cost_price}}
+                            {{product_form.cost_price.errors}}
+                        </div>
+                        <div class="form-group mb-3 col-xs-12 col-sm-33">
+                            <label for="{{product_form.selling_price.name}}">{{product_form.selling_price.label}}</label>
+                            {{product_form.selling_price}}
+                            {{product_form.selling_price.errors}}
+                        </div>
+                        <div class="form-group mb-3 col-xs-12 col-sm-33">
+                            <label for="{{product_form.discount_percent.name}}">{{product_form.discount_percent.label}}</label>
+                            {{product_form.discount_percent}}
+                            {{product_form.discount_percent.errors}}
+                        </div>
                     </div>
                 </div>
-                <div class="img-preview-background mt-8p">
-                    <div id="img-preview-container">Uploaded images preview will apper here</div>
+                <div class="col-12">
+                    <input type="submit" value="Edit Product" class="btn-add btn-add-primary btn-add-block text-uppercase"></input>
                 </div>
-                {{photos_form.photos.errors}}
-                <div class="mb-12p custom-file">
-                    {{photos_form.photos}}
-                    <input type="button" class="btn-add btn-add-primary btn-add-block mx-auto form-control text-uppercase" value="ADD PRODUCT IMAGES" onclick="document.getElementById('photosInput').click();">
-                </div>
-                {{product_form.non_field_errors}}
-                <div class="form-group mb-3 mt-3">
-                    <label for="{{product_form.name.name}}">{{product_form.name.label}}</label>
-                    {{product_form.name}}
-                    {{product_form.name.errors}}
-                </div>
-                <div class="form-group mb-3">
-                    <label for="{{product_form.description.name}}">{{product_form.description.label}}</label>
-                    {{product_form.description}}
-                    {{product_form.description.errors}}
-                </div>
-                <div class="row">
-                    <div class="form-group mb-3 col-xs-12 col-sm-66">
-                        <label for="{{product_form.tags.name}}">{{product_form.tags.label}}</label>
-                        {{product_form.tags}}
-                        {{product_form.tags.errors}}
-                    </div>
-                    <div class="form-group mb-3 col-xs-12 col-sm-33">
-                        <label for="{{product_form.stock.name}}">{{product_form.stock.label}}</label>
-                        {{product_form.stock}}
-                        {{product_form.stock.errors}}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="form-group mb-3 col-xs-12 col-sm-33">
-                        <label for="{{product_form.cost_price.name}}">{{product_form.cost_price.label}}</label>
-                        {{product_form.cost_price}}
-                        {{product_form.cost_price.errors}}
-                    </div>
-                    <div class="form-group mb-3 col-xs-12 col-sm-33">
-                        <label for="{{product_form.selling_price.name}}">{{product_form.selling_price.label}}</label>
-                        {{product_form.selling_price}}
-                        {{product_form.selling_price.errors}}
-                    </div>
-                    <div class="form-group mb-3 col-xs-12 col-sm-33">
-                        <label for="{{product_form.discount_percent.name}}">{{product_form.discount_percent.label}}</label>
-                        {{product_form.discount_percent}}
-                        {{product_form.discount_percent.errors}}
-                    </div>
-                </div>
-            </div>
-            <div class="col-12">
-                <input type="submit" value="Edit Product" class="btn-add btn-add-primary btn-add-block text-uppercase"></input>
-            </div>
-            <input type="hidden" name="category" value="{{category}}"></input>
-        </form>
+                <input id="category_hidden_input" type="hidden" name="category" value="{{category}}">here</input>
+            </form>
 
         </div>
       </div>
@@ -106,21 +107,6 @@
   </div>
 
 
-
-<script>
-var previewImages = function(event) {
-	var image_list = document.getElementById('img-preview-container');
-    if (image_list.firstChild.textContent == 'Uploaded images preview will apper here') {image_list.removeChild(image_list.firstChild)};
-    main_loop:
-    for (file of event.target.files) {
-        for (div_img of image_list.children) {
-            if (file.name == div_img.alt) {continue main_loop;}};
-        var elem = document.createElement("img");
-        elem.src = URL.createObjectURL(file);
-        elem.className = "img-preview";
-        elem.alt = file.name;
-        image_list.appendChild(elem)
-    };
-};
-</script>
+{% load static %}
+<script src="{% static 'glyke_back/js/product_add_edit.js' %}"></script>
 {% endblock %}

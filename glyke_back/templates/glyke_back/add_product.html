@@ -101,20 +101,6 @@
 
 
 
-  <script>
-    var previewImages = function(event) {
-        var image_list = document.getElementById('img-preview-container');
-        if (image_list.firstChild.textContent == 'Uploaded images preview will apper here') {image_list.removeChild(image_list.firstChild)};
-        main_loop:
-        for (file of event.target.files) {
-            for (div_img of image_list.children) {
-                if (file.name == div_img.alt) {continue main_loop;}};
-            var elem = document.createElement("img");
-            elem.src = URL.createObjectURL(file);
-            elem.className = "img-preview";
-            elem.alt = file.name;
-            image_list.appendChild(elem)
-        };
-    };
-    </script>
+{% load static %}
+<script src="{% static 'glyke_back/js/product_add_edit.js' %}"></script>
 {% endblock %}
