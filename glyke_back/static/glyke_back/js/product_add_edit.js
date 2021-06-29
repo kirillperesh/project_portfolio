@@ -1,3 +1,19 @@
+var remove_selected_image = function(event) {
+    var img_id = event.target.id.slice(0, -5) // removes "_span" in the end
+    document.getElementById(img_id + '_id').remove() // removes a tag and its child span tag
+    document.getElementById(img_id).remove() // removes img tag
+    var file_list = document.getElementById('photosInput').files;
+    console.log(file_list)
+    console.log(img_id)
+    for (file of file_list) {
+        if (file.name == img_id) {
+            file.value = ''
+            console.log(file)
+        }
+    }
+    // TODO doesn't delete the file from list (readonly)
+
+}
 
 var previewImages = function(event) {
     var image_list = document.getElementById('img-preview-container');
@@ -5,12 +21,21 @@ var previewImages = function(event) {
     main_loop:
     for (file of event.target.files) {
         for (div_img of image_list.children) {
-            if (file.name == div_img.alt) {continue main_loop;}};
+            if (file.name == div_img.id) {continue main_loop;}};
         var elem = document.createElement("img");
-        elem.src = URL.createObjectURL(file);
-        elem.className = "img-preview";
-        elem.alt = file.name;
-        image_list.appendChild(elem)
+        elem.setAttribute('src', URL.createObjectURL(file));
+        elem.setAttribute('class', "img-preview");
+        elem.setAttribute('id', file.name);
+        image_list.appendChild(elem);
+
+        var remove_btn_a = document.createElement('a');
+        remove_btn_a.setAttribute('onclick', 'remove_selected_image(event)')
+        remove_btn_a.setAttribute('id', file.name + '_id')
+        image_list.appendChild(remove_btn_a);
+        var remove_btn_span = document.createElement('span')
+        remove_btn_span.setAttribute('id', file.name + '_span')
+        remove_btn_span.setAttribute('class', "fas fa-times trans02s remove-photo-toggle")
+        remove_btn_a.appendChild(remove_btn_span)
     };
 };
 
@@ -32,22 +57,6 @@ var toggleRemoveCurrentImg = function(event) {
         document.getElementById('main_product_form').appendChild(photo_to_delete)
         event.target.className = 'fas fa-recycle trans02s remove-photo-toggle restore-photo'
     }
-
-
-
-    // if (img.classList.contains('img-to-delete')){
-    //     img.classList.remove('img-to-delete')
-    //     event.target.className = 'fas fa-times trans02s remove-photo-toggle'
-    //     console.log(photos_to_delete.value)
-    // } else {
-    //     img.classList.add('img-to-delete')
-    //     event.target.className = 'fas fa-recycle trans02s remove-photo-toggle restore-photo'
-    //     if (photos_to_delete.value) {var temp_thing = [photos_to_delete.value,]} else {var temp_thing = []}
-    //     temp_thing.push(img_id)
-    //     photos_to_delete.setAttribute('value', temp_thing);
-    //     console.log(photos_to_delete.value)
-
-    // }
 }
 
 

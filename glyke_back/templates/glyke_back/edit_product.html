@@ -40,7 +40,7 @@
                     <label for="{{photos_form.photos.name}}">{{photos_form.photos.label}}</label>
                     <div class="img-preview-background" style="background-color: #acc6de;">
                         <div class="mt-8p">
-                            {% for img_src in photos_thumbnail_urls %}
+                            {% for img_src in photos_display_urls %}
                             <img src="{{img_src}}" class='img-preview' id="{{img_src}}">
                             <a onclick="toggleRemoveCurrentImg(event)"><span id="{{img_src}}_span" class="fas fa-times trans02s remove-photo-toggle"></span></a>
                             {% endfor %}
