@@ -89,6 +89,53 @@ class AddProductViewTest(TestCase):
         self.assertEqual(product.photos.title, f'product_{self.category_0_filters.id}_gallery')
 
 
+class EditProductViewTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.test_user = User.objects.create(username='test_user', is_staff=False)
+        cls.test_user_staff = User.objects.create(username='test_user_staff', is_staff=True)
+        cls.test_user_superuser = User.objects.create(username='test_user_superuser', is_staff=True, is_superuser=True)
+
+        cls.category_2_filters = Category.objects.create(name='category_2_filters')
+        cls.category_2_filters.filters.add('filter_1', 'filter_2')
+
+        cls.product = Product.objects.create(name='product',
+                                             category=cls.category_2_filters,
+                                             attributes={"filter_1": "1", "filter_2": "2"},
+                                             cost_price=0,
+                                             selling_price=0,
+                                             discount_percent=0,
+                                             photos = photo_models.Gallery.objects.create(title='product_gallery')
+                                             )
+        cls.basic_url = reverse('edit_product', kwargs={'id': cls.product.id})
+
+    def setUp(self):
+        self.client.force_login(self.test_user_staff) # force_login before making requests because this is a staff-only view
+
+    def test_permissins(self):
+        """If is_staff==False return 404"""
+        response = self.client.get(self.basic_url) # case: staff
+        self.assertEqual(response.status_code, 200)
+        self.client.force_login(self.test_user)    # case: logged-in user
+        response = self.client.get(self.basic_url)
+        self.assertEqual(response.status_code, 404)
+        self.client.logout()                       # case: anonymous user
+        response = self.client.get(self.basic_url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_forms_instances(self):
+        """Checks if forms are rendered correctly on GET request"""
+        response = self.client.get(self.basic_url)
+        self.assertIsInstance(response.context['category_form'], SelectCategoryProductForm)
+        self.assertIsInstance(response.context['photos_form'], PhotosForm)
+        self.assertIsInstance(response.context['product_form'], AddProductForm)
+        self.assertIn('filter_form', response.context.keys())
+
+    #TODO continue here ---------------------------
+
+
+
+
 
 
 
