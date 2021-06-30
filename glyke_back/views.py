@@ -97,6 +97,7 @@ def add_product_dynamic_view(request):
 @user_is_staff_or_404()
 @require_http_methods(["GET", "POST"])
 def edit_product_dynamic_view(request, id):
+    # TODO add comments and docstr
     # """ If all the input is valid creates Product instance, photologue.Gallery instance (title=Product.name + _gallery),
     # associates it with product created, and, if provided, associates uploaded images with the gallery.
     # Passes selected 'category' as a parameter to the template so it's not lost when submitting main form
@@ -104,19 +105,6 @@ def edit_product_dynamic_view(request, id):
     # """
 
     product_instance = Product.objects.get(id=id)
-
-    # TODO add comments and docstr
-    for param_name in request.POST:
-        if param_name.startswith('to_del_photo_'):
-            to_del_photo_image = str(param_name).replace('_thumbnail', '').split('/')[-1]
-            to_del_photo = product_instance.photos.photos.filter(image__endswith = to_del_photo_image)
-            print(to_del_photo)
-            to_del_photo.delete()
-            # TODO this here deletes only model instance but not the files
-            # but admin delete button deletes the files
-
-
-
     current_category = Category.objects.get(id=request.POST['category']) if request.method == 'POST' else product_instance.category
     product_instance_data = {'name': product_instance.name,
                              'description': product_instance.description,
@@ -127,7 +115,7 @@ def edit_product_dynamic_view(request, id):
                              'discount_percent': product_instance.discount_percent,}
     category_fields = get_category_fields(category=current_category)
 
-    photos_thumbnail_urls = [ photo.get_thumbnail_url() for photo in product_instance.photos.photos.all() ]
+    photos_display_urls = [ photo.get_display_url() for photo in product_instance.photos.photos.all() ]
     photos_form = PhotosForm(request.POST, request.FILES)
     product_form = AddProductForm(initial=product_instance_data)
     CategoryFiltersForm = type('CategoryFiltersForm', (forms.Form,), category_fields) # creates a class (inherits from forms.Form class) with category_fields as attributes (form fields)
@@ -138,7 +126,7 @@ def edit_product_dynamic_view(request, id):
         'product_form': product_form,
         'filter_form': filters_form,
         'product': product_instance,
-        'photos_thumbnail_urls': photos_thumbnail_urls,
+        'photos_display_urls': photos_display_urls,
         'category': current_category.id,
         }
 
@@ -176,6 +164,23 @@ def edit_product_dynamic_view(request, id):
             else:
                 return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'photos (or photos form)'})}")
 
+            # current photos block
+            for param_name in request.POST:
+                # each photo_to_delete sends a POST parametr with the name "to_del_photo_{{ .get_display_url() }}"
+                # E.g. "to_del_photo_/media/photologue/photos/cache/ImageName_rndnumbers_display.jpg"
+                if param_name.startswith('to_del_photo_'):
+                    # parse parameter name to get a substring of photo's image's name
+                    # E.g. "ImageName_rndnumbers.jpg"
+                    to_del_photo_image = str(param_name).replace('_display', '').split('/')[-1]
+                    to_del_photo = product_instance.photos.photos.filter(image__endswith = to_del_photo_image)
+                    # to_del_photo is a queryset, if delete() is run on it, the associated files won't be deleted
+                    if to_del_photo.count() == 1:
+                        # so it's run on the only instance of the queryset
+                        to_del_photo.first().delete()
+                    else:
+                        return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'photos-to-delete number (not 1'})}")
+
+
             return redirect('edit_product', id=product_instance.id)
     return render(request, "edit_product.html", context)
 
@@ -187,6 +192,3 @@ class ProductsView(ListView):
     paginate_by = 8
     template_name = 'products.html'
     context_object_name = 'products'
-
-# TODO make previewImages script separate
-# TODO add remove photo button
