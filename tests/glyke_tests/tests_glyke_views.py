@@ -70,7 +70,6 @@ class AddProductViewTest(TestCase):
             self.assertEqual(list(product.attributes.keys()), filters_list)
             self.assertEqual(list(product.attributes.values()), filters_list)
 
-
     def test_product_gallery_creation(self):
         """Checks the error redirection on non-image upload file
         Checks if gallery of the product is created correctly"""
@@ -89,6 +88,7 @@ class AddProductViewTest(TestCase):
         self.assertEqual(product.photos.title, f'product_{self.category_0_filters.id}_gallery')
 
 
+
 class EditProductViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -105,6 +105,7 @@ class EditProductViewTest(TestCase):
                                              description='description text',
                                              category=cls.category_filters_1_2,
                                              attributes={"filter_1": "1", "filter_2": "2"},
+                                             stock=5,
                                              cost_price=10,
                                              selling_price=20,
                                              discount_percent=30,
@@ -115,6 +116,16 @@ class EditProductViewTest(TestCase):
 
     def setUp(self):
         self.client.force_login(self.test_user_staff) # force_login before making requests because this is a staff-only view
+        self.basic_context_data = {'category': self.product.category.id,
+                                   'filter_1': self.product.attributes['filter_1'],
+                                   'filter_2': self.product.attributes['filter_2'],
+                                   'name': self.product.name,
+                                   'description': self.product.description,
+                                   'cost_price': self.product.cost_price,
+                                   'selling_price': self.product.selling_price,
+                                   'discount_percent': self.product.discount_percent,
+                                   'tags': ', '.join(list(self.product.tags.names())),
+                                   'stock': self.product.stock,}
 
     def test_permissions(self):
         """If is_staff==False return 404"""
@@ -147,7 +158,7 @@ class EditProductViewTest(TestCase):
             self.assertEqual(initial, expected_initial)
 
     def test_category_switch(self):
-        """Checks if category and its filters switches properly on POST request"""
+        """Checks if the category and its filters switches properly on POST request"""
         initial_category = self.product.category
         switch_to_category = self.category_filters_2_3
         context_data = urlencode({'category': self.category_filters_2_3.id})
@@ -161,29 +172,76 @@ class EditProductViewTest(TestCase):
         self.assertEqual(list(response.context['filter_form'].fields.keys()), list(switch_to_category.filters.names()))
         self.assertEqual(response.context['filter_form'].initial, self.product.attributes)
 
-    # def test_edit_product(self):
-    #     """"""
-    #     response = self.client.get(self.basic_url)
-    #     # context_data = {'category': self.category_filters_2_3.id}
-    #     # context_data.update(response.context['filter_form'].initial)
-    #     # context_data.update(response.context['product_form'].initial)
+    def test_edit_product_except_category_and_name(self):
+        """ Checks that the product is updated properly when anything except category and name is edited"""
+        initial_products_count = Product.objects.all().count()
+        expected_data = {'filter_1': 'changed_filter_1',
+                         'filter_2': 'changed_filter_2',
+                         'description': 'changed_description',
+                         'tags': 'changed_tag_1, changed_tag_2',
+                         'stock': self.product.stock+1,
+                         'cost_price': self.product.cost_price+1,
+                         'selling_price': self.product.selling_price+1,
+                         'discount_percent': self.product.discount_percent+1,
+                         }
+        # case: edit 1 by 1
+        for field, expected_value in expected_data.items():
+            context_data = self.basic_context_data
+            context_data[field] = expected_value
+            context_data_encoded = urlencode(context_data)
+            self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
+            self.product.refresh_from_db()
+            self.assertEqual(Product.objects.all().count(), initial_products_count)
+            if field.startswith('filter_'):
+                actual_value = self.product.attributes[field]
+            elif field == 'tags':
+                actual_value = ', '.join(list(self.product.tags.names().order_by('name')))
+            else:
+                actual_value = getattr(self.product, field)
+            self.assertEqual(actual_value, expected_value)
+        # case: edit all at once
+        actual_data = {}
+        context_data = self.basic_context_data
+        context_data.update(expected_data)
+        context_data_encoded = urlencode(context_data)
+        self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
+        self.product.refresh_from_db()
+        self.assertEqual(Product.objects.all().count(), initial_products_count)
+        for field in expected_data.keys():
+            if field.startswith('filter_'):
+                actual_data[field] = self.product.attributes[field]
+            elif field == 'tags':
+                actual_data[field] = ', '.join(list(self.product.tags.names().order_by('name')))
+            else:
+                actual_data[field] = getattr(self.product, field)
+        self.assertEqual(actual_data, expected_data)
 
-    #     # context_data = {'category': self.category_filters_2_3.id,
-    #     #                 'filter_2': 'filter_2',
-    #     #                 'filter_3': 'filter_3',
-    #     #                 'name': self.product.name,
-    #     #                 'cost_price': '0','selling_price': '0', 'discount_percent': '0', 'tags': 'test_tag1, test_tag2', 'stock': '1',}
+    # TODO add docstr
+    def test_edit_product_category(self):
+        """"""
+        initial_products_count = Product.objects.all().count()
+        actual_data = {}
+        expected_data = {'filter_3': 'changed_filter_3',
+                         'filter_2': 'changed_filter_2',
+                         'category': self.category_filters_2_3.id,
+                         }
+        context_data = self.basic_context_data
+        context_data.update(expected_data)
+        context_data_encoded = urlencode(context_data)
+        response = self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
+        self.product.refresh_from_db()
+        self.assertEqual(Product.objects.all().count(), initial_products_count)
+        for field in expected_data.keys():
+            if field.startswith('filter_'):
+                actual_data[field] = self.product.attributes[field]
+            elif field.startswith('category'):
+                actual_data[field] = getattr(self.product, field).id
+            else: pass
+        self.assertEqual(actual_data, expected_data)
 
-    #     print(response.context['category_form'].errors)
-    #     print(response.context['product_form'].is_valid())
-    #     print(response.context['filter_form'].is_valid())
-
-
-
-    #     print(self.product.attributes)
-    #     context_data_encoded = urlencode(context_data)
-    #     response = self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
-    #     print(self.product.attributes)
+    # TODO
+    def test_edit_product_name(self):
+        pass
 
 
 
