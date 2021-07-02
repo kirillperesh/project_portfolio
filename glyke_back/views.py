@@ -103,7 +103,6 @@ def edit_product_dynamic_view(request, id):
     # Passes selected 'category' as a parameter to the template so it's not lost when submitting main form
     # (category selecting is done via separate form).
     # """
-
     product_instance = Product.objects.get(id=id)
     current_category = Category.objects.get(id=request.POST['category']) if request.method == 'POST' else product_instance.category
     product_instance_data = {'name': product_instance.name,
