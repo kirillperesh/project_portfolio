@@ -94,6 +94,7 @@ class Price(models.Model):
 
 class Product(Price, TimeStampedModel):
     name = models.CharField(_('name'), max_length=255, unique=True)
+    __original_name = None # an attribute to keep track on the previous name when changed
     description = models.TextField(_('description'), max_length=3000, blank=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     category = models.ForeignKey(Category,
@@ -120,13 +121,30 @@ class Product(Price, TimeStampedModel):
     def __str__(self):
         return self.name
 
+    def __init__(self, *args, **kwargs):
+        super(Product, self).__init__(*args, **kwargs)
+        self.__original_name = self.name
+
     def save(self, *args, **kwargs):
+        # main_photo block
         if not self.pk and self.photos:
             self.main_photo = self.photos.photos.all().first()
         #TODO add else with some default pic
+        # price block
         self.profit = self.selling_price * Decimal(1 - self.discount_percent / 100) - self.cost_price
         self.profit = Decimal(self.profit).quantize(Decimal('0.01'))
+        # name's changed block
+        if self.name != self.__original_name:
+            self.photos.title = self.name + _("_gallery")
+            self.photos.slug = slugify(self.name + _("_gallery"))
+            for photo in self.photos.photos.all():
+                photo.title = str(photo.title).replace(self.__original_name, self.name)
+                photo.slug = str(photo.slug).replace(self.__original_name, self.name)
+                photo.save()
+            self.photos.save()
+
         super(Product, self).save(*args, **kwargs)
+        self.__original_name = self.name
 
 
 class Check(Price, TimeStampedModel):

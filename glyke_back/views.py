@@ -135,18 +135,21 @@ def edit_product_dynamic_view(request, id):
             filters_form = CategoryFiltersForm(request.POST or None)
 
         if all([filters_form.is_valid(), product_form.is_valid_check_same_name(current_name=product_instance.name),]):
-            Product.objects.filter(id=id).update(name=product_form.cleaned_data['name'],
-                                                 description=product_form.cleaned_data['description'],
-                                                 category=current_category,
-                                                 # tags, (added later in this view)
-                                                 stock=product_form.cleaned_data['stock'],
-                                                 # TODO rename gallery if renamed product
-                                                 # photos=create_gallery(title=product_form.cleaned_data['name']),
-                                                 attributes=filters_form.cleaned_data,
-                                                 cost_price=product_form.cleaned_data['cost_price'],
-                                                 selling_price=product_form.cleaned_data['selling_price'],
-                                                 discount_percent=product_form.cleaned_data['discount_percent'],
-                                                )
+            # here queryset.update() is not used because save() method is needed and foreign key field (category) doesn't get saved with bulk __dict__.update method
+            # main edit block
+            product_instance.name = product_form.cleaned_data['name']
+            product_instance.category = current_category
+            product_instance.description = product_form.cleaned_data['description']
+            # tags, (added later in this view)
+            # product_instance.photos: title ans slug of the gallery (and all its photos) are updated via product's save() method,
+            product_instance.stock = product_form.cleaned_data['stock']
+            product_instance.attributes = filters_form.cleaned_data
+            product_instance.cost_price = product_form.cleaned_data['cost_price']
+            product_instance.selling_price = product_form.cleaned_data['selling_price']
+            product_instance.discount_percent = product_form.cleaned_data['discount_percent']
+
+            product_instance.save(force_update=True)
+
             # tags block
             product_instance.tags.clear()
             product_instance.tags.add(*product_form.cleaned_data['tags']) # using list as multiple positional arguments
