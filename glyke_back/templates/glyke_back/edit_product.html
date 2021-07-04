@@ -6,10 +6,13 @@
 {% block content %}
 <div class="row">
     <div class="col-xl-9 col-lg-10 col-md-12 col-sm-12 mx-auto">
-      <div class="tm-bg-primary-dark tm-block tm-block-h-auto">
+      <div class="tm-bg-primary-dark tm-block tm-block-h-auto {% if not product.is_active %}deleted-product-bg{% endif %}">
+        {% if not product.is_active %}
+            <div class="is-active-status">DELETED</div>
+        {% endif %}
         <div class="row">
           <div class="col-12">
-            <h2 class="tm-block-title d-inline-block">Редактировать {{ product.name }}</h2>
+            <h2 class="tm-block-title d-inline-block">Редактировать<br>{{ product.name }}</h2>
           </div>
         </div>
         <div class="row tm-edit-product-row">
@@ -23,7 +26,7 @@
                             {{category_form.category.errors}}
                         </div>
                         <div class="form-group mb-3 col-sm-33">
-                            <input type="submit" value="Update" class="form-control btn-add btn-add-primary btn-add-block text-uppercase">
+                            <input type="submit" value="Update" class="form-control btn-add btn-add-primary btn-add-block text-uppercase trans02s">
                         </div>
                     </div>
                 </form>
@@ -53,11 +56,11 @@
                     <div class="mb-12p custom-file">
                         {{photos_form.photos}}
                         <div class="row">
-                            <div class="form-group mb-3 col-sm-66">
-                                <input type="button" class="btn-add btn-add-primary btn-add-block mx-auto form-control text-uppercase" value="ADD PRODUCT IMAGES" onclick="document.getElementById('photosInput').click();">
+                            <div class="form-group mb-3 col-sm-66 trans02s">
+                                <input type="button" class="btn-add btn-add-primary btn-add-block mx-auto form-control text-uppercase trans02s" value="ADD PRODUCT IMAGES" onclick="document.getElementById('photosInput').click();">
                             </div>
-                            <div class="form-group mb-3 col-sm-33">
-                                <button type='button' class="form-control btn-add btn-add-primary btn-add-block text-uppercase" onmouseover="set_class_for_all_uploaded_images('img-preview img-to-delete')" onmouseout="set_class_for_all_uploaded_images('img-preview')" onclick="reset_uploaded_images()">clear</button>
+                            <div class="form-group mb-3 col-sm-33 trans02s">
+                                <button type='button' class="form-control btn-add btn-add-primary btn-add-block text-uppercase trans02s" onmouseover="set_class_for_all_uploaded_images('img-preview img-to-delete')" onmouseout="set_class_for_all_uploaded_images('img-preview')" onclick="reset_uploaded_images()">clear</button>
                             </div>
                         </div>
                     </div>
@@ -103,11 +106,21 @@
                     </div>
                 </div>
                 <div class="col-12">
-                    <input type="submit" value="Edit Product" class="btn-add btn-add-primary btn-add-block text-uppercase"></input>
+                    <div class="row">
+                        <div class="form-group mb-3 col-sm-83">
+                            <input type="submit" value="Edit Product" class="btn-add btn-add-primary btn-add-block text-uppercase trans02s"></input>
+                        </div>
+                        <div class="form-group mb-3 col-sm-16">
+                            {% if product.is_active %}
+                                <a href="{% url 'delete_product' id=product.id %}" class="btn-add btn-delete-primary btn-add-block text-uppercase" data-confirm="Are you sure you want to DELETE this product? ( {{product.name}} )">Delete</a>
+                            {% else %}
+                                <a href="{% url 'delete_product' id=product.id %}?recover=y" class="btn-add btn-recover-primary btn-add-block text-uppercase" data-confirm="Are you sure you want to RECOVER this product? ( {{product.name}} )">Recover</a>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-                <input id="category_hidden_input" type="hidden" name="category" value="{{category}}">here</input>
+                <input id="category_hidden_input" type="hidden" name="category" value="{{category}}"></input>
             </form>
-
         </div>
       </div>
     </div>
@@ -115,5 +128,11 @@
 
 
 {% load static %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/StephanWagner/jBox@v1.3.2/dist/jBox.all.min.js"></script>
+<link href="https://cdn.jsdelivr.net/gh/StephanWagner/jBox@v1.3.2/dist/jBox.all.min.css" rel="stylesheet">
+
 <script src="{% static 'glyke_back/js/product_add_edit.js' %}"></script>
+
+
 {% endblock %}

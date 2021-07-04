@@ -22,7 +22,7 @@
                             {{category_form.category}}
                             {{category_form.category.errors}}
                         </div>
-                        <div class="form-group mb-3 col-xs-12 col-sm-33">
+                        <div class="form-group mb-3 col-xs-12 col-sm-33 trans02s">
                             <input type="submit" value="Update" class="form-control btn-add btn-add-primary btn-add-block text-uppercase">
                         </div>
                     </div>
@@ -42,7 +42,7 @@
                     <div id="img-preview-container">Uploaded images preview will apper here</div>
                 </div>
                 {{photos_form.photos.errors}}
-                <div class="mb-12p custom-file">
+                <div class="mb-12p custom-file trans02s">
                     {{photos_form.photos}}
                     <input type="button" class="btn-add btn-add-primary btn-add-block mx-auto form-control text-uppercase" value="UPLOAD PRODUCT IMAGES" onclick="document.getElementById('photosInput').click();" {% if not request.POST.category %}disabled{% endif %}>
                 </div>
@@ -87,7 +87,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12">
+            <div class="col-12 trans02s">
                 <input type="submit" value="Add Product Now" class="btn-add btn-add-primary btn-add-block text-uppercase"
                        {% if not request.POST.category %}disabled{% endif %}></input>
             </div>
