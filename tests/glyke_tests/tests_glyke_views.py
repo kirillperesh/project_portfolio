@@ -91,6 +91,31 @@ class AddProductViewTest(TestCase):
         product = Product.objects.get(name=f'product_{self.category_0_filters.id}')
         self.assertEqual(product.photos.title, f'product_{self.category_0_filters.id}_gallery')
 
+    def test_profit_count(self):
+        """Checks if the profit is (re)calculated on save()"""
+        # case initial test (all 0)
+        context_data = {'category': self.category_0_filters.id, # using category w/o filters here
+                        'name': f'product_0_profit',
+                        'cost_price': '0', 'selling_price': '0', 'discount_percent': '0',
+                        'tags': 'test_tag', 'stock': '1',}
+        context_data_encoded = urlencode(context_data)
+        self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
+        self.assertEqual(Product.objects.get(name='product_0_profit').profit, 0)
+        # case: random profit, w/ discount (other cases are tested in tests_glyke_models.py)
+        rnd_cost_price = decimal.Decimal(random.randrange(1, 9999))/100
+        rnd_selling_price = decimal.Decimal(random.randrange((rnd_cost_price*100), 9999))/100
+        rnd_discount = random.randint(1, 80)
+        context_data = {'category': self.category_0_filters.id, # using category w/o filters here
+                        'name': f'product_rnd_profit',
+                        'cost_price': rnd_cost_price,
+                        'selling_price': rnd_selling_price,
+                        'discount_percent': rnd_discount,
+                        'tags': 'test_tag', 'stock': '1',}
+        context_data_encoded = urlencode(context_data)
+        self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
+        test_profit = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)-rnd_cost_price).quantize(Decimal('0.01'))
+        self.assertEqual(Product.objects.get(name='product_rnd_profit').profit, test_profit)
+
 class EditProductViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -254,44 +279,28 @@ class EditProductViewTest(TestCase):
 
     def test_profit_recount(self):
         """Checks if the profit is (re)calculated on save()"""
-        # case initial test
-        self.product.cost_price = 0
-        self.product.selling_price = 0
-        self.product.discount_percent = 0
-        self.product.save()
+        # case initial test (all 0)
+        expected_data = {'cost_price': 0, 'selling_price': 0, 'discount_percent': 0,}
+        context_data = self.basic_context_data.copy()
+        context_data.update(expected_data)
+        context_data_encoded = urlencode(context_data)
+        self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
+        self.product.refresh_from_db()
         self.assertEqual(self.product.profit, 0)
-        # case: random profit, w/ discount (other case are tested in tests_glyke_models.py)
+        # case: random profit, w/ discount (other cases are tested in tests_glyke_models.py)
         rnd_cost_price = decimal.Decimal(random.randrange(1, 9999))/100
         rnd_selling_price = decimal.Decimal(random.randrange((rnd_cost_price*100), 9999))/100
         rnd_discount = random.randint(1, 80)
-        
-        # TODO add POST request
-
-        # self.product.cost_price = rnd_cost_price
-        # self.product.selling_price = rnd_selling_price
-        # self.product.discount_percent = rnd_discount
-        # self.product.save()
+        expected_data = {'cost_price': rnd_cost_price,
+                         'selling_price': rnd_selling_price,
+                         'discount_percent': rnd_discount,}
+        context_data = self.basic_context_data.copy()
+        context_data.update(expected_data)
+        context_data_encoded = urlencode(context_data)
+        self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
+        self.product.refresh_from_db()
         test_profit = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)-rnd_cost_price).quantize(Decimal('0.01'))
         self.assertEqual(self.product.profit, test_profit)
-
-
-
-
-
-
-
-
-    # TODO add profit count (add) and recount (edit) test
-
-
-
-
-
-
-
-
-
-
 
 
 
