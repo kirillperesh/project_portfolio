@@ -16,7 +16,6 @@ class AddProductFormTest(TestCase):
     def setUp(self):
         self.base_form_data = {'name': 'unique_name', 'tags': 'tag1 tag2', 'stock': 0, 'cost_price': 0, 'selling_price': 0, 'discount_percent': 0,}
 
-
     def test_fields_list(self):
         """Checks if the form returns correct fields"""
         test_form = AddProductForm()

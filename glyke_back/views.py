@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django import forms
 from django.utils.translation import gettext_lazy as _
@@ -33,7 +33,7 @@ def get_category_fields(*, category=None):
 @user_is_staff_or_404()
 @require_http_methods(["GET", "POST"])
 def add_product_dynamic_view(request):
-    """ If all the input is valid creates Product instance, photologue.Gallery instance (title=Product.name + _gallery),
+    """ If all the input is valid creates a Product instance, photologue.Gallery instance (title=Product.name + _gallery),
     associates it with product created, and, if provided, associates uploaded images with the gallery.
     Passes selected 'category' as a parameter to the template so it's not lost when submitting main form
     (category selecting is done via separate form).
@@ -97,12 +97,10 @@ def add_product_dynamic_view(request):
 @user_is_staff_or_404()
 @require_http_methods(["GET", "POST"])
 def edit_product_dynamic_view(request, id):
-    # TODO add comments and docstr
-    # """ If all the input is valid creates Product instance, photologue.Gallery instance (title=Product.name + _gallery),
-    # associates it with product created, and, if provided, associates uploaded images with the gallery.
-    # Passes selected 'category' as a parameter to the template so it's not lost when submitting main form
-    # (category selecting is done via separate form).
-    # """
+    """ If all the input is valid edits a Product instance.
+    If the name has changed, the gallery and all the photos get renamed as well.
+    If a photo instance is removed, its associated files get deleted as well.
+    """
     product_instance = Product.objects.get(id=id)
     current_category = Category.objects.get(id=request.POST['category']) if request.method == 'POST' else product_instance.category
     product_instance_data = {'name': product_instance.name,
@@ -135,18 +133,20 @@ def edit_product_dynamic_view(request, id):
             filters_form = CategoryFiltersForm(request.POST or None)
 
         if all([filters_form.is_valid(), product_form.is_valid_check_same_name(current_name=product_instance.name),]):
-            Product.objects.filter(id=id).update(name=product_form.cleaned_data['name'],
-                                                 description=product_form.cleaned_data['description'],
-                                                 category=current_category,
-                                                 # tags, (added later in this view)
-                                                 stock=product_form.cleaned_data['stock'],
-                                                 # TODO rename gallery if renamed product
-                                                 # photos=create_gallery(title=product_form.cleaned_data['name']),
-                                                 attributes=filters_form.cleaned_data,
-                                                 cost_price=product_form.cleaned_data['cost_price'],
-                                                 selling_price=product_form.cleaned_data['selling_price'],
-                                                 discount_percent=product_form.cleaned_data['discount_percent'],
-                                                )
+            # here queryset.update() is not used because save() method is needed and foreign key field (category) doesn't get saved with bulk __dict__.update method
+            # main edit block
+            product_instance.name = product_form.cleaned_data['name']
+            product_instance.category = current_category
+            product_instance.description = product_form.cleaned_data['description']
+            # tags, (added later in this view)
+            # product_instance.photos: title ans slug of the gallery (and all its photos) are updated via product's save() method,
+            product_instance.stock = product_form.cleaned_data['stock']
+            product_instance.attributes = filters_form.cleaned_data
+            product_instance.cost_price = product_form.cleaned_data['cost_price']
+            product_instance.selling_price = product_form.cleaned_data['selling_price']
+            product_instance.discount_percent = product_form.cleaned_data['discount_percent']
+            product_instance.save(force_update=True)
+
             # tags block
             product_instance.tags.clear()
             product_instance.tags.add(*product_form.cleaned_data['tags']) # using list as multiple positional arguments
@@ -177,17 +177,38 @@ def edit_product_dynamic_view(request, id):
                         # so it's run on the only instance of the queryset
                         to_del_photo.first().delete()
                     else:
-                        return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'photos-to-delete number (not 1'})}")
-
-
+                        return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'photos-to-delete number (not 1)'})}")
             return redirect('edit_product', id=product_instance.id)
     return render(request, "edit_product.html", context)
+
+@user_is_staff_or_404()
+@require_http_methods(["GET",])
+def delete_product_view(request, id):
+    # TODO add comments and docstr
+    # """ If all the input is valid edits a Product instance.
+    # If the name has changed, the gallery and all the photos get renamed as well.
+    # If a photo instance is removed, its associated files get deleted as well.
+    # """
+    # if 'id' not in request.GET:
+    #     return f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'tile to delete'})}"
+    product_to_delete = get_object_or_404(Product, id=id)
+    initial_status = product_to_delete.is_active
+    product_to_delete.is_active = True if request.GET.__contains__('recover') else False
+    product_to_delete.save()
+    product_to_delete.refresh_from_db()
+    redirect_url = f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'product deletion (status has not change)'})}" if initial_status == product_to_delete.is_active else reverse('products')
+    return redirect(redirect_url)
 
 class ProductsView(ListView):
     http_method_names = ['get', ]
     model = Product
     queryset = model.objects.filter(is_active=True)
     ordering = '-modified'
-    paginate_by = 8
+    paginate_by = 9
     template_name = 'products.html'
     context_object_name = 'products'
+
+
+# TODO add main_photo switch on main_photo delete
+# TODO add main_photo chosing thingy
+# TODO add product list view for staff purposes

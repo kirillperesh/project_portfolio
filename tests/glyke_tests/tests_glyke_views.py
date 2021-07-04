@@ -1,12 +1,16 @@
+from django.core.validators import validate_comma_separated_integer_list
+from django.db.models.expressions import Value
 from django.test import TestCase
 from django.urls import reverse
 from urllib.parse import urlencode
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
+import decimal
+import random
 
 from glyke_back.models import *
 from glyke_back.forms import *
-
+from .tests_glyke_models import get_random_temp_file
 
 
 class AddProductViewTest(TestCase):
@@ -64,7 +68,7 @@ class AddProductViewTest(TestCase):
                                       'filter_2': 'filter_2',
                                       'name': f'product_{category_id}',
                                       'cost_price': '0','selling_price': '0', 'discount_percent': '0', 'tags': 'test_tag', 'stock': '1',})
-            response = self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
+            self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
             self.assertEqual(Product.objects.all().count(), category_id)
             product = Product.objects.get(name=f'product_{category_id}')
             self.assertEqual(list(product.attributes.keys()), filters_list)
@@ -87,7 +91,30 @@ class AddProductViewTest(TestCase):
         product = Product.objects.get(name=f'product_{self.category_0_filters.id}')
         self.assertEqual(product.photos.title, f'product_{self.category_0_filters.id}_gallery')
 
-
+    def test_profit_count(self):
+        """Checks if the profit is (re)calculated on save()"""
+        # case initial test (all 0)
+        context_data = {'category': self.category_0_filters.id, # using category w/o filters here
+                        'name': f'product_0_profit',
+                        'cost_price': '0', 'selling_price': '0', 'discount_percent': '0',
+                        'tags': 'test_tag', 'stock': '1',}
+        context_data_encoded = urlencode(context_data)
+        self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
+        self.assertEqual(Product.objects.get(name='product_0_profit').profit, 0)
+        # case: random profit, w/ discount (other cases are tested in tests_glyke_models.py)
+        rnd_cost_price = decimal.Decimal(random.randrange(1, 9999))/100
+        rnd_selling_price = decimal.Decimal(random.randrange((rnd_cost_price*100), 9999))/100
+        rnd_discount = random.randint(1, 80)
+        context_data = {'category': self.category_0_filters.id, # using category w/o filters here
+                        'name': f'product_rnd_profit',
+                        'cost_price': rnd_cost_price,
+                        'selling_price': rnd_selling_price,
+                        'discount_percent': rnd_discount,
+                        'tags': 'test_tag', 'stock': '1',}
+        context_data_encoded = urlencode(context_data)
+        self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
+        test_profit = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)-rnd_cost_price).quantize(Decimal('0.01'))
+        self.assertEqual(Product.objects.get(name='product_rnd_profit').profit, test_profit)
 
 class EditProductViewTest(TestCase):
     @classmethod
@@ -101,9 +128,11 @@ class EditProductViewTest(TestCase):
         cls.category_filters_2_3 = Category.objects.create(name='category_filters_2_3')
         cls.category_filters_2_3.filters.add('filter_2', 'filter_3')
 
-        cls.product = Product.objects.create(name='product',
+    def setUp(self):
+        self.client.force_login(self.test_user_staff) # force_login before making requests because this is a staff-only view
+        self.product = Product.objects.create(name='product',
                                              description='description text',
-                                             category=cls.category_filters_1_2,
+                                             category=self.category_filters_1_2,
                                              attributes={"filter_1": "1", "filter_2": "2"},
                                              stock=5,
                                              cost_price=10,
@@ -111,11 +140,9 @@ class EditProductViewTest(TestCase):
                                              discount_percent=30,
                                              photos = photo_models.Gallery.objects.create(title='product_gallery')
                                              )
-        cls.product.tags.add('tag1, tag2')
-        cls.basic_url = reverse('edit_product', kwargs={'id': cls.product.id})
-
-    def setUp(self):
-        self.client.force_login(self.test_user_staff) # force_login before making requests because this is a staff-only view
+        self.product.tags.add('tag1, tag2')
+        self.basic_url = reverse('edit_product', kwargs={'id': self.product.id})
+        self.initial_products_count = Product.objects.all().count()
         self.basic_context_data = {'category': self.product.category.id,
                                    'filter_1': self.product.attributes['filter_1'],
                                    'filter_2': self.product.attributes['filter_2'],
@@ -174,7 +201,6 @@ class EditProductViewTest(TestCase):
 
     def test_edit_product_except_category_and_name(self):
         """ Checks that the product is updated properly when anything except category and name is edited"""
-        initial_products_count = Product.objects.all().count()
         expected_data = {'filter_1': 'changed_filter_1',
                          'filter_2': 'changed_filter_2',
                          'description': 'changed_description',
@@ -185,13 +211,13 @@ class EditProductViewTest(TestCase):
                          'discount_percent': self.product.discount_percent+1,
                          }
         # case: edit 1 by 1
+        context_data = self.basic_context_data.copy()
         for field, expected_value in expected_data.items():
-            context_data = self.basic_context_data
-            context_data[field] = expected_value
+            context_data.update({field: expected_value})
             context_data_encoded = urlencode(context_data)
             self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
             self.product.refresh_from_db()
-            self.assertEqual(Product.objects.all().count(), initial_products_count)
+            self.assertEqual(Product.objects.all().count(), self.initial_products_count) # assert new products haven't been created
             if field.startswith('filter_'):
                 actual_value = self.product.attributes[field]
             elif field == 'tags':
@@ -201,12 +227,12 @@ class EditProductViewTest(TestCase):
             self.assertEqual(actual_value, expected_value)
         # case: edit all at once
         actual_data = {}
-        context_data = self.basic_context_data
+        context_data = self.basic_context_data.copy()
         context_data.update(expected_data)
         context_data_encoded = urlencode(context_data)
         self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
         self.product.refresh_from_db()
-        self.assertEqual(Product.objects.all().count(), initial_products_count)
+        self.assertEqual(Product.objects.all().count(), self.initial_products_count) # assert new products haven't been created
         for field in expected_data.keys():
             if field.startswith('filter_'):
                 actual_data[field] = self.product.attributes[field]
@@ -216,21 +242,19 @@ class EditProductViewTest(TestCase):
                 actual_data[field] = getattr(self.product, field)
         self.assertEqual(actual_data, expected_data)
 
-    # TODO add docstr
     def test_edit_product_category(self):
-        """"""
-        initial_products_count = Product.objects.all().count()
+        """Checks if products category if changed properly"""
         actual_data = {}
-        expected_data = {'filter_3': 'changed_filter_3',
-                         'filter_2': 'changed_filter_2',
+        expected_data = {'filter_2': 'changed_filter_2',
+                         'filter_3': 'changed_filter_3',
                          'category': self.category_filters_2_3.id,
                          }
-        context_data = self.basic_context_data
+        context_data = self.basic_context_data.copy()
         context_data.update(expected_data)
         context_data_encoded = urlencode(context_data)
-        response = self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
+        self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
         self.product.refresh_from_db()
-        self.assertEqual(Product.objects.all().count(), initial_products_count)
+        self.assertEqual(Product.objects.all().count(), self.initial_products_count) # assert new products haven't been created
         for field in expected_data.keys():
             if field.startswith('filter_'):
                 actual_data[field] = self.product.attributes[field]
@@ -239,15 +263,44 @@ class EditProductViewTest(TestCase):
             else: pass
         self.assertEqual(actual_data, expected_data)
 
-    # TODO
     def test_edit_product_name(self):
-        pass
+        """Checks if product's name is changed (and back) properly (including gallery name) without changing its pk or creating new product"""
+        initial_product_name, initial_product_id = self.product.name, self.product.id
+        for new_name in ('changed_name_product', initial_product_name):
+            context_data = self.basic_context_data.copy()
+            context_data.update({'name': new_name,})
+            context_data_encoded = urlencode(context_data)
+            self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
+            self.product.refresh_from_db()
+            self.assertEqual(Product.objects.all().count(), self.initial_products_count) # assert new products haven't been created
+            self.assertEqual(self.product.id, initial_product_id) # assert id hasn't changed
+            self.assertEqual(self.product.name, new_name) # assert name has changed
+            self.assertEqual(self.product.photos.title, new_name+"_gallery") # assert gallery name has changed
 
-
-
-
-
-
+    def test_profit_recount(self):
+        """Checks if the profit is (re)calculated on save()"""
+        # case initial test (all 0)
+        expected_data = {'cost_price': 0, 'selling_price': 0, 'discount_percent': 0,}
+        context_data = self.basic_context_data.copy()
+        context_data.update(expected_data)
+        context_data_encoded = urlencode(context_data)
+        self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.profit, 0)
+        # case: random profit, w/ discount (other cases are tested in tests_glyke_models.py)
+        rnd_cost_price = decimal.Decimal(random.randrange(1, 9999))/100
+        rnd_selling_price = decimal.Decimal(random.randrange((rnd_cost_price*100), 9999))/100
+        rnd_discount = random.randint(1, 80)
+        expected_data = {'cost_price': rnd_cost_price,
+                         'selling_price': rnd_selling_price,
+                         'discount_percent': rnd_discount,}
+        context_data = self.basic_context_data.copy()
+        context_data.update(expected_data)
+        context_data_encoded = urlencode(context_data)
+        self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
+        self.product.refresh_from_db()
+        test_profit = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)-rnd_cost_price).quantize(Decimal('0.01'))
+        self.assertEqual(self.product.profit, test_profit)
 
 
 

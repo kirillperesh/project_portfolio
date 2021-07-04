@@ -17,7 +17,9 @@
           {% for product in products %}
             <div class="u-align-center-md u-align-center-sm u-align-center-xl u-align-center-xs u-container-style u-list-item u-repeater-item u-video-cover u-list-item-1">
               <div class="u-container-layout u-similar-container u-container-layout-1">
+                <a href="{% url 'edit_product' id=product.id %}">
                 <img src="{{ product.main_photo.get_display_url }}" alt="{{ product.main_photo.name }}" class="u-expanded-width u-image u-image-1">
+                </a>
                 <div class="u-align-center u-container-style u-group u-opacity u-opacity-85 u-group-1 bg-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
                   <div class="u-container-layout u-valign-middle u-container-layout-2">
                     <h2 class="u-align-center u-custom-font u-text u-text-3 product-name">{{ product.name }}</h2>

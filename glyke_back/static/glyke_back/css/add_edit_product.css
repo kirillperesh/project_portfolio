@@ -18,14 +18,16 @@ textarea{overflow:auto !important; resize:vertical !important;}
 h2{margin-bottom:.5rem;font-family:inherit;font-weight:500;line-height:1.2;color:inherit;}
 h2{font-size:2rem;}
 .row{display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap;margin-right:-15px;margin-left:-15px;}
-.col-12,.col-lg-10,.col-lg-6,.col-md-12,.col-sm-12,.col-sm-33,.col-sm-40,.col-sm-50,.col-sm-60,.col-sm-66,.col-xl-6,.col-xl-9{position:relative;width:100%;min-height:1px;padding-right:15px;padding-left:15px;}
+.col-12,.col-lg-10,.col-lg-6,.col-md-12,.col-sm-12,.col-sm-16,.col-sm-33,.col-sm-40,.col-sm-50,.col-sm-60,.col-sm-66,.col-sm-83,.col-xl-6,.col-xl-9{position:relative;width:100%;min-height:1px;padding-right:15px;padding-left:15px;}
 .col-12{-ms-flex:0 0 100%;flex:0 0 100%;max-width:100%;}
 @media (min-width:576px){
+.col-sm-16{-ms-flex:0 0 16.66%;flex:0 0 16.66%;max-width:16.66%;}
 .col-sm-33{-ms-flex:0 0 33.33%;flex:0 0 33.33%;max-width:33.33%;}
 .col-sm-40{-ms-flex:0 0 40%;flex:0 0 40%;max-width:40%;}
 .col-sm-50{-ms-flex:0 0 50%;flex:0 0 50%;max-width:50%;}
 .col-sm-60{-ms-flex:0 0 60%;flex:0 0 60%;max-width:60%;}
 .col-sm-66{-ms-flex:0 0 66.66%;flex:0 0 66.66%;max-width:66.66%;}
+.col-sm-83{-ms-flex:0 0 83.33%;flex:0 0 83.33%;max-width:83.33%;}
 .col-sm-12{-ms-flex:0 0 100%;flex:0 0 100%;max-width:100%;}
 }
 @media (min-width:768px){
@@ -62,6 +64,8 @@ textarea.form-control{height:auto;}
 .btn-add:disabled{opacity:.65;}
 .btn-add-primary{color:#fff;background-color:#007bff;border-color:#007bff;}
 .btn-add-primary:hover{color:#fff;background-color:#0069d9;border-color:#0062cc;}
+.btn-delete-primary:hover{color:#fff;background-color:rgba(255, 99, 71, 0.75);border-color:tomato;}
+.btn-recover-primary:hover{color:#fff;background-color:rgba(64, 202, 0, 0.75);border-color:rgb(64, 202, 0);}
 .btn-add-primary:focus{box-shadow:0 0 0 .2rem rgba(0,123,255,.5);}
 .btn-add-primary:disabled{color:#fff;background-color:#0069d99f;border-color:#0069d9; cursor: default;}
 .btn-add-block{display:block;width:100%;}
@@ -104,6 +108,8 @@ label{color:#fff;margin-bottom:10px;}
 .form-group{margin-bottom:15px;}
 .btn-add{border-radius:0;padding:13px 28px;transition:all 0.2s ease;max-width:100%;}
 .btn-add-primary{color:#fff;background-color:#f5a623;border:2px solid #f5a623;font-size:90%;font-weight:600;}
+.btn-delete-primary{color:#fff;background-color:rgba(255, 99, 71, 0.4);border:2px solid rgba(255, 99, 71, 0.25);font-size:90%;font-weight:600;}
+.btn-recover-primary{color:#fff;background-color:rgba(64, 202, 0, 0.4);border:2px solid rgba(64, 202, 0, 0.25);font-size:90%;font-weight:600;}
 .btn-add-primary:active,.btn-primary:hover{color:#f5a623;background-color:transparent;border:2px solid #f5a623;}
 .tm-bg-primary-dark{background-color:#435c70;}
 .custom-select{width:100%;border:none;color:#acc6de;height:50px;-webkit-appearance:none;-moz-appearance:none;-ms-appearance:none;-o-appearance:none;appearance:none;-webkit-border-radius:0;-moz-border-radius:0;-ms-border-radius:0;-o-border-radius:0;border-radius:0;padding:15px;background:url(https://technext.github.io/product-admin/img/arrow-down.png) 98% no-repeat #50657b;}
@@ -168,9 +174,10 @@ label{color:#fff;margin-bottom:10px;}
 }
 
 .trans02s {
-    -webkit-transition: transform 0.2s ease-in-out;
-    -o-transition: transform 0.2s ease-in-out;
-    transition: transform 0.2s ease-in-out;
+    -webkit-transition: transform 0.2s ease;
+    -o-transition: transform 0.2s ease;
+    transition: transform 0.2s ease;
+    transition: all 0.2s !important;
 }
 
 .remove-photo-toggle {
@@ -205,7 +212,20 @@ label{color:#fff;margin-bottom:10px;}
 .img-to-delete {
     opacity: 0.7;
     border-width: 5px !important;
-    border: dashed rgba(255, 99, 71, 0.7);
-  }
+    border: dashed rgba(255, 99, 71, 0.7);  }
 
+.delete_confirm .jBox-container {border-radius: 0px !important;}
+.delete_confirm .jBox-Confirm-button-submit {background-color: #f5a623;border-radius: 0px !important;}
+.delete_confirm .jBox-Confirm-button-cancel:hover {background-color: rgba(255, 99, 71, 0.8);border-radius: 0px !important;}
+
+.is-active-status {
+    position: absolute;
+    padding-right: 15px;
+    right: 40px;
+    top: 8px;
+    color: tomato;
+    font-size: 2.5em;
+}
+
+.deleted-product-bg {background-color: #4a4370;}
 
