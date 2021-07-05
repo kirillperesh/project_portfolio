@@ -6,6 +6,7 @@ from django.views.decorators.http import require_http_methods
 from django.utils.text import slugify
 from urllib.parse import urlencode
 from django.views.generic import ListView
+from proj_folio.defaults import DEFAULT_NO_IMAGE_URL
 
 from photologue import models as photo_models
 from .forms import AddProductForm, PhotosForm, SelectCategoryProductForm
@@ -91,6 +92,7 @@ def add_product_dynamic_view(request):
                     new_product.photos.photos.add(photo)
             else:
                 return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'photos (or photos form)'})}")
+            # success
             return redirect('add_product')
     return render(request, "add_product.html", context)
 
@@ -145,12 +147,9 @@ def edit_product_dynamic_view(request, id):
             product_instance.cost_price = product_form.cleaned_data['cost_price']
             product_instance.selling_price = product_form.cleaned_data['selling_price']
             product_instance.discount_percent = product_form.cleaned_data['discount_percent']
-            product_instance.save(force_update=True)
-
             # tags block
             product_instance.tags.clear()
             product_instance.tags.add(*product_form.cleaned_data['tags']) # using list as multiple positional arguments
-
             # new photos block
             if photos_form.is_valid():
                 for image in request.FILES.getlist('photos'):
@@ -162,7 +161,6 @@ def edit_product_dynamic_view(request, id):
                     product_instance.photos.photos.add(photo)
             else:
                 return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'photos (or photos form)'})}")
-
             # current photos block
             for param_name in request.POST:
                 # each photo_to_delete sends a POST parametr with the name "to_del_photo_{{ .get_display_url() }}"
@@ -178,7 +176,11 @@ def edit_product_dynamic_view(request, id):
                         to_del_photo.first().delete()
                     else:
                         return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'photos-to-delete number (not 1)'})}")
+            # success
+            # saving an instance here
+            product_instance.save(force_update=True)
             return redirect('edit_product', id=product_instance.id)
+            # return redirect('products')
     return render(request, "edit_product.html", context)
 
 @user_is_staff_or_404()
@@ -207,8 +209,11 @@ class ProductsView(ListView):
     paginate_by = 9
     template_name = 'products.html'
     context_object_name = 'products'
+    extra_context={'no_image_url': DEFAULT_NO_IMAGE_URL}
 
 
 # TODO add main_photo switch on main_photo delete
 # TODO add main_photo chosing thingy
 # TODO add product list view for staff purposes
+# TODO add view fullsize image button
+# TODO add make_main_photo button

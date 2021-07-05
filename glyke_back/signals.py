@@ -13,4 +13,3 @@ def category_pre_delete_handler(sender, instance, **kwargs):
     Category.objects.filter(parent_id=instance.id).update(parent=new_parent)
     Product.objects.filter(category_id=instance.id).update(category=new_parent)
 
-
