@@ -44,8 +44,11 @@
                     <div class="img-preview-background" style="background-color: #acc6de;">
                         <div class="mt-8p">
                             {% for img_src in photos_display_urls %}
-                            <img src="{{img_src}}" class='img-preview' id="{{img_src}}">
+                            <img onclick="setMainPhoto(event)" src="{{img_src}}" class='img-preview' id="{{img_src}}">
                             <a onclick="toggleRemoveCurrentImg(event)"><span id="{{img_src}}_span" class="fas fa-times trans02s remove-photo-toggle"></span></a>
+                            {% if img_src == product.main_photo.get_display_url %}
+                                <a><span id="main-photo-mark" class="fas fa-image trans02s photo-is-main"></span></a>
+                            {% endif %}
                             {% endfor %}
                         </div>
                     </div>

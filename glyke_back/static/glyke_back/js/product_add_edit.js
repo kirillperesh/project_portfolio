@@ -78,6 +78,19 @@ var toggleRemoveCurrentImg = function(event) {
     }
 }
 
+var setMainPhoto = function(event) {
+    var main_photo_mark = document.getElementById('main-photo-mark')
+    main_photo_mark.classList.add('photo-is-main-updated')
+    event.target.parentNode.insertBefore(main_photo_mark, document.getElementById(event.target.id + '_span').parentNode)
+    if (document.getElementById('new_main_photo')) {document.getElementById('new_main_photo').remove()}
+    var new_main_photo = document.createElement("input")
+        new_main_photo.setAttribute('id', 'new_main_photo')
+        new_main_photo.setAttribute('name', 'new_main_photo')
+        new_main_photo.setAttribute('value', event.target.id)
+        new_main_photo.setAttribute('type', 'hidden')
+    document.getElementById('main_product_form').appendChild(new_main_photo)
+}
+
 new jBox('Confirm', {
     title: 'Confirm deletion/recovery',
     confirmButton: "I'm sure",

@@ -131,14 +131,14 @@ class EditProductViewTest(TestCase):
     def setUp(self):
         self.client.force_login(self.test_user_staff) # force_login before making requests because this is a staff-only view
         self.product = Product.objects.create(name='product',
-                                             description='description text',
-                                             category=self.category_filters_1_2,
-                                             attributes={"filter_1": "1", "filter_2": "2"},
-                                             stock=5,
-                                             cost_price=10,
-                                             selling_price=20,
-                                             discount_percent=30,
-                                             photos = photo_models.Gallery.objects.create(title='product_gallery')
+                                              description='description text',
+                                              category=self.category_filters_1_2,
+                                              attributes={"filter_1": "1", "filter_2": "2"},
+                                              stock=5,
+                                              cost_price=10,
+                                              selling_price=20,
+                                              discount_percent=30,
+                                              photos = photo_models.Gallery.objects.create(title='product_gallery')
                                              )
         self.product.tags.add('tag1, tag2')
         self.basic_url = reverse('edit_product', kwargs={'id': self.product.id})
@@ -301,6 +301,82 @@ class EditProductViewTest(TestCase):
         self.product.refresh_from_db()
         test_profit = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)-rnd_cost_price).quantize(Decimal('0.01'))
         self.assertEqual(self.product.profit, test_profit)
+
+class DeleteProductViewTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.test_user = User.objects.create(username='test_user', is_staff=False)
+        cls.test_user_staff = User.objects.create(username='test_user_staff', is_staff=True)
+        cls.test_user_superuser = User.objects.create(username='test_user_superuser', is_staff=True, is_superuser=True)
+
+        cls.category_0_filters = Category.objects.create(name='category_0_filters')
+
+    def setUp(self):
+        self.client.force_login(self.test_user_staff) # force_login before making requests because this is a staff-only view
+        self.product = Product.objects.create(name='product',
+                                              description='description text',
+                                              category=self.category_0_filters,
+                                              stock=5,
+                                              cost_price=10,
+                                              selling_price=20,
+                                              discount_percent=30,
+                                              photos = photo_models.Gallery.objects.create(title='product_gallery')
+                                             )
+        self.product.tags.add('tag1, tag2')
+        self.basic_url = reverse('delete_product', kwargs={'id': self.product.id})
+
+    def test_permissions(self):
+        """If is_staff==False return 404"""
+        response = self.client.get(self.basic_url) # case: staff
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('products'))
+        self.client.force_login(self.test_user)    # case: logged-in user
+        response = self.client.get(self.basic_url)
+        self.assertEqual(response.status_code, 404)
+        self.client.logout()                       # case: anonymous user
+        response = self.client.get(self.basic_url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_product(self):
+        """Checks that the product is deactivated properly on delete url"""
+        self.assertEqual(Product.objects.all().count(), 1)
+        self.assertEqual(Product.objects.all().first().is_active, True)
+        self.client.get(self.basic_url)
+        self.assertEqual(Product.objects.all().count(), 1)
+        self.assertEqual(Product.objects.all().first().is_active, False)
+
+    def test_recover_product(self):
+        """Checks that the product is recovered properly on delete url w/ recover query parameter"""
+        self.assertEqual(Product.objects.all().count(), 1)
+        Product.objects.all().update(is_active=False)
+        self.assertEqual(Product.objects.all().first().is_active, False)
+        self.client.get(self.basic_url + "?recover=y")
+        self.assertEqual(Product.objects.all().count(), 1)
+        self.assertEqual(Product.objects.all().first().is_active, True)
+
+    def test_delete_inactive_product(self):
+        """Checks redirect on trying to delete inactive product"""
+        self.assertEqual(Product.objects.all().count(), 1)
+        Product.objects.all().update(is_active=False)
+        self.assertEqual(Product.objects.all().first().is_active, False)
+        response = self.client.get(self.basic_url)
+        self.assertTrue(str(response.url).startswith(reverse('smth_went_wrong')))
+
+    def test_recover_active_product(self):
+        """Checks redirect on trying to recover active product"""
+        self.assertEqual(Product.objects.all().count(), 1)
+        self.assertEqual(Product.objects.all().first().is_active, True)
+        response = self.client.get(self.basic_url + "?recover=y")
+        self.assertTrue(str(response.url).startswith(reverse('smth_went_wrong')))
+
+
+
+
+
+
+
+
+
 
 
 

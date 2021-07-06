@@ -12,6 +12,7 @@ from decimal import Decimal
 
 from photologue import models as photo_models
 
+
 def get_deleted_instance(model):
     """Returns a callable to get a deleted instance of given model.
     Meant to be used as an argument for on_delete.SET().
@@ -93,8 +94,8 @@ class Price(models.Model):
         abstract = True
 
 class Product(Price, TimeStampedModel):
-    name = models.CharField(_('name'), max_length=255, unique=True)
     __original_name = None # an attribute to keep track on the previous name when changed
+    name = models.CharField(_('name'), max_length=255, unique=True)
     description = models.TextField(_('description'), max_length=3000, blank=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     category = models.ForeignKey(Category,
@@ -111,7 +112,7 @@ class Product(Price, TimeStampedModel):
                                   verbose_name=_('photos'),
                                   blank=True,
                                   null=True)
-    main_photo = models.OneToOneField(photo_models.Photo,
+    main_photo = models.OneToOneField(photo_models.Photo, # TODO add comment
                                       on_delete=models.SET_NULL,
                                       verbose_name=_('main photo'),
                                       blank=True,
@@ -126,14 +127,15 @@ class Product(Price, TimeStampedModel):
         self.__original_name = self.name
 
     def save(self, *args, **kwargs):
-        # main_photo block
-        if not self.pk and self.photos:
-            self.main_photo = self.photos.photos.all().first()
-        #TODO add else with some default pic
-        # price block
+        # main_photo block: update main_photo
+        try: # check if main_photo is None or has just been deleted (DoesNotExist is raised)
+            if not self.main_photo: raise photo_models.Photo.DoesNotExist
+        except photo_models.Photo.DoesNotExist:
+            if self.photos: self.main_photo = self.photos.photos.all().first() # sets main_photo to default value (first() for now)
+        # prices block: recount profit
         self.profit = self.selling_price * Decimal(1 - self.discount_percent / 100) - self.cost_price
         self.profit = Decimal(self.profit).quantize(Decimal('0.01'))
-        # name's changed block
+        # name's changed block: change galery's and photos' names if the product got renamed
         if self.name != self.__original_name:
             self.photos.title = self.name + _("_gallery")
             self.photos.slug = slugify(self.name + _("_gallery"))
@@ -195,3 +197,4 @@ class CheckLine(Price):
         super(CheckLine, self).save(*args, **kwargs)
 
 
+# TODO add defaul no_image from defaults to category photo
