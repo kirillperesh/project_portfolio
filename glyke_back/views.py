@@ -1,4 +1,6 @@
-from django.shortcuts import render, redirect, get_object_or_404
+import inspect
+from django.db.models.query import InstanceCheckMeta
+from django.shortcuts import render, redirect, get_object_or_404, resolve_url
 from django.urls import reverse
 from django import forms
 from django.utils.translation import gettext_lazy as _
@@ -30,6 +32,19 @@ def get_category_fields(*, category=None):
                                                                                           label=_(str(filter).capitalize()))
     return category_fields
 
+def get_photo_image_name_from_img_src(img_src, exclude = '_display'):
+    """Parses img_src gotten from photologue's .get_display_url() (or thumbnail)
+    (E.g. "to_del_photo_/media/photologue/photos/cache/ImageName_rndnumbers_display.jpg")
+    and returns a substring of photo's image's name. (E.g. "ImageName_rndnumbers.jpg)
+    Excludes '_display' substring by default.
+    """
+    return str(img_src).replace(str(exclude), '').split('/')[-1]
+
+def get_photo_from_img_src(*, img_src, model_instance, exclude = '_display'):
+    """Returns a photo instance from product_instance.photos based on get_display_url() (or thumbnail)"""
+    photo_image_substr = get_photo_image_name_from_img_src(img_src, exclude=exclude)
+    photo_queryset = model_instance.photos.photos.filter(image__endswith = photo_image_substr)
+    if photo_queryset.count() == 1: return photo_queryset.first()
 
 @user_is_staff_or_404()
 @require_http_methods(["GET", "POST"])
@@ -99,7 +114,7 @@ def add_product_dynamic_view(request):
 @user_is_staff_or_404()
 @require_http_methods(["GET", "POST"])
 def edit_product_dynamic_view(request, id):
-    """ If all the input is valid edits a Product instance.
+    """If all the input is valid edits a Product instance.
     If the name has changed, the gallery and all the photos get renamed as well.
     If a photo instance is removed, its associated files get deleted as well.
     """
@@ -156,26 +171,27 @@ def edit_product_dynamic_view(request, id):
                     image_name = image.name + f'_{product_instance.name}' # product's name is appended for later filtering purposes
                     if product_instance.photos.photos.filter(title=image_name).exists(): # can't use get_or_create and have to specify slug because of some photologue bug
                         image_name += f'_{photo_models.Photo.objects.filter(title__startswith=image_name).count() + 1}'
-                    # TODO add any photologue filters down here
+                    # TODO (or not) add any photologue filters down here
                     photo = photo_models.Photo.objects.create(image=image, title=image_name, slug=slugify(image_name)) #
                     product_instance.photos.photos.add(photo)
             else:
                 return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'photos (or photos form)'})}")
             # current photos block
             for param_name in request.POST:
-                # each photo_to_delete sends a POST parametr with the name "to_del_photo_{{ .get_display_url() }}"
-                # E.g. "to_del_photo_/media/photologue/photos/cache/ImageName_rndnumbers_display.jpg"
                 if param_name.startswith('to_del_photo_'):
-                    # parse parameter name to get a substring of photo's image's name
-                    # E.g. "ImageName_rndnumbers.jpg"
-                    to_del_photo_image = str(param_name).replace('_display', '').split('/')[-1]
-                    to_del_photo = product_instance.photos.photos.filter(image__endswith = to_del_photo_image)
-                    # to_del_photo is a queryset, if delete() is run on it, the associated files won't be deleted
-                    if to_del_photo.count() == 1:
-                        # so it's run on the only instance of the queryset
-                        to_del_photo.first().delete()
+                    # get a photo instance from product_instance.photos based on get_display_url()
+                    to_del_photo = get_photo_from_img_src(img_src=param_name,
+                                                          model_instance=product_instance)
+                    if to_del_photo:
+                        to_del_photo.delete()
                     else:
                         return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'photos-to-delete number (not 1)'})}")
+            # update main_photo
+            if 'new_main_photo' in request.POST:
+                # get a photo instance from product_instance.photos based on get_display_url()
+                new_main_photo = get_photo_from_img_src(img_src=request.POST['new_main_photo'],
+                                                        model_instance=product_instance)
+                if new_main_photo: product_instance.main_photo = new_main_photo
             # success
             # saving an instance here
             product_instance.save(force_update=True)
@@ -186,18 +202,14 @@ def edit_product_dynamic_view(request, id):
 @user_is_staff_or_404()
 @require_http_methods(["GET",])
 def delete_product_view(request, id):
-    # TODO add comments and docstr
-    # """ If all the input is valid edits a Product instance.
-    # If the name has changed, the gallery and all the photos get renamed as well.
-    # If a photo instance is removed, its associated files get deleted as well.
-    # """
-    # if 'id' not in request.GET:
-    #     return f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'tile to delete'})}"
+    """Switches is_active status of a product.
+    If 'recover' parameter is passed, is_active switches to True,
+    else - False
+    """
     product_to_delete = get_object_or_404(Product, id=id)
     initial_status = product_to_delete.is_active
     product_to_delete.is_active = True if request.GET.__contains__('recover') else False
     product_to_delete.save()
-    product_to_delete.refresh_from_db()
     redirect_url = f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'product deletion (status has not change)'})}" if initial_status == product_to_delete.is_active else reverse('products')
     return redirect(redirect_url)
 
@@ -212,8 +224,6 @@ class ProductsView(ListView):
     extra_context={'no_image_url': DEFAULT_NO_IMAGE_URL}
 
 
-# TODO add main_photo switch on main_photo delete
-# TODO add main_photo chosing thingy
+
 # TODO add product list view for staff purposes
-# TODO add view fullsize image button
-# TODO add make_main_photo button
+# TODO add view fullsize image button (probably after product detail view)
