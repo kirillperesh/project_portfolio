@@ -370,7 +370,7 @@ class DeleteProductViewTest(TestCase):
         self.assertTrue(str(response.url).startswith(reverse('smth_went_wrong')))
 
 
-
+# TODO add end_user_price update test
 
 
 

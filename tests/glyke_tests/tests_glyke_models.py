@@ -178,6 +178,7 @@ class ModelsTest(TestCase):
         self.assertEqual(product.profit, test_profit)
 
 
+# TODO add end_user_price update test
 
 
 
