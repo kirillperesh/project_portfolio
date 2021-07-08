@@ -88,10 +88,23 @@ class Price(models.Model):
                                            validators=[MinValueValidator(0),
                                            MaxValueValidator(80)],
                                            default=0)
+    end_user_price = models.DecimalField(_('end user price'),
+                                         max_digits=6,
+                                         decimal_places=2,
+                                         validators=[MinValueValidator(0)],
+                                         default=0)
     profit = models.DecimalField(_('profit'), max_digits=6, decimal_places=2, default=0)
 
     class Meta:
         abstract = True
+
+    def save(self, *args, **kwargs):
+        # recount profit and end_user_price on save
+        self.end_user_price = self.selling_price * Decimal(1 - self.discount_percent / 100)
+        self.end_user_price = Decimal(self.end_user_price).quantize(Decimal('0.01'))
+        self.profit = self.end_user_price - self.cost_price
+        self.profit = Decimal(self.profit).quantize(Decimal('0.01'))
+        super(Price, self).save(*args, **kwargs)
 
 class Product(Price, TimeStampedModel):
     __original_name = None # an attribute to keep track on the previous name when changed
@@ -132,9 +145,6 @@ class Product(Price, TimeStampedModel):
             if not self.main_photo: raise photo_models.Photo.DoesNotExist
         except photo_models.Photo.DoesNotExist:
             if self.photos: self.main_photo = self.photos.photos.all().first() # sets main_photo to default value (first() for now)
-        # prices block: recount profit
-        self.profit = self.selling_price * Decimal(1 - self.discount_percent / 100) - self.cost_price
-        self.profit = Decimal(self.profit).quantize(Decimal('0.01'))
         # name's changed block: change galery's and photos' names if the product got renamed
         if self.name != self.__original_name:
             self.photos.title = self.name + _("_gallery")
@@ -144,7 +154,6 @@ class Product(Price, TimeStampedModel):
                 photo.slug = str(photo.slug).replace(self.__original_name, self.name)
                 photo.save()
             self.photos.save()
-
         super(Product, self).save(*args, **kwargs)
         self.__original_name = self.name
 

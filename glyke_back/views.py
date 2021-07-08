@@ -195,8 +195,8 @@ def edit_product_dynamic_view(request, id):
             # success
             # saving an instance here
             product_instance.save(force_update=True)
-            return redirect('edit_product', id=product_instance.id)
-            # return redirect('products')
+            # return redirect('edit_product', id=product_instance.id)
+            return redirect('products')
     return render(request, "edit_product.html", context)
 
 @user_is_staff_or_404()
@@ -204,8 +204,7 @@ def edit_product_dynamic_view(request, id):
 def delete_product_view(request, id):
     """Switches is_active status of a product.
     If 'recover' parameter is passed, is_active switches to True,
-    else - False
-    """
+    else - False"""
     product_to_delete = get_object_or_404(Product, id=id)
     initial_status = product_to_delete.is_active
     product_to_delete.is_active = True if request.GET.__contains__('recover') else False
@@ -222,6 +221,8 @@ class ProductsView(ListView):
     template_name = 'products.html'
     context_object_name = 'products'
     extra_context={'no_image_url': DEFAULT_NO_IMAGE_URL}
+
+
 
 
 

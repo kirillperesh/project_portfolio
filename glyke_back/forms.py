@@ -11,7 +11,7 @@ from .models import Category, Product
 class AddProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        exclude = ['is_active', 'photos', 'category', 'attributes', 'profit']
+        exclude = ['is_active', 'photos', 'category', 'attributes', 'profit', 'end_user_price']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control',}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': '3'}),
@@ -42,7 +42,7 @@ class AddProductForm(forms.ModelForm):
                 if ['name'] == list(self.errors.keys()): form_is_valid = True
                 self.errors.pop('name')
         return form_is_valid
-        
+
 
 class SelectCategoryProductForm(forms.Form):
     category = forms.ModelChoiceField(required=True,

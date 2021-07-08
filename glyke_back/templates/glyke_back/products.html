@@ -18,15 +18,45 @@
             <div class="u-align-center-md u-align-center-sm u-align-center-xl u-align-center-xs u-container-style u-list-item u-repeater-item u-video-cover u-list-item-1">
               <div class="u-container-layout u-similar-container u-container-layout-1">
                 <a href="{% url 'edit_product' id=product.id %}">
-                <img src="{% if product.main_photo %}{{ product.main_photo.get_display_url }}{% else %}{{ no_image_url }}{% endif %}" alt="{{product.name}} main photo" class="u-expanded-width u-image u-image-1">
+                <img src="{% if product.main_photo %}{{ product.main_photo.image.url }}{% else %}{{ no_image_url }}{% endif %}" alt="{{product.name}} main photo" class="u-expanded-width u-image u-image-1">
                 </a>
+                <div class="other-photos-container">
+                  {% for photo in product.photos.photos.all %}
+                    {% if photo == product.main_photo%}
+                    <img src="{{ photo.get_display_url }}" style="display: none;" />
+                    {% else %}
+                    {% if forloop.counter <= 4 %}
+                      <a href="{{ photo.image.url }}">
+                        <img src="{{ photo.get_display_url }}" alt="{{ photo.title }}" class="other-photo trans02s">
+                      </a>
+                      {% endif %}
+                      {% endif %}
+                  {% endfor %}
+                </div>
                 <div class="u-align-center u-container-style u-group u-opacity u-opacity-85 u-group-1 bg-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
                   <div class="u-container-layout u-valign-middle u-container-layout-2">
                     <h2 class="u-align-center u-custom-font u-text u-text-3 product-name">{{ product.name }}</h2>
+                    <a href="/"><span class="product-namebox-bottom-category">{{ product.category }}</span></a>
                   </div>
                 </div>
-                <p class="u-align-center-lg u-text u-text-default u-text-4 test">{{ product.description }}</p>
-                <h3 class="u-align-center-lg u-custom-font u-text u-text-default u-text-5">$ {{product.selling_price}}</h3>
+                <div>
+                  <span class="u-text-tags product-tags">
+                    {% for tag in product.tags.all %}
+                      <a href="/">{{ tag }}</a>
+                      {% if tag != product.tags.all.last %}, {% endif %}
+                    {% endfor %}
+                  </span>
+                </div>
+                <p class="u-align-center-lg u-text u-text-default product-desc">{{ product.description }}</p>
+                <span>
+                  {% if product.discount_percent %}
+                    <span class="product-discount discount-old-price">&nbsp;${{product.selling_price}}&nbsp;</span>
+                  {% endif %}
+                  <span class="product-selling-price">$ {{product.end_user_price}}</span>
+                  {% if product.discount_percent %}
+                    <span class="product-discount discount-percent">{{product.discount_percent}}% OFF</span>
+                  {% endif %}
+                </span>
                 <a href="https://nicepage.com" class="u-btn u-button-style u-palette-5-dark-2 u-btn-1">add to cart</a>
               </div>
             </div>
@@ -64,3 +94,4 @@
 {% endblock %}
 
 
+<!-- # TODO edit ither photos (remove main photo) -->
