@@ -116,6 +116,30 @@ class AddProductViewTest(TestCase):
         test_profit = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)-rnd_cost_price).quantize(Decimal('0.01'))
         self.assertEqual(Product.objects.get(name='product_rnd_profit').profit, test_profit)
 
+    def test_end_user_price_count(self):
+        """Checks if the end_user_price is (re)calculated on save()"""
+        # case initial test (all 0)
+        context_data = {'category': self.category_0_filters.id, # using category w/o filters here
+                        'name': f'product_0_end_user_price',
+                        'cost_price': '0', 'selling_price': '0', 'discount_percent': '0',
+                        'tags': 'test_tag', 'stock': '1',}
+        context_data_encoded = urlencode(context_data)
+        self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
+        self.assertEqual(Product.objects.get(name='product_0_end_user_price').end_user_price, 0)
+        # case: all > 0 (other cases are tested in tests_glyke_models.py)
+        rnd_selling_price = decimal.Decimal(random.randrange(100, 9999))/100
+        rnd_discount = random.randint(1, 80)
+        context_data = {'category': self.category_0_filters.id, # using category w/o filters here
+                        'name': f'product_rnd_end_user_price',
+                        'cost_price': 0,
+                        'selling_price': rnd_selling_price,
+                        'discount_percent': rnd_discount,
+                        'tags': 'test_tag', 'stock': '1',}
+        context_data_encoded = urlencode(context_data)
+        self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
+        test_end_user_price = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)).quantize(Decimal('0.01'))
+        self.assertEqual(Product.objects.get(name='product_rnd_end_user_price').end_user_price, test_end_user_price)
+
 class EditProductViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -279,6 +303,32 @@ class EditProductViewTest(TestCase):
 
     def test_profit_recount(self):
         """Checks if the profit is (re)calculated on save()"""
+        for _ in range(1000):
+            # case initial test (all 0)
+            expected_data = {'cost_price': 0, 'selling_price': 0, 'discount_percent': 0,}
+            context_data = self.basic_context_data.copy()
+            context_data.update(expected_data)
+            context_data_encoded = urlencode(context_data)
+            self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
+            self.product.refresh_from_db()
+            self.assertEqual(self.product.profit, 0)
+            # case: random profit, w/ discount (other cases are tested in tests_glyke_models.py)
+            rnd_cost_price = decimal.Decimal(random.randrange(1, 9999))/100
+            rnd_selling_price = decimal.Decimal(random.randrange((rnd_cost_price*100), 9999))/100
+            rnd_discount = random.randint(1, 80)
+            expected_data = {'cost_price': rnd_cost_price,
+                            'selling_price': rnd_selling_price,
+                            'discount_percent': rnd_discount,}
+            context_data = self.basic_context_data.copy()
+            context_data.update(expected_data)
+            context_data_encoded = urlencode(context_data)
+            self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
+            self.product.refresh_from_db()
+            test_profit = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)-rnd_cost_price).quantize(Decimal('0.01'))
+            self.assertEqual(self.product.profit, test_profit)
+
+    def test_end_user_price_recount(self):
+        """Checks if the profit is (re)calculated on save()"""
         # case initial test (all 0)
         expected_data = {'cost_price': 0, 'selling_price': 0, 'discount_percent': 0,}
         context_data = self.basic_context_data.copy()
@@ -286,12 +336,11 @@ class EditProductViewTest(TestCase):
         context_data_encoded = urlencode(context_data)
         self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
         self.product.refresh_from_db()
-        self.assertEqual(self.product.profit, 0)
-        # case: random profit, w/ discount (other cases are tested in tests_glyke_models.py)
-        rnd_cost_price = decimal.Decimal(random.randrange(1, 9999))/100
-        rnd_selling_price = decimal.Decimal(random.randrange((rnd_cost_price*100), 9999))/100
+        self.assertEqual(self.product.end_user_price, 0)
+        # case: all > 0 (other cases are tested in tests_glyke_models.py)
+        rnd_selling_price = decimal.Decimal(random.randrange(100, 9999))/100
         rnd_discount = random.randint(1, 80)
-        expected_data = {'cost_price': rnd_cost_price,
+        expected_data = {'cost_price': 0,
                          'selling_price': rnd_selling_price,
                          'discount_percent': rnd_discount,}
         context_data = self.basic_context_data.copy()
@@ -299,8 +348,8 @@ class EditProductViewTest(TestCase):
         context_data_encoded = urlencode(context_data)
         self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
         self.product.refresh_from_db()
-        test_profit = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)-rnd_cost_price).quantize(Decimal('0.01'))
-        self.assertEqual(self.product.profit, test_profit)
+        test_end_user_price = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)).quantize(Decimal('0.01'))
+        self.assertEqual(self.product.end_user_price, test_end_user_price)
 
 class DeleteProductViewTest(TestCase):
     @classmethod
@@ -370,7 +419,7 @@ class DeleteProductViewTest(TestCase):
         self.assertTrue(str(response.url).startswith(reverse('smth_went_wrong')))
 
 
-# TODO add end_user_price update test
+# TODO fix recalc profit test (line 327) (cause of end-user-price)
 
 
 

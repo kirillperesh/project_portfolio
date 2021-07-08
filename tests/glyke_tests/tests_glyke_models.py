@@ -177,8 +177,34 @@ class ModelsTest(TestCase):
         test_profit = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)-rnd_cost_price).quantize(Decimal('0.01'))
         self.assertEqual(product.profit, test_profit)
 
+    def test_product_save_end_user_price_update(self):
+        """Assert product save method updates end_user_price attr"""
+        # case: all == 0
+        product = Product.objects.create(name=get_random_string())
+        # case: all > 0
+        rnd_selling_price = decimal.Decimal(random.randrange(100, 9999))/100
+        rnd_discount = random.randint(1, 99)
+        product.selling_price = rnd_selling_price
+        product.discount_percent = rnd_discount
+        product.save()
+        test_end_user_price = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)).quantize(Decimal('0.01'))
+        self.assertEqual(product.end_user_price, test_end_user_price)
+        # case: selling_price has changed
+        rnd_selling_price = decimal.Decimal(random.randrange(100, 9999))/100
+        product.selling_price = rnd_selling_price
+        product.save()
+        test_end_user_price = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)).quantize(Decimal('0.01'))
+        self.assertEqual(product.discount_percent, rnd_discount)
+        self.assertEqual(product.end_user_price, test_end_user_price)
+        # case: discount_percent has changed
+        rnd_discount = random.randint(1, 99)
+        product.discount_percent = rnd_discount
+        product.save()
+        test_end_user_price = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)).quantize(Decimal('0.01'))
+        self.assertEqual(product.selling_price, rnd_selling_price)
+        self.assertEqual(product.end_user_price, test_end_user_price)
 
-# TODO add end_user_price update test
+
 
 
 
