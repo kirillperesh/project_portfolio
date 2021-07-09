@@ -303,29 +303,29 @@ class EditProductViewTest(TestCase):
 
     def test_profit_recount(self):
         """Checks if the profit is (re)calculated on save()"""
-        for _ in range(1000):
-            # case initial test (all 0)
-            expected_data = {'cost_price': 0, 'selling_price': 0, 'discount_percent': 0,}
-            context_data = self.basic_context_data.copy()
-            context_data.update(expected_data)
-            context_data_encoded = urlencode(context_data)
-            self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
-            self.product.refresh_from_db()
-            self.assertEqual(self.product.profit, 0)
-            # case: random profit, w/ discount (other cases are tested in tests_glyke_models.py)
-            rnd_cost_price = decimal.Decimal(random.randrange(1, 9999))/100
-            rnd_selling_price = decimal.Decimal(random.randrange((rnd_cost_price*100), 9999))/100
-            rnd_discount = random.randint(1, 80)
-            expected_data = {'cost_price': rnd_cost_price,
-                            'selling_price': rnd_selling_price,
-                            'discount_percent': rnd_discount,}
-            context_data = self.basic_context_data.copy()
-            context_data.update(expected_data)
-            context_data_encoded = urlencode(context_data)
-            self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
-            self.product.refresh_from_db()
-            test_profit = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)-rnd_cost_price).quantize(Decimal('0.01'))
-            self.assertEqual(self.product.profit, test_profit)
+        # case initial test (all 0)
+        expected_data = {'cost_price': 0, 'selling_price': 0, 'discount_percent': 0,}
+        context_data = self.basic_context_data.copy()
+        context_data.update(expected_data)
+        context_data_encoded = urlencode(context_data)
+        self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.profit, 0)
+        # case: random profit, w/ discount (other cases are tested in tests_glyke_models.py)
+        rnd_cost_price = decimal.Decimal(random.randrange(1, 9999))/100
+        rnd_selling_price = decimal.Decimal(random.randrange((rnd_cost_price*100), 9999))/100
+        rnd_discount = random.randint(1, 80)
+        expected_data = {'cost_price': rnd_cost_price,
+                        'selling_price': rnd_selling_price,
+                        'discount_percent': rnd_discount,}
+        context_data = self.basic_context_data.copy()
+        context_data.update(expected_data)
+        context_data_encoded = urlencode(context_data)
+        self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
+        self.product.refresh_from_db()
+        test_profit = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)-rnd_cost_price).quantize(Decimal('0.01'))
+        self.assertEqual(self.product.profit, test_profit)
+        self.assertEqual(self.product.profit, self.product.end_user_price-rnd_cost_price)
 
     def test_end_user_price_recount(self):
         """Checks if the profit is (re)calculated on save()"""
@@ -418,8 +418,6 @@ class DeleteProductViewTest(TestCase):
         response = self.client.get(self.basic_url + "?recover=y")
         self.assertTrue(str(response.url).startswith(reverse('smth_went_wrong')))
 
-
-# TODO fix recalc profit test (line 327) (cause of end-user-price)
 
 
 
