@@ -142,67 +142,63 @@ class ModelsTest(TestCase):
 
     def test_product_save_profit_update(self):
         """Assert product save method updates profit attr"""
+        def update_check_prices():
+            product.cost_price = rnd_cost_price
+            product.discount_percent = rnd_discount
+            product.selling_price = rnd_selling_price
+            product.save()
+            test_profit = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)-rnd_cost_price).quantize(Decimal('0.01'))
+            self.assertEqual(product.profit, test_profit)
+            self.assertEqual(product.cost_price, rnd_cost_price)
+            self.assertEqual(product.discount_percent, rnd_discount)
+            self.assertEqual(product.selling_price, rnd_selling_price)
+            self.assertEqual(product.profit, product.end_user_price-rnd_cost_price)
         # case: all 0
         product = Product.objects.create(name='test_product')
         self.assertEqual(product.profit, 0)
-        # case: profit > 0, no discount
+        # case: profit > 0, w/ discount
         rnd_cost_price = decimal.Decimal(random.randrange(1, 9999))/100
         rnd_selling_price = decimal.Decimal(random.randrange((rnd_cost_price*100), 9999))/100
-        product.cost_price = rnd_cost_price
-        product.selling_price = rnd_selling_price
-        product.discount_percent = 0
-        product.save()
-        self.assertGreaterEqual(product.profit, 0)
-        self.assertEqual(product.profit, rnd_selling_price-rnd_cost_price)
-        # case: profit > 0, w/ discount
         rnd_discount = random.randint(0, int((1-(rnd_cost_price/rnd_selling_price))*100))
-        product.discount_percent = rnd_discount
-        product.save()
-        test_profit = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)-rnd_cost_price).quantize(Decimal('0.01'))
+        update_check_prices()
         self.assertGreaterEqual(product.profit, 0)
-        self.assertEqual(product.profit, test_profit)
+        # case: profit > 0, no discount
+        rnd_discount = 0
+        update_check_prices()
+        self.assertGreaterEqual(product.profit, 0)
         # case: profit < 0, no discount
         rnd_selling_price = decimal.Decimal(random.randrange(1, 9999))/100
         rnd_cost_price = decimal.Decimal(random.randrange((rnd_selling_price*100), 9999))/100
-        product.cost_price = rnd_cost_price
-        product.selling_price = rnd_selling_price
-        product.discount_percent = 0
-        product.save()
+        update_check_prices()
         self.assertLessEqual(product.profit, 0)
-        self.assertEqual(product.profit, rnd_selling_price-rnd_cost_price)
         # case: profit < 0, w/ discount
         rnd_discount = random.randint(1, 80)
-        product.discount_percent = rnd_discount
-        product.save()
-        test_profit = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)-rnd_cost_price).quantize(Decimal('0.01'))
-        self.assertEqual(product.profit, test_profit)
+        update_check_prices()
 
     def test_product_save_end_user_price_update(self):
         """Assert product save method updates end_user_price attr"""
+        def update_check_prices():
+            product.discount_percent = rnd_discount
+            product.selling_price = rnd_selling_price
+            product.save()
+            test_end_user_price = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)).quantize(Decimal('0.01'))
+            self.assertEqual(product.selling_price, rnd_selling_price)
+            self.assertEqual(product.discount_percent, rnd_discount)
+            self.assertEqual(product.end_user_price, test_end_user_price)
+            self.assertEqual(product.profit, test_end_user_price-product.cost_price)
         # case: all == 0
         product = Product.objects.create(name=get_random_string())
+        self.assertEqual(product.end_user_price, 0)
         # case: all > 0
         rnd_selling_price = decimal.Decimal(random.randrange(100, 9999))/100
         rnd_discount = random.randint(1, 99)
-        product.selling_price = rnd_selling_price
-        product.discount_percent = rnd_discount
-        product.save()
-        test_end_user_price = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)).quantize(Decimal('0.01'))
-        self.assertEqual(product.end_user_price, test_end_user_price)
+        update_check_prices()
         # case: selling_price has changed
         rnd_selling_price = decimal.Decimal(random.randrange(100, 9999))/100
-        product.selling_price = rnd_selling_price
-        product.save()
-        test_end_user_price = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)).quantize(Decimal('0.01'))
-        self.assertEqual(product.discount_percent, rnd_discount)
-        self.assertEqual(product.end_user_price, test_end_user_price)
+        update_check_prices()
         # case: discount_percent has changed
         rnd_discount = random.randint(1, 99)
-        product.discount_percent = rnd_discount
-        product.save()
-        test_end_user_price = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)).quantize(Decimal('0.01'))
-        self.assertEqual(product.selling_price, rnd_selling_price)
-        self.assertEqual(product.end_user_price, test_end_user_price)
+        update_check_prices()
 
 
 
