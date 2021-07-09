@@ -102,7 +102,8 @@ class Price(models.Model):
         # recount profit and end_user_price on save
         self.end_user_price = self.selling_price * Decimal(1 - self.discount_percent / 100)
         self.end_user_price = Decimal(self.end_user_price).quantize(Decimal('0.01'))
-        self.profit = self.end_user_price - self.cost_price
+            # not using end_user_price here because of some rounding issues
+        self.profit = self.selling_price * Decimal(1 - self.discount_percent / 100) - self.cost_price
         self.profit = Decimal(self.profit).quantize(Decimal('0.01'))
         super(Price, self).save(*args, **kwargs)
 

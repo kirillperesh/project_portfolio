@@ -20,17 +20,18 @@
                 <a href="{% url 'edit_product' id=product.id %}">
                 <img src="{% if product.main_photo %}{{ product.main_photo.image.url }}{% else %}{{ no_image_url }}{% endif %}" alt="{{product.name}} main photo" class="u-expanded-width u-image u-image-1">
                 </a>
+                {% if request.user.is_staff %}
+                  <a href="{% url 'edit_product' id=product.id %}">
+                    <button type="button" class="product-btn product-btn-edit"><i class="fas fa-edit"></i></button>
+                  </a>
+                {% endif %}
                 <div class="other-photos-container">
                   {% for photo in product.photos.photos.all %}
-                    {% if photo == product.main_photo%}
-                    <img src="{{ photo.get_display_url }}" style="display: none;" />
-                    {% else %}
-                    {% if forloop.counter <= 4 %}
+                    {% if photo != product.main_photo and forloop.counter <= 4 %}
                       <a href="{{ photo.image.url }}">
                         <img src="{{ photo.get_display_url }}" alt="{{ photo.title }}" class="other-photo trans02s">
                       </a>
-                      {% endif %}
-                      {% endif %}
+                    {% endif %}
                   {% endfor %}
                 </div>
                 <div class="u-align-center u-container-style u-group u-opacity u-opacity-85 u-group-1 bg-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
@@ -90,6 +91,9 @@
         </li>
         </ul>
     </nav>
+
+{% load static %}
+<script src="{% static 'glyke_back/js/products.js' %}">test_func()</script>
 
 {% endblock %}
 

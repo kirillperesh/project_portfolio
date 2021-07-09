@@ -1,21 +1,3 @@
-// var remove_selected_image = function(event) {
-//     var img_id = event.target.id.slice(0, -5) // removes "_span" in the end
-//     document.getElementById(img_id + '_id').remove() // removes a tag and its child span tag
-//     document.getElementById(img_id).remove() // removes img tag
-//     var input = document.getElementById('photosInput');
-//     var file_list = input.files;
-//     console.log(input.in)
-//     console.log(file_list)
-//     console.log(img_id)
-//     for (file of file_list) {
-//         if (file.name == img_id) {
-//             file.value = ''
-//             console.log(file)
-//         }
-//     }
-//     // TODO doesn't delete the file from list (readonly)
-
-// }
 
 var reset_uploaded_images = function(event) {
     document.getElementById('photosInput').value = null;
