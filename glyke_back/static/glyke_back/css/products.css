@@ -276,11 +276,10 @@ a:hover,a:focus{text-decoration:none!important;outline:none!important;-webkit-bo
     margin-top: -85px;
     right: -20px;
     text-align: right;
-    opacity: 0.9;
+    opacity: 0.85;
     max-width: 70%;
     z-index: 1 !important;
 }
-
 .other-photo{
     position: relative;
     width: 30%;
@@ -290,17 +289,17 @@ a:hover,a:focus{text-decoration:none!important;outline:none!important;-webkit-bo
     padding: 0px !important;
     border: 1px solid rgba(255, 255, 255, 0.5);
 }
-
 .other-photo:hover{
     z-index: 2 !important;
     transform: scale(2.2);
     cursor: pointer;
 }
 
+.product-btn-container {text-align: left;}
 .product-btn {
     position: absolute;
-    margin-top: -60px;
-    right: 185px;
+    top: -60px;
+    left: 15px;
     font-size: 2.2em;
     cursor: pointer;
     background: transparent;
@@ -308,11 +307,18 @@ a:hover,a:focus{text-decoration:none!important;outline:none!important;-webkit-bo
     color: #adcce9 ;
     opacity: 0.6;
 }
-
 .product-btn-edit:hover{
     transform: scale(1.2);
     opacity: 1;
 }
+
+
+
+
+
+
+
+
 
 
 

@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_http_methods
 from django.utils.text import slugify
 from urllib.parse import urlencode
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
 from proj_folio.defaults import DEFAULT_NO_IMAGE_URL
 
 from photologue import models as photo_models
@@ -221,6 +221,16 @@ class ProductsView(ListView):
     template_name = 'products.html'
     context_object_name = 'products'
     extra_context={'no_image_url': DEFAULT_NO_IMAGE_URL}
+
+class ProductDetailView(DetailView):
+    http_method_names = ['get', ]
+    model = Product
+    pk_url_kwarg = 'id'
+    queryset = model.objects.filter(is_active=True)
+    template_name = 'product.html'
+    context_object_name = 'product'
+    extra_context={'no_image_url': DEFAULT_NO_IMAGE_URL}
+
 
 
 

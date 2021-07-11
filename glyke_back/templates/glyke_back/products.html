@@ -17,13 +17,15 @@
           {% for product in products %}
             <div class="u-align-center-md u-align-center-sm u-align-center-xl u-align-center-xs u-container-style u-list-item u-repeater-item u-video-cover u-list-item-1">
               <div class="u-container-layout u-similar-container u-container-layout-1">
-                <a href="{% url 'edit_product' id=product.id %}">
+                <a href="{% url 'product_details' id=product.id %}">
                 <img src="{% if product.main_photo %}{{ product.main_photo.image.url }}{% else %}{{ no_image_url }}{% endif %}" alt="{{product.name}} main photo" class="u-expanded-width u-image u-image-1">
                 </a>
                 {% if request.user.is_staff %}
-                  <a href="{% url 'edit_product' id=product.id %}">
-                    <button type="button" class="product-btn product-btn-edit"><i class="fas fa-edit"></i></button>
-                  </a>
+                  <div class="product-btn-container">
+                    <a href="{% url 'edit_product' id=product.id %}">
+                      <button type="button" class="product-btn product-btn-edit"><i class="fas fa-edit"></i></button>
+                    </a>
+                  </div>
                 {% endif %}
                 <div class="other-photos-container">
                   {% for photo in product.photos.photos.all %}
