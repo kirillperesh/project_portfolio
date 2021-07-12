@@ -72,12 +72,12 @@ class Category(TimeStampedModel):
     def __str__(self):
         return self.name
 
-    def save(self, *args, **kwargs):
-        for filter_name in self.filters.names():
-            print(filter_name)
-        print(self.products.all())
+    # def save(self, *args, **kwargs):
+    #     for filter_name in self.filters.names():
+    #         print(filter_name)
+    #     print(self.products.all())
 
-        return super(Category, self).save(*args, **kwargs)
+    #     return super(Category, self).save(*args, **kwargs)
 
 
 class Price(models.Model):
