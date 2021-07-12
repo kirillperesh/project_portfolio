@@ -237,7 +237,10 @@ a:hover,a:focus{text-decoration:none!important;outline:none!important;-webkit-bo
     max-width: 37%;
     line-height: 1.4em;
 }
-.product-desc{display: block; height: 100px; overflow: auto;
+.product-desc{
+    display: block;
+    height: 100px;
+    overflow: auto;
     margin-top: 0px !important;
     font-size: 1.1em;
 }
@@ -277,7 +280,7 @@ a:hover,a:focus{text-decoration:none!important;outline:none!important;-webkit-bo
     right: -20px;
     text-align: right;
     opacity: 0.85;
-    max-width: 70%;
+    width: 70%;
     z-index: 1 !important;
 }
 .other-photo{

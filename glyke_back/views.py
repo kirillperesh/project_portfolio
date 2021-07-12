@@ -215,21 +215,45 @@ def delete_product_view(request, id):
 class ProductsView(ListView):
     http_method_names = ['get', ]
     model = Product
-    queryset = model.objects.filter(is_active=True)
-    ordering = '-modified'
+    # queryset = model.objects.filter(is_active=True)
+    # ordering = '-modified'
     paginate_by = 9
     template_name = 'products.html'
     context_object_name = 'products'
-    extra_context={'no_image_url': DEFAULT_NO_IMAGE_URL}
+    extra_context = {'no_image_url': DEFAULT_NO_IMAGE_URL}
+
+    def get_queryset(self):
+        queryset = self.model.objects.filter(is_active=True) # basic queryset
+        queryset = queryset.order_by('-modified') # basic ordering
+        # category filter block
+        if self.request.GET.get('category'):
+            category_filter = self.request.GET.get('category')
+            queryset = queryset.filter(category__name=category_filter)
+        # only_tag filter block
+        if self.request.GET.get('only_tag'):
+            only_tag_filter = self.request.GET.get('only_tag')
+            queryset = queryset.filter(tags__name=only_tag_filter)
+
+        return queryset
 
 class ProductDetailView(DetailView):
     http_method_names = ['get', ]
     model = Product
     pk_url_kwarg = 'id'
-    queryset = model.objects.filter(is_active=True)
+    queryset = model.objects.filter(is_active=True) # if product isn't active returns 404
     template_name = 'product.html'
     context_object_name = 'product'
     extra_context={'no_image_url': DEFAULT_NO_IMAGE_URL}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # model_instance = self.model.objects.get(id=self.kwargs['id'])
+        # for name, value in model_instance:
+        #     context
+
+
+
+        return context
 
 
 

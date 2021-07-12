@@ -16,13 +16,13 @@
             <div class="is-active-status">DELETED</div>
         {% endif %}
         <div class="row">
-          <div class="col-12">
-            <h2 class="tm-block-title d-inline-block details-name">{{ product.name }}</h2>
-          </div>
-          <a href="">
+          <a href="{% url 'products'%}?category={{ product.category }}">
           <div class="details-category-container bg-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
               <span class="details-category ">{{ product.category }}</span>
           </div></a>
+          <div class="col-12">
+            <h2 class="tm-block-title d-inline-block details-name">{{ product.name }}</h2>
+          </div>
           {% if request.user.is_staff %}
             <div class="product-btn-container">
               <a href="{% url 'edit_product' id=product.id %}">
@@ -49,9 +49,26 @@
 
 
             <div class="col-xl-6 col-lg-6 col-md-12">
-                pew pew
+              <div class="details-description-container bg-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
+                <span class="details-description">{{ product.description }}</span>
+              </div>
+
+
+              <div class="details-attributes-container bg-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
+                <table>
+                  {% for name, value in product.attributes.items %}
+                    <tr>
+                      <td>{{name}}:</td>
+                      <td>{{value}}</td>
+                    </tr>
+                  {% endfor %}
+              </table>
+              </div>
+
 
             </div>
+
+
         </div>
 
 

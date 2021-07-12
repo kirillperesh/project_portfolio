@@ -1,6 +1,7 @@
 .details-category-container {
+    z-index: 1;
     position: absolute;
-    right: -2%;
+    right: -1%;
     top: 14px;
     font-size: 1.5em;
     padding: 1em 0em;
@@ -14,14 +15,22 @@
     padding: 0em 2em;
 }
 @media (max-width: 575px){
-    /* TODO update this thing */
-    /* .details-category-container{
-        transform: scale(0.5);
-        right: -100px;
-        top: 10px;} */
+    .details-category-container{
+        /* z-index: 1; */
+        width: 300px;
+        transform: rotate(90deg) scale(0.8);
+        right: 0px;
+        padding: 0px;
+        margin-right: -124px;
+        top: 150px;
+    }
     .details-other-photo {
         width: 145px !important;
         height: 130px !important;
+    }
+    .details-name {
+        max-width: 250px;
+        word-wrap: break-word;
     }
 }
 
@@ -66,6 +75,39 @@
 .product-btn-edit:hover{
     transform: scale(1.2);
     opacity: 1;
+}
+
+.details-description-container {
+    /* position: relative; */
+    font-size: 1em;
+    padding: 1em;
+    box-shadow:1px 1px 5px 0 #455c71;
+    background-size: cover;
+    display: block;
+    overflow: auto;
+    margin-top: 0px !important;
+    font-size: 1.1em;
+    line-height: 1.2em;
+    text-align: justify;
+}
+
+/* .details-description {
+
+} */
+
+.details-attributes-container {
+    position: relative;
+    top: 1em;
+    font-size: 1em;
+    padding: 1em;
+    box-shadow:1px 1px 5px 0 #455c71;
+    background-size: cover;
+    display: block;
+    overflow: auto;
+    margin-top: 0px !important;
+    font-size: 1.1em;
+    line-height: 1.2em;
+    text-align: justify;
 }
 
 

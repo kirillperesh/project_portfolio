@@ -39,13 +39,14 @@
                 <div class="u-align-center u-container-style u-group u-opacity u-opacity-85 u-group-1 bg-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
                   <div class="u-container-layout u-valign-middle u-container-layout-2">
                     <h2 class="u-align-center u-custom-font u-text u-text-3 product-name">{{ product.name }}</h2>
-                    <a href="/"><span class="product-namebox-bottom-category">{{ product.category }}</span></a>
+                    <a href="{% url 'products'%}?category={{ product.category }}">
+                      <span class="product-namebox-bottom-category">{{ product.category }}</span></a>
                   </div>
                 </div>
                 <div>
                   <span class="u-text-tags product-tags">
                     {% for tag in product.tags.all %}
-                      <a href="/">{{ tag }}</a>
+                      <a href="{% url 'products'%}?only_tag={{ tag }}">{{ tag }}</a>
                       {% if tag != product.tags.all.last %}, {% endif %}
                     {% endfor %}
                   </span>
