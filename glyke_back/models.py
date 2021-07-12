@@ -72,6 +72,13 @@ class Category(TimeStampedModel):
     def __str__(self):
         return self.name
 
+    # def save(self, *args, **kwargs):
+    #     for filter_name in self.filters.names():
+    #         print(filter_name)
+    #     print(self.products.all())
+
+    #     return super(Category, self).save(*args, **kwargs)
+
 
 class Price(models.Model):
     cost_price = models.DecimalField(_('cost price'),
@@ -102,7 +109,8 @@ class Price(models.Model):
         # recount profit and end_user_price on save
         self.end_user_price = self.selling_price * Decimal(1 - self.discount_percent / 100)
         self.end_user_price = Decimal(self.end_user_price).quantize(Decimal('0.01'))
-        self.profit = self.end_user_price - self.cost_price
+            # not using end_user_price here because of some rounding issues
+        self.profit = self.selling_price * Decimal(1 - self.discount_percent / 100) - self.cost_price
         self.profit = Decimal(self.profit).quantize(Decimal('0.01'))
         super(Price, self).save(*args, **kwargs)
 
@@ -207,3 +215,4 @@ class CheckLine(Price):
 
 
 # TODO add defaul no_image from defaults to category photo
+# TODO if any category filter has been renamed or deleted, corresponding product attributes have to be renamed or delete either

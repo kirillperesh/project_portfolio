@@ -17,32 +17,36 @@
           {% for product in products %}
             <div class="u-align-center-md u-align-center-sm u-align-center-xl u-align-center-xs u-container-style u-list-item u-repeater-item u-video-cover u-list-item-1">
               <div class="u-container-layout u-similar-container u-container-layout-1">
-                <a href="{% url 'edit_product' id=product.id %}">
+                <a href="{% url 'product_details' id=product.id %}">
                 <img src="{% if product.main_photo %}{{ product.main_photo.image.url }}{% else %}{{ no_image_url }}{% endif %}" alt="{{product.name}} main photo" class="u-expanded-width u-image u-image-1">
                 </a>
+                {% if request.user.is_staff %}
+                  <div class="product-btn-container">
+                    <a href="{% url 'edit_product' id=product.id %}">
+                      <button type="button" class="product-btn product-btn-edit"><i class="fas fa-edit"></i></button>
+                    </a>
+                  </div>
+                {% endif %}
                 <div class="other-photos-container">
                   {% for photo in product.photos.photos.all %}
-                    {% if photo == product.main_photo%}
-                    <img src="{{ photo.get_display_url }}" style="display: none;" />
-                    {% else %}
-                    {% if forloop.counter <= 4 %}
+                    {% if photo != product.main_photo and forloop.counter <= 4 %}
                       <a href="{{ photo.image.url }}">
                         <img src="{{ photo.get_display_url }}" alt="{{ photo.title }}" class="other-photo trans02s">
                       </a>
-                      {% endif %}
-                      {% endif %}
+                    {% endif %}
                   {% endfor %}
                 </div>
                 <div class="u-align-center u-container-style u-group u-opacity u-opacity-85 u-group-1 bg-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
                   <div class="u-container-layout u-valign-middle u-container-layout-2">
                     <h2 class="u-align-center u-custom-font u-text u-text-3 product-name">{{ product.name }}</h2>
-                    <a href="/"><span class="product-namebox-bottom-category">{{ product.category }}</span></a>
+                    <a href="{% url 'products'%}?category={{ product.category }}">
+                      <span class="product-namebox-bottom-category">{{ product.category }}</span></a>
                   </div>
                 </div>
                 <div>
                   <span class="u-text-tags product-tags">
                     {% for tag in product.tags.all %}
-                      <a href="/">{{ tag }}</a>
+                      <a href="{% url 'products'%}?only_tag={{ tag }}">{{ tag }}</a>
                       {% if tag != product.tags.all.last %}, {% endif %}
                     {% endfor %}
                   </span>
@@ -90,6 +94,9 @@
         </li>
         </ul>
     </nav>
+
+{% load static %}
+<script src="{% static 'glyke_back/js/products.js' %}">test_func()</script>
 
 {% endblock %}
 
