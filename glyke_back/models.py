@@ -72,6 +72,13 @@ class Category(TimeStampedModel):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        for filter_name in self.filters.names():
+            print(filter_name)
+        print(self.products.all())
+
+        return super(Category, self).save(*args, **kwargs)
+
 
 class Price(models.Model):
     cost_price = models.DecimalField(_('cost price'),
@@ -208,3 +215,4 @@ class CheckLine(Price):
 
 
 # TODO add defaul no_image from defaults to category photo
+# TODO if any category filter has been renamed or deleted, corresponding product attributes have to be renamed or delete either
