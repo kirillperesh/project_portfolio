@@ -1,0 +1,33 @@
+{% extends 'glyke_base.html' %}
+
+{% block title %} Sign Up {% endblock %}
+
+{% block content %}
+    <div class="sign-up">
+
+        <form class="sign-up-form" role="form" action="" method="post">
+            <h2>Hello there</h2>
+
+            {% csrf_token %}
+            {% for field in form %}
+                {{ field }}
+                {% if field.errors %}
+                    <div class="form-errors">
+                        {% for error in field.errors %}
+                            <p >{{error}}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            <input class="sign-up-submit" type="submit" value="Sign Up">
+            <p class="bottom-txt">Already have an account?</p>
+            <a href="{% url 'sign_in'%}">
+                <input type="button" value="Log In">
+            </a>
+        </form>
+        {% block oauth2 %}
+            {% include "oauth2_block.html" %}
+        {% endblock %}
+    </div>
+{% endblock %}

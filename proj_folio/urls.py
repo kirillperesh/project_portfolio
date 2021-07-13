@@ -23,8 +23,11 @@ from .views import SmthWentWrong
 
 
 urlpatterns = [
-    path("folio/", include("folio_back.urls")),
-    path("glyke/", include("glyke_back.urls")),
+    # old_portfolio app
+    # path("folio/", include("folio_back.urls")),
+    # path("glyke/", include("glyke_back.urls")),
+
+    path("", include("glyke_back.urls")),
     path('admin/', admin.site.urls),
 
     path("oops/", SmthWentWrong.as_view(), name="smth_went_wrong"),

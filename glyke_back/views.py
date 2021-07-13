@@ -7,11 +7,13 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_http_methods
 from django.utils.text import slugify
 from urllib.parse import urlencode
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, TemplateView, CreateView
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.models import User
 from proj_folio.defaults import DEFAULT_NO_IMAGE_URL
 
 from photologue import models as photo_models
-from .forms import AddProductForm, PhotosForm, SelectCategoryProductForm
+from .forms import AddProductForm, PhotosForm, SelectCategoryProductForm, RegisterForm, SignInForm
 from .models import Category, Product
 from .glyke_decorators import user_is_staff_or_404
 
@@ -245,19 +247,21 @@ class ProductDetailView(DetailView):
     context_object_name = 'product'
     extra_context={'no_image_url': DEFAULT_NO_IMAGE_URL}
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # model_instance = self.model.objects.get(id=self.kwargs['id'])
-        # for name, value in model_instance:
-        #     context
 
+class Home(TemplateView):
+    http_method_names = ['get', ]
+    template_name = 'portfolio.html'
 
+class SignUpView(CreateView):
+    http_method_names = ['get', 'post']
+    model = User
+    form_class = RegisterForm
+    template_name = 'sign_up.html'
 
-        return context
-
-
-
-
+class SignInView(LoginView):
+    http_method_names = ['get', 'post']
+    authentication_form = SignInForm
+    template_name = 'sign_in.html'
 
 
 # TODO add product list view for staff purposes

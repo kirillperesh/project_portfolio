@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'photologue', # an to assign multiple photos to a model instance
     'sortedm2m', # for photologue
 
-    'folio_back',
+    # 'folio_back', old app
     'glyke_back',
 ]
 

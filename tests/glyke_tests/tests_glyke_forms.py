@@ -95,6 +95,3 @@ class SelectCategoryProductFormTest(TestCase):
         self.category_2_2_2.save()
         invalid_form = SelectCategoryProductForm(data={'category': self.category_2_2_2})
         self.assertEqual(invalid_form.errors['category'], ['Select a valid choice. That choice is not one of the available choices.'])
-
-
-
