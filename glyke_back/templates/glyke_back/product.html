@@ -34,8 +34,8 @@
         <div class="row">
             <div class="col-xl-6 col-lg-6 col-md-12">
                 <div class="details-active-photo-container">
-                    <a id='active_photo_id' href="{{ product.main_photo.image.url }}">
-                        <img id='active_photo_img' src="{{ product.main_photo.image.url }}" class="details-active-photo">
+                    <a id='active_photo_id' href="{% if product.main_photo %}{{ product.main_photo.image.url }}{% else %}{{ no_image_url }}{% endif %}">
+                        <img id='active_photo_img' src="{% if product.main_photo %}{{ product.main_photo.image.url }}{% else %}{{ no_image_url }}{% endif %}" class="details-active-photo">
                     </a>
                 </div>
                 <div class="details-other-photos-container">

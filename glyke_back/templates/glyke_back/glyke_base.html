@@ -10,16 +10,12 @@
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.0/css/all.css">
 
 
-
     {% load static %}
-    <!-- <link rel="stylesheet" type="text/css" href="{% static 'folio_back/css/nav_style.css' %}"/> -->
-    <link rel="stylesheet" type="text/css" href="{% static 'folio_back/css/my_style.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'folio_back/css/profile_style.css' %}"/>
-    <link rel="shortcut icon" type="image/png" href="{% static 'folio_back/favicon.ico' %}"/>
-
-
+    <link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/my_style.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/profile_style.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/old_styles.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/add_edit_product.css' %}"/>
+    <link rel="shortcut icon" type="image/png" href="{% static 'glyke_back/favicon.ico' %}"/>
 
     {% block additional_head %}
     {% endblock %}
@@ -32,12 +28,8 @@
 </head>
 
 <body>
-    {% block nav_bar %}
-        {% include "nav_bar.html" %}
-    {% endblock %}
-
     {% block header %}
-        {% include "header.html" %}
+        {% include "glyke_header.html" %}
     {% endblock %}
 
     <div class="content">
@@ -47,13 +39,13 @@
     </div>
 
     {% block footer %}
-        {% include "footer.html" %}
+        {% include "glyke_footer.html" %}
     {% endblock %}
 
 
     {% load static %}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="{% static 'folio_back/js/main.js' %}"></script>
+    <script src="{% static 'glyke_back/js/main.js' %}"></script>
 
 </body>
 

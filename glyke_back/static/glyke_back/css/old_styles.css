@@ -81,7 +81,7 @@ h2{orphans:3;widows:3;}
 h2{page-break-after:avoid;}
 body{min-width:992px!important;}
 }
-body{font-family:"Poppins", Arial, sans-serif;font-size:14px;line-height:1.8;font-weight:normal;background:#F8F8F8;color:gray;}
+body{font-family:"Poppins", Arial, sans-serif;font-size:14px;line-height:1.8;font-weight:normal;background:rgba(230, 230, 230);color:gray;}
 a{-webkit-transition:.3s all ease;-o-transition:.3s all ease;transition:.3s all ease;color:#2f89fc;}
 a:hover,a:focus{text-decoration:none!important;outline:none!important;-webkit-box-shadow:none;box-shadow:none;}
 button{-webkit-transition:.3s all ease;-o-transition:.3s all ease;transition:.3s all ease;}

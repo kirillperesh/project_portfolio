@@ -417,14 +417,3 @@ class DeleteProductViewTest(TestCase):
         self.assertEqual(Product.objects.all().first().is_active, True)
         response = self.client.get(self.basic_url + "?recover=y")
         self.assertTrue(str(response.url).startswith(reverse('smth_went_wrong')))
-
-
-
-
-
-
-
-
-
-
-

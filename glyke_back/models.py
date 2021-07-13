@@ -72,13 +72,6 @@ class Category(TimeStampedModel):
     def __str__(self):
         return self.name
 
-    # def save(self, *args, **kwargs):
-    #     for filter_name in self.filters.names():
-    #         print(filter_name)
-    #     print(self.products.all())
-
-    #     return super(Category, self).save(*args, **kwargs)
-
 
 class Price(models.Model):
     cost_price = models.DecimalField(_('cost price'),
@@ -164,7 +157,6 @@ class Product(Price, TimeStampedModel):
             self.photos.save()
         super(Product, self).save(*args, **kwargs)
         self.__original_name = self.name
-
 
 class Check(Price, TimeStampedModel):
     number = models.CharField(_('number'), max_length=100, blank=True)

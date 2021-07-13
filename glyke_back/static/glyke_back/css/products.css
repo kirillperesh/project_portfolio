@@ -112,6 +112,7 @@ a:hover{color:#387cbd;}
 .u-palette-5-dark-3 .u-btn{background-color:#adcce9;color:#000000;}
 .u-palette-5-dark-3 .u-btn:hover{background-color:#8db8e0;color:#ffffff;}
 .u-palette-5-dark-3 .u-btn:active{background-color:#8db8e0;color:#ffffff;}
+.u-section-2 {padding-bottom: 1em;}
 .u-section-2 .u-sheet-1{min-height:760px;}
 .u-section-2 .u-text-1{margin:55px auto 0;}
 .u-section-2 .u-text-2{font-weight:400;margin:20px auto 0;}
@@ -206,11 +207,11 @@ a{color:#007bff;text-decoration:none;background-color:transparent;}
 a:hover{color:#0056b3;text-decoration:underline;}
 .pagination{display:-webkit-box;display:-ms-flexbox;display:flex;padding-left:0;list-style:none;border-radius:0.25rem;}
 .page-link{position:relative;display:block;padding:0.5rem 0.75rem;margin-left:-1px;line-height:1.25;color:#007bff;background-color:#fff;border:1px solid #dee2e6;}
-.page-link:hover{z-index:2;color:#0056b3;text-decoration:none;background-color:#e9ecef;border-color:#dee2e6;}
+.page-link:hover{z-index:2;color:rgb(67, 92, 112);text-decoration:none;background-color:#e9ecef;border-color:#dee2e6;}
 .page-link:focus{z-index:2;outline:0;-webkit-box-shadow:0 0 0 0.2rem rgba(0, 123, 255, 0.25);box-shadow:0 0 0 0.2rem rgba(0, 123, 255, 0.25);}
 .page-item:first-child .page-link{margin-left:0;border-top-left-radius:0.25rem;border-bottom-left-radius:0.25rem;}
 .page-item:last-child .page-link{border-top-right-radius:0.25rem;border-bottom-right-radius:0.25rem;}
-.page-item.active .page-link{z-index:1;color:#fff;background-color:#007bff;border-color:#007bff;}
+.page-item.active .page-link{z-index:1;color:#fff;background-color:rgb(67, 92, 112);border-color:rgb(67, 92, 112);}
 .justify-content-center{-webkit-box-pack:center!important;-ms-flex-pack:center!important;justify-content:center!important;}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0, 0, 0, 0);white-space:nowrap;border:0;}
 @media print{
@@ -236,6 +237,7 @@ a:hover,a:focus{text-decoration:none!important;outline:none!important;-webkit-bo
     padding-left: 0.5em;
     max-width: 37%;
     line-height: 1.4em;
+    height: 60px;
 }
 .product-desc{
     display: block;
@@ -313,6 +315,9 @@ a:hover,a:focus{text-decoration:none!important;outline:none!important;-webkit-bo
 .product-btn-edit:hover{
     transform: scale(1.2);
     opacity: 1;
+}
+.pagination-block {
+    margin-top: 2em;
 }
 
 

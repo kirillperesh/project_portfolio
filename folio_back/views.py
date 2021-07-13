@@ -12,14 +12,11 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 
 from .models import Tile
 from .forms import AddEditTileForm, RegisterForm, SignInForm
-from folio_back import models
 
 
 class Home(TemplateView):
     http_method_names = ['get', ]
     template_name = 'home.html'
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
 
 class SignUpView(CreateView):
     http_method_names = ['get', 'post']

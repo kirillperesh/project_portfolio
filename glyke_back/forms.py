@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.urls.base import is_valid_path
+# from django.urls.base import is_valid_path
 from django.utils.translation import gettext_lazy as _
 
 from photologue import models as photo_models
@@ -61,3 +61,24 @@ class PhotosForm(forms.Form):
                                                                      'type': "file",
                                                                      'style': "display:none;",
                                                                      'onchange': "previewImages(event)"}))
+
+class RegisterForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
+        widgets = {
+            'username': forms.TextInput(attrs={'class':'required', 'placeholder': _('General Kenobi! (username)'),}),
+            'first_name': forms.TextInput(attrs={'placeholder': _('First name..'),}),
+            'last_name': forms.TextInput(attrs={'placeholder': _('Last name..'),}),
+            'email': forms.EmailInput(attrs={'placeholder': _('Email..'),}),
+        }
+    def __init__(self, *args, **kwargs):
+        super(RegisterForm, self).__init__(*args, **kwargs)
+        self.fields['password1'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Password..'})
+        self.fields['password2'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Repeat password..'})
+
+class SignInForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        super(SignInForm, self).__init__(*args, **kwargs)
+        self.fields['username'].widget = forms.TextInput(attrs={'class':'required', 'placeholder': 'Username'})
+        self.fields['password'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Password'})
