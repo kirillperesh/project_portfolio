@@ -250,7 +250,7 @@ class ProductDetailView(DetailView):
 
 class Home(TemplateView):
     http_method_names = ['get', ]
-    template_name = 'portfolio.html'
+    template_name = 'home.html'
 
 class SignUpView(CreateView):
     http_method_names = ['get', 'post']

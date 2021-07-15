@@ -12,7 +12,7 @@
         {% endif %}
         <div class="row">
           <div class="col-12">
-            <h2 class="tm-block-title d-inline-block">Редактировать<br>{{ product.name }}</h2>
+            <h2 class="tm-block-title d-inline-block">Edit<br>{{ product.name }}</h2>
           </div>
         </div>
         <div class="row tm-edit-product-row">
@@ -53,7 +53,7 @@
                         </div>
                     </div>
                     <div class="img-preview-background mt-8p">
-                        <div id="img-preview-container">Uploaded images preview will apper here</div>
+                        <div id="img-preview-container">Uploaded images preview</div>
                     </div>
                     {{photos_form.photos.errors}}
                     <div class="mb-12p custom-file">
@@ -136,6 +136,5 @@
 <link href="https://cdn.jsdelivr.net/gh/StephanWagner/jBox@v1.3.2/dist/jBox.all.min.css" rel="stylesheet">
 
 <script src="{% static 'glyke_back/js/product_add_edit.js' %}"></script>
-
 
 {% endblock %}

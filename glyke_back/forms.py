@@ -4,8 +4,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 # from django.urls.base import is_valid_path
 from django.utils.translation import gettext_lazy as _
 
-from photologue import models as photo_models
-
+# from photologue import models as photo_models
 from .models import Category, Product
 
 class AddProductForm(forms.ModelForm):
@@ -82,3 +81,4 @@ class SignInForm(AuthenticationForm):
         super(SignInForm, self).__init__(*args, **kwargs)
         self.fields['username'].widget = forms.TextInput(attrs={'class':'required', 'placeholder': 'Username'})
         self.fields['password'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Password'})
+        
