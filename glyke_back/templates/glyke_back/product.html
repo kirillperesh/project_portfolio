@@ -17,7 +17,7 @@
         {% endif %}
         <div class="row">
           <a href="{% url 'products'%}?category={{ product.category }}">
-          <div class="details-category-container bg-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
+          <div class="details-category-container bg-details-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
               <span class="details-category ">{{ product.category }}</span>
           </div></a>
           <div class="col-12">
@@ -31,59 +31,93 @@
             </div>
           {% endif %}
         </div>
+
         <div class="row">
-            <div class="col-xl-6 col-lg-6 col-md-12">
-                <div class="details-active-photo-container">
-                    <a id='active_photo_id' href="{% if product.main_photo %}{{ product.main_photo.image.url }}{% else %}{{ no_image_url }}{% endif %}">
-                        <img id='active_photo_img' src="{% if product.main_photo %}{{ product.main_photo.image.url }}{% else %}{{ no_image_url }}{% endif %}" class="details-active-photo">
-                    </a>
-                </div>
-                <div class="details-other-photos-container">
-                    {% for photo in product.photos.photos.all %}
-                    <a href="{{ photo.image.url }}">
-                        <img onmouseover="update_active_photo(event, '{{photo.image.url}}')" src="{{ photo.get_display_url }}" alt="{{photo.title}}" class="details-other-photo trans02s">
-                        {% endfor %}
-                    </a>
-                </div>
+          <div class="col-xl-6 col-lg-6 col-md-12 mx-auto">
+            <div class="details-active-photo-container">
+              <a id='active_photo_id' href="{% if product.main_photo %}{{ product.main_photo.image.url }}{% else %}{{ no_image_url }}{% endif %}">
+                  <img id='active_photo_img' src="{% if product.main_photo %}{{ product.main_photo.image.url }}{% else %}{{ no_image_url }}{% endif %}" class="details-active-photo">
+              </a>
             </div>
+            <div class="details-other-photos-container">
+                {% for photo in product.photos.photos.all %}
+                <a href="{{ photo.image.url }}">
+                    <img onmouseover="update_active_photo(event, '{{photo.image.url}}')" src="{{ photo.get_display_url }}" alt="{{photo.title}}" class="details-other-photo trans02s">
+                    {% endfor %}
+                </a>
+            </div>
+          </div>
 
-
-            <div class="col-xl-6 col-lg-6 col-md-12">
-              <div class="details-description-container bg-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
-                <span class="details-description">{{ product.description }}</span>
+          <div class="col-xl-6 col-lg-6 col-md-12 mx-auto">
+            <div class="row">
+              <div class="col-sm-66">
+                <div class="details-container details-attributes bg-details-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
+                  <table>
+                    <div class="details-block-title"><span>Atrributes</span></div>
+                    <hr class="divider-60">
+                    {% for name, value in product.attributes.items %}
+                      <tr class="details-attr-row">
+                        <td class="details-attr-name-col">{{name}}:</td>
+                        <td class="details-attr-value-col">{{value}}</td>
+                      </tr>
+                    {% endfor %}
+                  </table>
+                </div>
               </div>
+              <div class="col-sm-33">
+                <div class="details-container details-prices bg-details-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
+                  <div class="details-block-title"><span>Price</span></div>
+                  <hr class="divider-60">
+                  <div class="product-selling-price">$ {{product.end_user_price}}</div>
+                  {% if product.discount_percent %}
+                    <div class="product-discount discount-percent">{{product.discount_percent}}% OFF</div>
+                    <div class="product-discount discount-old-price">&nbsp;$ {{product.selling_price}}&nbsp;</div>
+                  {% endif %}
+                </div>
 
+                <div class="details-container details-stock bg-details-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
+                  {% if product.stock %}
+                    <table>
+                      <tr>
+                        <td class="stock-name-col">
+                          Stock:
+                        </td>
+                        <td class="stock-value-col {% if product.stock < 6 %}stock-last-5{% endif %}">
+                          {{product.stock}}
+                        </td>
+                      </tr>
+                    </table>
+                  {% else %}
+                    <span class="stock-out" >OUT OF STOCK</span>
+                  {% endif %}
+                </div>
 
-              <div class="details-attributes-container bg-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
-                <table>
-                  {% for name, value in product.attributes.items %}
-                    <tr>
-                      <td>{{name}}:</td>
-                      <td>{{value}}</td>
-                    </tr>
+                <div class="details-container details-tags bg-details-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
+                  <div class="details-block-title"><span>Tags</span></div>
+                  <hr class="divider-60">
+                  {% for tag in product.tags.all %}
+                    <a class="details-tag" href="{% url 'products'%}?only_tag={{ tag }}">{{ tag }}</a>{% if tag != product.tags.all.last %}, {% endif %}
                   {% endfor %}
-              </table>
+                </div>
+
               </div>
 
-
+              {% if product.description %}
+                <div class="col-md-12">
+                  <div class="details-container details-description bg-details-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
+                    <span class="details-description">{{ product.description }}</span>
+                  </div>
+                </div>
+              {% endif %}
             </div>
-
-
+          </div>
         </div>
-
-
-
-
-
-
-
-
       </div>
     </div>
-  </div>
+</div>
+
+
 
 
 <script src="{% static 'glyke_back/js/product_details.js' %}"></script>
-
-
 {% endblock %}

@@ -15,7 +15,7 @@ var set_class_for_all_uploaded_images = function(new_class) {
 
 var previewImages = function(event) {
     var image_preview_container = document.getElementById('img-preview-container');
-    if (image_preview_container.firstChild.textContent == 'Uploaded images preview will apper here') {image_preview_container.removeChild(image_preview_container.firstChild)};
+    if (image_preview_container.firstChild.textContent == 'Uploaded images preview') {image_preview_container.removeChild(image_preview_container.firstChild)};
     main_loop:
     for (file of event.target.files) {
         for (div_img of image_preview_container.children) {

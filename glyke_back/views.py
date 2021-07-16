@@ -197,8 +197,8 @@ def edit_product_dynamic_view(request, id):
             # success
             # saving an instance here
             product_instance.save(force_update=True)
-            # return redirect('edit_product', id=product_instance.id)
-            return redirect('products')
+            return redirect('product_details', id=product_instance.id)
+            # return redirect('products')
     return render(request, "edit_product.html", context)
 
 @user_is_staff_or_404()

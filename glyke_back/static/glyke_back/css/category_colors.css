@@ -1,0 +1,25 @@
+/* product list category color list */
+.bg-default:before{color:#ffffff;background-color: grey;}
+.bg-tomato:before{color:#ffffff;background-color: tomato;}
+.bg-darkorange:before{color:#ffffff;background-color: darkorange;}
+.bg-darkorange:before{color:#ffffff;background-color: orange;}
+.bg-palegreen:before{color:#ffffff;background-color: palegreen;}
+.bg-skyblue:before{color:#ffffff;background-color: skyblue;}
+.bg-mediumturquoise:before{color:#ffffff;background-color: mediumturquoise;}
+.bg-peachpuff:before{color:#ffffff;background-color: peachpuff;}
+.bg-mediumorchid:before{color:#ffffff;background-color: mediumorchid;}
+
+
+
+
+
+/* product details category color list */
+.bg-details-default{color:#ffffff; background-color: rgba(128, 128, 128, 0.7);}
+.bg-details-tomato{color:#ffffff; background-color: rgba(255, 99, 71, 0.7);}
+.bg-details-darkorange{color:#ffffff; background-color: rgba(255, 140, 0, 0.7);}
+.bg-details-orange{color:#ffffff; background-color: rgba(255, 166, 0, 0.7);}
+.bg-details-palegreen{color:#ffffff; background-color: rgba(152, 251, 152, 0.7);}
+.bg-details-skyblue{color:#ffffff; background-color: rgba(135, 207, 235, 0.7);}
+.bg-details-mediumturquoise{color:#ffffff;background-color: rgba(72, 209, 205, 0.7);}
+.bg-details-peachpuff{color:#ffffff; background-color: rgba(255, 218, 185, 0.7);}
+.bg-details-mediumorchid{color:#ffffff; background-color: rgba(186, 85, 211, 0.7);}

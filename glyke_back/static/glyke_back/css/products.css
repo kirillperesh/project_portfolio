@@ -1,4 +1,4 @@
-/*! CSS Used from: http://127.0.0.1:8000/static/glyke_back/css/products.css */
+
 body{margin:0;}
 section{display:block;}
 a{background-color:transparent;-webkit-text-decoration-skip:objects;}
@@ -322,21 +322,3 @@ a:hover,a:focus{text-decoration:none!important;outline:none!important;-webkit-bo
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-/* category color list */
-.bg-default:before{color:#ffffff;background-color: grey;}
-.bg-tomato:before{color:#ffffff;background-color: tomato;}
-.bg-palegreen:before{color:#ffffff;background-color: palegreen;}
-.bg-skyblue:before{color:#ffffff;background-color: skyblue;}
-.bg-peachpuff:before{color:#ffffff;background-color: peachpuff;}
-.bg-mediumorchid:before{color:#ffffff;background-color: mediumorchid;}

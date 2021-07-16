@@ -46,12 +46,13 @@
                 <div>
                   <span class="u-text-tags product-tags">
                     {% for tag in product.tags.all %}
-                      <a href="{% url 'products'%}?only_tag={{ tag }}">{{ tag }}</a>
-                      {% if tag != product.tags.all.last %}, {% endif %}
+                        <a href="{% url 'products'%}?only_tag={{ tag }}">{{ tag }}</a>{% if tag != product.tags.all.last %}, {% endif %}
                     {% endfor %}
                   </span>
                 </div>
+                {% if product.description %}
                 <p class="u-align-center-lg u-text u-text-default product-desc">{{ product.description }}</p>
+                {% endif %}
                 <span>
                   {% if product.discount_percent %}
                     <span class="product-discount discount-old-price">&nbsp;${{product.selling_price}}&nbsp;</span>
