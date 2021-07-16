@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
 
-    'allauth',
+    'allauth', # allauth app
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'photologue', # an to assign multiple photos to a model instance
     'sortedm2m', # for photologue
 
-    # 'folio_back', old app
+    # 'folio_back', # old app
     'glyke_back',
 ]
 

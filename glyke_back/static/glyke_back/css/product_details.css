@@ -64,7 +64,7 @@
 .product-btn {
     position: absolute;
     top: 10px;
-    left: 30px;
+    left: 250px;
     font-size: 2.2em;
     cursor: pointer;
     background: transparent;
@@ -77,56 +77,97 @@
     opacity: 1;
 }
 
-.details-description-container {
-    /* position: relative; */
+.details-container {
+    margin-top: 0px;
+    margin-bottom: 24px;
     font-size: 1em;
     padding: 1em;
     box-shadow:1px 1px 5px 0 #455c71;
     background-size: cover;
     display: block;
     overflow: auto;
-    margin-top: 0px !important;
     font-size: 1.1em;
     line-height: 1.2em;
     text-align: justify;
 }
-
-/* .details-description {
-
-} */
-
-.details-attributes-container {
-    position: relative;
-    top: 1em;
-    font-size: 1em;
-    padding: 1em;
-    box-shadow:1px 1px 5px 0 #455c71;
-    background-size: cover;
-    display: block;
-    overflow: auto;
-    margin-top: 0px !important;
-    font-size: 1.1em;
-    line-height: 1.2em;
-    text-align: justify;
+.details-description {
+    max-height: 21em;
+    /* margin-top: 24px !important; */
+}
+/* .details-description {} */
+/* .details-attributes {} */
+/* .details-prices {} */
+.details-stock {
+    margin-top: 24px !important;
+    font-size: 1.7em;
+    text-align: center;
 }
 
+.product-selling-price {
+    font-size: 2.5em;
+    line-height: 2em;
+    font-weight: 700 !important;
+    text-align: center;
+    text-justify: auto;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    color: white;
+}
+
+.product-discount {
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.3em;
+    text-justify: auto;
+}
+.discount-percent {
+    color: tomato;
+    text-align: center;
+    font-size: 1.6em;
+    font-weight: 800;
+    text-shadow: 2px 2px rgba(255, 255, 255, 0.9), -2px -2px rgba(255, 255, 255, 0.9);
+}
+.discount-old-price {
+    text-align: center;
+    font-size: 1.4em;
+    text-decoration: line-through;
+}
+.stock-value-col {
+    text-align: right;
+    width: 100%;
+}
+.stock-last-5 {
+    color: tomato;
+    font-size: 1.9em;
+}
+.stock-out {
+    color: tomato;
+    font-size: 1.3em;
+}
+
+.details-attr-name-col {
+    min-width: 50px;
+    max-width: 100px;
+    word-wrap: break-word;
+    padding-right: .5em;
+    vertical-align: top;
+    opacity: .7;
+}
+.details-attr-row>td {
+    padding: .3em;
+}
+.details-block-title {
+    width: 100%;
+    text-align: center;
+    font-size: 1.3em;
+}
+
+.details-tag {
+    color: white;
+}
+
+.divider-60 {border: none; border-top: 2px solid rgba(255, 255, 255, 0.6);}
 
 
 
 
 
 
-
-
-
-
-
-
-
-/* category color list */
-.bg-default{color:#ffffff;background-color: rgba(128, 128, 128, 0.7);}
-.bg-tomato{background-color: rgba(255, 99, 71, 0.7);}
-.bg-palegreen{color:#ffffff;background-color: rgba(152, 251, 152, 0.7);}
-.bg-skyblue{color:#ffffff;background-color: rgba(135, 207, 235, 0.7);}
-.bg-peachpuff{color:#ffffff;background-color: rgba(255, 218, 185, 0.7);}
-.bg-mediumorchid{color:#ffffff;background-color: rgba(186, 85, 211, 0.7);}

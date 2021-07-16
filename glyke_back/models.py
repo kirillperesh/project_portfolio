@@ -1,6 +1,4 @@
 from django.db import models
-from django.db.models.deletion import SET_NULL
-from django.db.models.expressions import F
 from django.utils import timezone, dateformat
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
