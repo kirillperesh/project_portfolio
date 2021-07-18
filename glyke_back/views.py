@@ -237,7 +237,7 @@ class ProductsStaffView(ListView):
     model = Product
     queryset = model.objects.all()
     ordering = '-modified'
-    paginate_by = 20
+    # paginate_by = 20
     template_name = 'products_staff.html'
     context_object_name = 'products'
     extra_context = {'no_image_url': DEFAULT_NO_IMAGE_URL}
