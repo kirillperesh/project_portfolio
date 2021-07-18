@@ -98,18 +98,13 @@ def add_product_dynamic_view(request):
             if photos_form.is_valid():
                 for image in request.FILES.getlist('photos'):
                     image_name = image.name + f'_{new_product.name}' # product's name is appended for later filtering purposes
-
-                    # # this block wil be used in update view, not needed here
-                    # if new_product.photos.photos.filter(title=image_name).exists(): # can't use get_or_create and have to specify slug because of some photologue bug
-                    #     image_name += f'_{photo_models.Photo.objects.filter(title=image_name).count() + 1}'
-                    # # this block wil be used in update view, not needed here
-
                     # TODO add any photologue filters down here
                     photo = photo_models.Photo.objects.create(image=image, title=image_name, slug=slugify(image_name)) #
                     new_product.photos.photos.add(photo)
             else:
                 return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'photos (or photos form)'})}")
             # success
+            new_product.save()
             return redirect('add_product')
     return render(request, "add_product.html", context)
 
@@ -235,8 +230,17 @@ class ProductsView(ListView):
         if self.request.GET.get('only_tag'):
             only_tag_filter = self.request.GET.get('only_tag')
             queryset = queryset.filter(tags__name=only_tag_filter)
-
         return queryset
+
+class ProductsStaffView(ListView):
+    http_method_names = ['get', ]
+    model = Product
+    queryset = model.objects.all()
+    ordering = '-modified'
+    # paginate_by = 20
+    template_name = 'products_staff.html'
+    context_object_name = 'products'
+    extra_context = {'no_image_url': DEFAULT_NO_IMAGE_URL}
 
 class ProductDetailView(DetailView):
     http_method_names = ['get', ]
@@ -266,3 +270,4 @@ class SignInView(LoginView):
 
 # TODO add product list view for staff purposes
 # TODO add view fullsize image button (probably after product detail view)
+# TODO add 403 to 404 and staff_only mixins to products_staff view

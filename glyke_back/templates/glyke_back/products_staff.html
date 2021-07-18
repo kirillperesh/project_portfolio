@@ -1,0 +1,162 @@
+{% extends 'glyke_base.html' %}
+{% block title %} Products for staff {% endblock %}
+
+{% block additional_head %}
+<!-- DataTables CDN -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/products_staff.css' %}"/>
+
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-xl-9 col-lg-10 col-md-12 col-sm-12 mx-auto">
+      <div class="tm-bg-primary-dark tm-block tm-block-h-auto">
+        <div class="row">
+          <div class="col-12">
+            <h2 class="tm-block-title d-inline-block details-name">Products</h2>
+          </div>
+
+          <div class="col-12">
+            <table id="products_staff_table">
+              <thead>
+                  <tr>
+                    <th class="col-5">Id</th>
+                    <th class="col-10">Name</th>
+                    <th class="col-10">Category</th>
+                    <th class="col-15">Description</th>
+                    <th class="col-10">Created</th>
+                    <th class="col-15">Photos</th>
+                    <th class="col-5">Cost price</th>
+                    <th class="col-5">Selling price</th>
+                    <th class="col-5">Discount, %</th>
+                    <th class="col-5">End user price</th>
+                    <th class="col-5">Profit</th>
+                    <th class="col-10">Active</th>
+                  </tr>
+              </thead>
+              <tbody>
+                {% for product in products %}
+                  <tr>
+                    <td class="col-5">{{ product.id }}</td>
+                    <td class="col-10">{{ product.name }}</td>
+                    <td class="col-10">{{ product.category }}</td>
+                    <td class="col-15"><div class="td-height-100">{{ product.description }}</div></td>
+                    <td class="col-10">{{ product.created }} by {{ product.created_by }}</td>
+                    <td class="col-15">
+                        {% for photo in product.photos.photos.all %}
+                            {{ photo.get_thumbnail_url }}
+                        {% endfor %}
+                    </td>
+                    <td class="col-5">$ {{ product.cost_price }}</td>
+                    <td class="col-5">$ {{ product.selling_price }}</td>
+                    <td class="col-5">{{ product.discount_percent }} %</td>
+                    <td class="col-5">$ {{ product.end_user_price }}</td>
+                    <td class="col-5">$ {{ product.profit }}</td>
+                    <td class="col-10">
+                        {% if product.is_active %}
+                            ACTIVE
+                        {% else %}
+                            DELETED
+                        {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xl-6 col-lg-6 col-md-12 mx-auto">
+            <div class="details-active-photo-container">
+              <a id='active_photo_id' href="{% if product.main_photo %}{{ product.main_photo.image.url }}{% else %}{{ no_image_url }}{% endif %}">
+                  <img id='active_photo_img' src="{% if product.main_photo %}{{ product.main_photo.image.url }}{% else %}{{ no_image_url }}{% endif %}" class="details-active-photo">
+              </a>
+            </div>
+            <div class="details-other-photos-container">
+                {% for photo in product.photos.photos.all %}
+                <a href="{{ photo.image.url }}">
+                    <img onmouseover="update_active_photo(event, '{{photo.image.url}}')" src="{{ photo.get_display_url }}" alt="{{photo.title}}" class="details-other-photo trans02s">
+                    {% endfor %}
+                </a>
+            </div>
+          </div>
+
+          <div class="col-xl-6 col-lg-6 col-md-12 mx-auto">
+            <div class="row">
+              <div class="col-sm-66">
+                <div class="details-container details-attributes bg-details-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
+                  <table>
+                    <div class="details-block-title"><span>Atrributes</span></div>
+                    <hr class="divider-60">
+                    {% for name, value in product.attributes.items %}
+                      <tr class="details-attr-row">
+                        <td class="details-attr-name-col">{{name}}:</td>
+                        <td class="details-attr-value-col">{{value}}</td>
+                      </tr>
+                    {% endfor %}
+                  </table>
+                </div>
+              </div>
+              <div class="col-sm-33">
+                <div class="details-container details-prices bg-details-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
+                  <div class="details-block-title"><span>Price</span></div>
+                  <hr class="divider-60">
+                  <div class="product-selling-price">$ {{product.end_user_price}}</div>
+                  {% if product.discount_percent %}
+                    <div class="product-discount discount-percent">{{product.discount_percent}}% OFF</div>
+                    <div class="product-discount discount-old-price">&nbsp;$ {{product.selling_price}}&nbsp;</div>
+                  {% endif %}
+                </div>
+
+                <div class="details-container details-stock bg-details-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
+                  {% if product.stock %}
+                    <table>
+                      <tr>
+                        <td class="stock-name-col">
+                          Stock:
+                        </td>
+                        <td class="stock-value-col {% if product.stock < 6 %}stock-last-5{% endif %}">
+                          {{product.stock}}
+                        </td>
+                      </tr>
+                    </table>
+                  {% else %}
+                    <span class="stock-out" >OUT OF STOCK</span>
+                  {% endif %}
+                </div>
+
+                <div class="details-container details-tags bg-details-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
+                  <div class="details-block-title"><span>Tags</span></div>
+                  <hr class="divider-60">
+                  {% for tag in product.tags.all %}
+                    <a class="details-tag" href="{% url 'products'%}?only_tag={{ tag }}">{{ tag }}</a>{% if tag != product.tags.all.last %}, {% endif %}
+                  {% endfor %}
+                </div>
+
+              </div>
+
+              {% if product.description %}
+                <div class="col-md-12">
+                  <div class="details-container details-description bg-details-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
+                    <span class="details-description">{{ product.description }}</span>
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+    <!-- {% block pagination %}
+        {% include "pagination.html" %}
+    {% endblock %} -->
+
+<script src="{% static 'glyke_back/js/products_staff_datatables.js' %}"></script>
+{% endblock %}
