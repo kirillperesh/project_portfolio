@@ -198,4 +198,10 @@ footer, header {
     border: 5px;
     border-color: red;
   }
+  .trans02s {
+      -webkit-transition: transform 0.2s ease;
+      -o-transition: transform 0.2s ease;
+      transition: transform 0.2s ease;
+      transition: all 0.2s !important;
+  }
 
