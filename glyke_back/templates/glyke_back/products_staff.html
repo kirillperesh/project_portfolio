@@ -4,7 +4,10 @@
 {% block additional_head %}
 <!-- DataTables CDN -->
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.dataTables.min.css">
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.colVis.min.js"></script>
 
 {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/products_staff.css' %}"/>
@@ -63,11 +66,9 @@
                     <td class="col-50p-f">{{ product.discount_percent }} %</td>
                     <td class="col-65p-f">$ {{ product.end_user_price }}</td>
                     <td class="col-65p-f">$ {{ product.profit }}</td>
-                    <td class="col-65p-f">
-                        {% if product.is_active %} ACTIVE
-                        {% else %} <span style="color: tomato;">DELETED</span>
-                        {% endif %}
-                    </td>
+                    {% if product.is_active %} <td class="col-65p-f product-color-active">ACTIVE</td>
+                    {% else %} <td class="col-65p-f product-color-deleted">DELETED</td>
+                    {% endif %}
                     <td class="col-185p-m image-container">
                       <span>
                         {% for photo in product.photos.photos.all %}
@@ -79,6 +80,24 @@
                   </tr>
                 {% endfor %}
               </tbody>
+
+        <tfoot>
+          <tr>
+            <th class="col-50p-f col-filter">ID</th>
+            <th class="col-150p-f col-filter">Name</th>
+            <th class="col-100p-f col-filter">Category</th>
+            <th class="col-65p-f col-filter hidden">Tags</th>
+            <th class="col-185p-m col-filter hidden">Description</th>
+            <th class="col-65p-f col-filter">Cost price</th>
+            <th class="col-65p-f col-filter">Selling price</th>
+            <th class="col-50p-f col-filter">Discount, %</th>
+            <th class="col-65p-f col-filter">End user price</th>
+            <th class="col-65p-f col-filter">Profit</th>
+            <th class="col-65p-f col-filter">Active</th>
+            <th class="col-185p-m col-filter hidden">Photos</th>
+            <th class="col-100p-f col-filter">Created</th>
+          </tr>
+      </tfoot>
             </table>
           </div>
         </div>

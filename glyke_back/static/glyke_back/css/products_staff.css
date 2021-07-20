@@ -25,7 +25,7 @@
 }
 #products_staff_table img:hover{
     opacity: 1;
-    transform: scale(1.2);
+    transform: scale(1.1);
     border-radius: 4px;
 }
 #products_staff_table .image-container {padding: 5px;}
@@ -62,4 +62,11 @@
 }
 .product-staff-deleted img{
     opacity: .5;
+}
+.product-color-active {color: limegreen;}
+.product-color-deleted {color: tomato;}
+
+.col-filter {
+    padding: 1px !important;
+    margin: 2px 0px !important;
 }
