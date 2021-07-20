@@ -236,11 +236,11 @@ class ProductsStaffView(ListView):
     http_method_names = ['get', ]
     model = Product
     queryset = model.objects.all()
-    ordering = '-modified'
+    # ordering = '-modified'
     # paginate_by = 20
     template_name = 'products_staff.html'
     context_object_name = 'products'
-    extra_context = {'no_image_url': DEFAULT_NO_IMAGE_URL}
+    # extra_context = {'no_image_url': DEFAULT_NO_IMAGE_URL}
 
 class ProductDetailView(DetailView):
     http_method_names = ['get', ]

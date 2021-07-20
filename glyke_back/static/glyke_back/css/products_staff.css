@@ -1,21 +1,72 @@
 #products_staff_table {
     /* color: white; */
-    width: 100%;
+    min-width: 100% !important;
+    max-width: 200% !important;
     table-layout: fixed;
     font-size: 12px !important;
 }
-#products_staff_table td {
+#products_staff_table div,td{
     overflow: auto;
-    /* overflow: scroll; */
-    height: 100px !important;
-    color: tomato;
+    max-height: 100px !important;
 }
-.col-5 {width: 5% !important;}
-.col-10 {width: 10% !important;}
-.col-15 {width: 15% !important;}
-.col-20 {width: 20% !important;}
-.col-25 {width: 25% !important;}
+#products_staff_table td{
+    max-width: 250px !important;
+}
+#products_staff_thead{
+    word-break: break-all !important;
+    background-color: white;
+}
+#products_staff_thead th {
+    border-right: 1px solid rgb(221, 221, 221);
+    font-size: 12px !important;
+}
+#products_staff_table img{
+    border-radius: 10px;
+}
+#products_staff_table img:hover{
+    opacity: 1;
+    transform: scale(1.1);
+    border-radius: 4px;
+}
+#products_staff_table .image-container {padding: 5px;}
 
-.td-height-100{
-    height: 100px !important;
+.col-50p-f {width: 50px !important;}
+.col-65p-f {width: 65px !important;}
+.col-100p-f {width: 100px !important;}
+.col-150p-f {width: 150px !important;}
+.col-185p-m {min-width: 185px !important;}
+
+.dataTables_paginate, .dataTables_info{
+    background-color: rgb(249, 249, 249);
+    height: 49px;
+    padding: 4px !important;
+    vertical-align: middle !important;
+}
+.product-btn-container {text-align: center;}
+.product-btn {
+    transform: scale(.7);
+    font-size: 2.2em;
+    cursor: pointer;
+    background: transparent;
+    border: transparent;
+    color: #adcce9 ;
+    opacity: 0.6;
+}
+.product-btn-edit:hover{
+    transform: scale(.8);
+    opacity: 1;
+}
+.product-staff-deleted {
+    text-decoration: line-through;
+    background-color: rgb(255, 242, 240) !important;
+}
+.product-staff-deleted img{
+    opacity: .5;
+}
+.product-color-active {color: limegreen;}
+.product-color-deleted {color: tomato;}
+
+.col-filter {
+    padding: 1px !important;
+    margin: 2px 0px !important;
 }

@@ -176,13 +176,6 @@ label{color:#fff;margin-bottom:10px;}
     cursor: pointer;
 }
 
-.trans02s {
-    -webkit-transition: transform 0.2s ease;
-    -o-transition: transform 0.2s ease;
-    transition: transform 0.2s ease;
-    transition: all 0.2s !important;
-}
-
 .remove-photo-toggle {
     color: rgba(255, 99, 71, 0.4);
     background-color: rgba(170, 170, 170, 0.30);
