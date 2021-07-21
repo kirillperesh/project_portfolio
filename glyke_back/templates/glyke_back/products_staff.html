@@ -37,6 +37,7 @@
                     <th class="col-50p-f">Discount, %</th>
                     <th class="col-65p-f">End user price</th>
                     <th class="col-65p-f">Profit</th>
+                    <th class="col-50p-f">Stock</th>
                     <th class="col-65p-f">Active</th>
                     <th class="col-185p-m">Photos</th>
                     <th class="col-100p-f">Created</th>
@@ -66,6 +67,7 @@
                     <td class="col-50p-f">{{ product.discount_percent }} %</td>
                     <td class="col-65p-f">$ {{ product.end_user_price }}</td>
                     <td class="col-65p-f">$ {{ product.profit }}</td>
+                    <td class="col-50p-f">{{ product.stock }}</td>
                     {% if product.is_active %} <td class="col-65p-f product-color-active">ACTIVE</td>
                     {% else %} <td class="col-65p-f product-color-deleted">DELETED</td>
                     {% endif %}
@@ -83,8 +85,8 @@
 
         <tfoot>
           <tr>
-            <th class="col-50p-f col-filter">ID</th>
-            <th class="col-150p-f col-filter">Name</th>
+            <th class="col-50p-f col-filter hidden">ID</th>
+            <th class="col-150p-f col-filter hidden">Name</th>
             <th class="col-100p-f col-filter">Category</th>
             <th class="col-65p-f col-filter hidden">Tags</th>
             <th class="col-185p-m col-filter hidden">Description</th>
