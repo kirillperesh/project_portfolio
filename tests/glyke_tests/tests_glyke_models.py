@@ -199,3 +199,5 @@ class ModelsTest(TestCase):
         # case: discount_percent has changed
         rnd_discount = random.randint(1, 99)
         update_check_prices()
+
+# TODO fix line 155 (decimal rounding error)
