@@ -1,5 +1,6 @@
 from functools import wraps
 from django.http.response import Http404
+from django.contrib.auth.mixins import UserPassesTestMixin
 
 
 def user_passes_test_or_404(test_func):
@@ -18,10 +19,24 @@ def user_passes_test_or_404(test_func):
     return decorator
 
 def user_is_staff_or_404():
-    """Decorator for views that checks that the user is_staff,redirecting to 404 if not."""
+    """Decorator for views that checks if the user is_staff, redirecting to 404 if not."""
     return user_passes_test_or_404(lambda user: user.is_staff)
 
 def user_is_superuser_or_404():
-    """Decorator for views that checks that the user is_superuser,redirecting to 404 if not."""
+    """Decorator for views that checks if the user is_superuser, redirecting to 404 if not."""
     return user_passes_test_or_404(lambda user: user.is_superuser)
 
+class UserPassesTest_Or404_Mixin(UserPassesTestMixin):
+    """Mixin that redirects to 404 if test_func didn't pass"""
+    def handle_no_permission(self):
+        raise Http404
+
+class UserIsStaff_Or404_Mixin(UserPassesTest_Or404_Mixin):
+    """Mixin that checks if the user is_staff, redirecting to 404 if not."""
+    def test_func(self):
+        return self.request.user.is_staff
+
+class UserIsSuperuser_Or404_Mixin(UserPassesTest_Or404_Mixin):
+    """Mixin that checks if the user is_superuser, redirecting to 404 if not."""
+    def test_func(self):
+        return self.request.user.is_superuser

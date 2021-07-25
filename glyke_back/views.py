@@ -15,7 +15,7 @@ from proj_folio.defaults import DEFAULT_NO_IMAGE_URL
 from photologue import models as photo_models
 from .forms import AddProductForm, PhotosForm, SelectCategoryProductForm, RegisterForm, SignInForm
 from .models import Category, Product
-from .glyke_decorators import user_is_staff_or_404
+from .decorators_mixins import user_is_staff_or_404, UserIsStaff_Or404_Mixin
 
 
 def create_gallery(*, title):
@@ -142,6 +142,7 @@ def edit_product_dynamic_view(request, id):
         }
 
     if request.method == 'POST':
+        # if category is not the only POST arameter
         if len(request.POST) > 2:
             product_form = AddProductForm(request.POST or None)
             filters_form = CategoryFiltersForm(request.POST or None)
@@ -232,7 +233,7 @@ class ProductsView(ListView):
             queryset = queryset.filter(tags__name=only_tag_filter)
         return queryset
 
-class ProductsStaffView(ListView):
+class ProductsStaffView(UserIsStaff_Or404_Mixin, ListView):
     http_method_names = ['get', ]
     model = Product
     queryset = model.objects.all()
@@ -267,7 +268,3 @@ class SignInView(LoginView):
     authentication_form = SignInForm
     template_name = 'sign_in.html'
 
-
-# TODO add product list view for staff purposes
-# TODO add view fullsize image button (probably after product detail view)
-# TODO add 403 to 404 and staff_only mixins to products_staff view

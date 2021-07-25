@@ -12,15 +12,36 @@ from glyke_back.models import *
 from glyke_back.forms import *
 from .tests_glyke_models import get_random_temp_file
 
-
-class AddProductViewTest(TestCase):
+class TestPermissionsMixin:
     @classmethod
-    def setUpTestData(cls):
-        cls.basic_url = reverse('add_product')
+    def setUpTestPermissionsUsers(cls, *, expected_permissions_status_codes):
+        """Expects an expected status_code list as argument that maps [anonymous, regular, staff, superuser] users (is this exact order), e.g. [404, 304, 200, 200].
+        expected_permissions_status_codes length must match the number of users + 1 (anonymous).
+        Sets up 3 test users (regular, staff, superuser)"""
         cls.test_user = User.objects.create(username='test_user', is_staff=False)
         cls.test_user_staff = User.objects.create(username='test_user_staff', is_staff=True)
         cls.test_user_superuser = User.objects.create(username='test_user_superuser', is_staff=True, is_superuser=True)
+        # None for anonymous user
+        test_users_list = [None, cls.test_user, cls.test_user_staff, cls. test_user_superuser]
+        if len(test_users_list) != len(expected_permissions_status_codes):
+            raise AssertionError(f'Incorrect number of users or status codes ({cls.__name__})')
+        # Maps users to their expected status codes (for GET requests for now)
+        cls.user_to_expected_status_dict = dict(zip(test_users_list, expected_permissions_status_codes))
 
+    def test_permissions_GET(self):
+        """add"""
+        for user, expected_status_code in self.user_to_expected_status_dict.items():
+            self.client.logout()
+            if user is not None: # case: anonymous user
+                self.client.force_login(user)
+            response = self.client.get(self.basic_url)
+            self.assertEqual(response.status_code, expected_status_code)
+
+class AddProductViewTest(TestPermissionsMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200]) # from TestPermissionsMixin
+        cls.basic_url = reverse('add_product')
         cls.category_0_filters = Category.objects.create(name='category_0_filters')
         cls.category_1_filters = Category.objects.create(name='category_1_filters')
         cls.category_1_filters.filters.add('filter_1')
@@ -32,17 +53,6 @@ class AddProductViewTest(TestCase):
                                         cls.category_2_filters.id: list(cls.category_2_filters.filters.names()),} # case: category w/ 2 filters
     def setUp(self):
         self.client.force_login(self.test_user_staff) # force_login before making requests because this is a staff-only view
-
-    def test_permissions(self):
-        """If is_staff==False return 404"""
-        response = self.client.get(self.basic_url) # case: staff
-        self.assertEqual(response.status_code, 200)
-        self.client.force_login(self.test_user)    # case: logged-in user
-        response = self.client.get(self.basic_url)
-        self.assertEqual(response.status_code, 404)
-        self.client.logout()                       # case: anonymous user
-        response = self.client.get(self.basic_url)
-        self.assertEqual(response.status_code, 404)
 
     def test_forms_instances(self):
         """Checks if forms are rendered correctly on GET request"""
@@ -140,13 +150,10 @@ class AddProductViewTest(TestCase):
         test_end_user_price = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)).quantize(Decimal('0.01'))
         self.assertEqual(Product.objects.get(name='product_rnd_end_user_price').end_user_price, test_end_user_price)
 
-class EditProductViewTest(TestCase):
+class EditProductViewTest(TestPermissionsMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.test_user = User.objects.create(username='test_user', is_staff=False)
-        cls.test_user_staff = User.objects.create(username='test_user_staff', is_staff=True)
-        cls.test_user_superuser = User.objects.create(username='test_user_superuser', is_staff=True, is_superuser=True)
-
+        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200]) # from TestPermissionsMixin
         cls.category_filters_1_2 = Category.objects.create(name='category_filters_1_2')
         cls.category_filters_1_2.filters.add('filter_1', 'filter_2')
         cls.category_filters_2_3 = Category.objects.create(name='category_filters_2_3')
@@ -177,17 +184,6 @@ class EditProductViewTest(TestCase):
                                    'discount_percent': self.product.discount_percent,
                                    'tags': ', '.join(list(self.product.tags.names())),
                                    'stock': self.product.stock,}
-
-    def test_permissions(self):
-        """If is_staff==False return 404"""
-        response = self.client.get(self.basic_url) # case: staff
-        self.assertEqual(response.status_code, 200)
-        self.client.force_login(self.test_user)    # case: logged-in user
-        response = self.client.get(self.basic_url)
-        self.assertEqual(response.status_code, 404)
-        self.client.logout()                       # case: anonymous user
-        response = self.client.get(self.basic_url)
-        self.assertEqual(response.status_code, 404)
 
     def test_forms_instances(self):
         """Checks if forms are rendered correctly on GET request"""
@@ -351,13 +347,10 @@ class EditProductViewTest(TestCase):
         test_end_user_price = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)).quantize(Decimal('0.01'))
         self.assertEqual(self.product.end_user_price, test_end_user_price)
 
-class DeleteProductViewTest(TestCase):
+class DeleteProductViewTest(TestPermissionsMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.test_user = User.objects.create(username='test_user', is_staff=False)
-        cls.test_user_staff = User.objects.create(username='test_user_staff', is_staff=True)
-        cls.test_user_superuser = User.objects.create(username='test_user_superuser', is_staff=True, is_superuser=True)
-
+        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,302,302]) # from TestPermissionsMixin
         cls.category_0_filters = Category.objects.create(name='category_0_filters')
 
     def setUp(self):
@@ -373,18 +366,6 @@ class DeleteProductViewTest(TestCase):
                                              )
         self.product.tags.add('tag1, tag2')
         self.basic_url = reverse('delete_product', kwargs={'id': self.product.id})
-
-    def test_permissions(self):
-        """If is_staff==False return 404"""
-        response = self.client.get(self.basic_url) # case: staff
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('products'))
-        self.client.force_login(self.test_user)    # case: logged-in user
-        response = self.client.get(self.basic_url)
-        self.assertEqual(response.status_code, 404)
-        self.client.logout()                       # case: anonymous user
-        response = self.client.get(self.basic_url)
-        self.assertEqual(response.status_code, 404)
 
     def test_delete_product(self):
         """Checks that the product is deactivated properly on delete url"""
@@ -417,3 +398,15 @@ class DeleteProductViewTest(TestCase):
         self.assertEqual(Product.objects.all().first().is_active, True)
         response = self.client.get(self.basic_url + "?recover=y")
         self.assertTrue(str(response.url).startswith(reverse('smth_went_wrong')))
+
+class ProductsStaffViewTest(TestPermissionsMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200]) # from TestPermissionsMixin
+
+    def setUp(self):
+        self.client.force_login(self.test_user_staff) # force_login before making requests because this is a staff-only view
+        self.basic_url = reverse('products_staff')
+
+
+# TODO add docstr and comments to permissions
