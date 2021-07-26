@@ -6,7 +6,7 @@ from model_utils.models import TimeStampedModel
 from django.core.validators import MinValueValidator, MaxValueValidator
 from taggit.managers import TaggableManager
 from django.contrib.auth.models import User
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 
 from photologue import models as photo_models
 
@@ -99,10 +99,8 @@ class Price(models.Model):
     def save(self, *args, **kwargs):
         # recount profit and end_user_price on save
         self.end_user_price = self.selling_price * Decimal(1 - self.discount_percent / 100)
-        self.end_user_price = Decimal(self.end_user_price).quantize(Decimal('0.01'))
-            # not using end_user_price here because of some rounding issues
-        self.profit = self.selling_price * Decimal(1 - self.discount_percent / 100) - self.cost_price
-        self.profit = Decimal(self.profit).quantize(Decimal('0.01'))
+        self.end_user_price = Decimal(self.end_user_price).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        self.profit = self.end_user_price - self.cost_price
         super(Price, self).save(*args, **kwargs)
 
 class Product(Price, TimeStampedModel):
