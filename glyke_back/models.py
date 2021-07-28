@@ -154,14 +154,14 @@ class Product(Price, TimeStampedModel):
         super(Product, self).save(*args, **kwargs)
         self.__original_name = self.name
 
-class Check(Price, TimeStampedModel):
+class Order(Price, TimeStampedModel):
     number = models.CharField(_('number'), max_length=100, blank=True)
     customer = models.ForeignKey(User,
-                              on_delete=models.SET_NULL,
-                              verbose_name=_('customer'),
-                              related_name='checks',
-                              blank=False,
-                              null=True)
+                                 on_delete=models.SET_NULL,
+                                 verbose_name=_('customer'),
+                                 related_name='orders',
+                                 blank=False,
+                                 null=True)
 
     class Meta:
         ordering = ['-created']
@@ -175,31 +175,31 @@ class Check(Price, TimeStampedModel):
             time_stamp = dateformat.format(timezone.localtime(timezone.now()), 'His_dmy')
             prefix = self.customer.username[:5] if self.customer else 'no_name'
             self.number = f'{prefix}_{time_stamp}'
-        super(Check, self).save(*args, **kwargs)
+        super(Order, self).save(*args, **kwargs)
 
 
-class CheckLine(Price):
-    parent_check = models.ForeignKey(Check,
+class OrderLine(Price):
+    parent_order = models.ForeignKey(Order,
                                      on_delete=models.CASCADE,
-                                     verbose_name=_('check'),
-                                     related_name='check_lines',
+                                     verbose_name=_('order'),
+                                     related_name='order_lines',
                                      blank=False)
     line_number = models.PositiveIntegerField(_('line number'), blank=True)
     product = models.ForeignKey(Product,
                                 on_delete=models.SET(get_deleted_instance(Product)),
                                 verbose_name=_('product'),
-                                related_name='check_lines',
+                                related_name='order_lines',
                                 blank=False)
     quantity = models.PositiveIntegerField(_('quantity'), default=1)
 
     def __str__(self):
-        return f'{self.parent_check} | Line: {self.line_number}'
+        return f'{self.parent_order} | Line: {self.line_number}'
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            lines_count = self.parent_check.check_lines.count()
+            lines_count = self.parent_order.order_lines.count()
             self.line_number = (lines_count + 1) if lines_count else 1
-        super(CheckLine, self).save(*args, **kwargs)
+        super(OrderLine, self).save(*args, **kwargs)
 
 
 # TODO add defaul no_image from defaults to category photo

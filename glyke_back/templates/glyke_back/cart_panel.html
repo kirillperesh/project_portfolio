@@ -1,0 +1,23 @@
+{% if user.is_authenticated %}
+    <div id="cart_panel">
+        <div>
+            <p id='cart_title'>
+                <span>
+                    Your cart:
+                </span>
+                <span class="fas fa-shopping-cart"></span>
+            </p>
+            <p id='cart_info'>
+                <span id="cart_items">
+                    {{ user.orders.all.first.order_lines.count }} items
+                </span>
+                <span>
+                    &nbsp;|&nbsp;
+                </span>
+                <span id="cart_price">
+                    Total: _NN_.NN $
+                </span>
+            </p>
+        </div>
+    </div>
+{% endif %}
