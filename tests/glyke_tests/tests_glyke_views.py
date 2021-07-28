@@ -1,5 +1,6 @@
 from django.core.validators import validate_comma_separated_integer_list
 from django.db.models.expressions import Value
+from django.http import response
 from django.test import TestCase
 from django.urls import reverse
 from urllib.parse import urlencode
@@ -13,24 +14,30 @@ from glyke_back.models import *
 from glyke_back.forms import *
 from .tests_glyke_models import get_random_temp_file
 
-class TestPermissionsMixin:
+class TestPermissionsGETMixin:
+    """
+    Inheriting class has to inherit from django's TestCase
+    self.basic_url has to be defined in inheriting class
+    """
     @classmethod
     def setUpTestPermissionsUsers(cls, *, expected_permissions_status_codes):
-        """Expects an expected status_code list as argument that maps [anonymous, regular, staff, superuser] users (is this exact order), e.g. [404, 304, 200, 200].
-        expected_permissions_status_codes length must match the number of users + 1 (anonymous).
+        """Expects an expected GET request's status_code list as argument that maps [anonymous, regular, staff, superuser] users (is this exact order), e.g. [404, 304, 200, 200].
+        expected_permissions_status_codes length must match the number of users + 1 (for anonymous).
         Sets up 3 test users (regular, staff, superuser)"""
         cls.test_user = User.objects.create(username='test_user', is_staff=False)
         cls.test_user_staff = User.objects.create(username='test_user_staff', is_staff=True)
         cls.test_user_superuser = User.objects.create(username='test_user_superuser', is_staff=True, is_superuser=True)
-        # None for anonymous user
+        # None is for anonymous user
         test_users_list = [None, cls.test_user, cls.test_user_staff, cls. test_user_superuser]
+        # Checks if the number of expected status codes is correct
         if len(test_users_list) != len(expected_permissions_status_codes):
             raise AssertionError(f'Incorrect number of users or status codes ({cls.__name__})')
-        # Maps users to their expected status codes (for GET requests for now)
+        # Maps users to their expected status codes (GET requests)
         cls.user_to_expected_status_dict = dict(zip(test_users_list, expected_permissions_status_codes))
 
     def test_permissions_GET(self):
-        """add"""
+        """Iterates through created users.
+        Checks is response.status_code is correct for each user"""
         for user, expected_status_code in self.user_to_expected_status_dict.items():
             self.client.logout()
             if user is not None: # case: anonymous user
@@ -38,10 +45,10 @@ class TestPermissionsMixin:
             response = self.client.get(self.basic_url)
             self.assertEqual(response.status_code, expected_status_code)
 
-class AddProductViewTest(TestPermissionsMixin, TestCase):
+class AddProductViewTest(TestPermissionsGETMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200]) # from TestPermissionsMixin
+        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200]) # from TestPermissionsGETMixin
         cls.basic_url = reverse('add_product')
         cls.category_0_filters = Category.objects.create(name='category_0_filters')
         cls.category_1_filters = Category.objects.create(name='category_1_filters')
@@ -153,10 +160,10 @@ class AddProductViewTest(TestPermissionsMixin, TestCase):
         test_end_user_price = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         self.assertEqual(Product.objects.get(name=rnd_name).end_user_price, test_end_user_price)
 
-class EditProductViewTest(TestPermissionsMixin, TestCase):
+class EditProductViewTest(TestPermissionsGETMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200]) # from TestPermissionsMixin
+        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200]) # from TestPermissionsGETMixin
         cls.category_filters_1_2 = Category.objects.create(name='category_filters_1_2')
         cls.category_filters_1_2.filters.add('filter_1', 'filter_2')
         cls.category_filters_2_3 = Category.objects.create(name='category_filters_2_3')
@@ -350,10 +357,10 @@ class EditProductViewTest(TestPermissionsMixin, TestCase):
         test_end_user_price = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         self.assertEqual(self.product.end_user_price, test_end_user_price)
 
-class DeleteProductViewTest(TestPermissionsMixin, TestCase):
+class DeleteProductViewTest(TestPermissionsGETMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,302,302]) # from TestPermissionsMixin
+        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,302,302]) # from TestPermissionsGETMixin
         cls.category_0_filters = Category.objects.create(name='category_0_filters')
 
     def setUp(self):
@@ -402,14 +409,21 @@ class DeleteProductViewTest(TestPermissionsMixin, TestCase):
         response = self.client.get(self.basic_url + "?recover=y")
         self.assertTrue(str(response.url).startswith(reverse('smth_went_wrong')))
 
-class ProductsStaffViewTest(TestPermissionsMixin, TestCase):
+class ProductsStaffViewTest(TestPermissionsGETMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200]) # from TestPermissionsMixin
+        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200]) # from TestPermissionsGETMixin
 
     def setUp(self):
         self.client.force_login(self.test_user_staff) # force_login before making requests because this is a staff-only view
         self.basic_url = reverse('products_staff')
 
-
-# TODO add docstr and comments to permissions
+    def test_initial_products_queryset(self):
+        """Checks if the view receives all the products instances"""
+        products_count = random.randint(25, 50)
+        for i in range(products_count):
+            Product.objects.create(name=f'{i}_{get_random_string()}')
+        response = self.client.get(self.basic_url)
+        view_products_queryset = response.context['products'].order_by('id')
+        self.assertEqual(view_products_queryset.all().count(), products_count)
+        self.assertQuerysetEqual(view_products_queryset, Product.objects.all())
