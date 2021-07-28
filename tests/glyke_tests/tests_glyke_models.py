@@ -37,8 +37,8 @@ class ModelsTest(TestCase):
         cls.product_sub_parent = Product.objects.create(name='Product of sub-parent cat', category = cls.sub_parent_cat)
         cls.product_child = Product.objects.create(name='Product of child cat', category = cls.child_cat)
 
-        cls.check = Check.objects.create(number=1, customer=None)
-        cls.check_line = CheckLine.objects.create(parent_check=cls.check, product=cls.product_child)
+        cls.order = Order.objects.create(number=1, customer=None)
+        cls.order_line = OrderLine.objects.create(parent_order=cls.order, product=cls.product_child)
 
     @classmethod
     def tearDownClass(cls):  # delete temp dir on teardown
@@ -79,9 +79,9 @@ class ModelsTest(TestCase):
     def test_get_deleted_instance_on_delete(self):
         """Assert a deleted instance is created on_delete"""
         self.product_child.delete()
-        self.check_line.refresh_from_db()
+        self.order_line.refresh_from_db()
         deleted_product_auto = Product.objects.get(name='_deleted_')
-        self.assertEqual(self.check_line.product, deleted_product_auto)
+        self.assertEqual(self.order_line.product, deleted_product_auto)
 
     def test_is_active_switch(self):
         """Assert is_active attribute switches correctly"""
@@ -100,22 +100,22 @@ class ModelsTest(TestCase):
         self.assertEqual(str(category), rnd_str)
         product = Product.objects.create(name=rnd_str)
         self.assertEqual(str(product), rnd_str)
-        check_no_user = Check.objects.create(number=rnd_str, customer=None)
-        self.assertIn('no_name', str(check_no_user))
-        check = Check.objects.create(number=rnd_str, customer=self.user_not_staff)
-        self.assertIn(self.user_not_staff.username, str(check))
-        checkline_no_user = CheckLine.objects.create(parent_check=check_no_user, product=product)
-        self.assertIn('no_name | Line: 1', str(checkline_no_user))
-        checkline = CheckLine.objects.create(parent_check=check, product=product)
-        self.assertIn(f'{self.user_not_staff.username} | Line: 1', str(checkline))
+        order_no_user = Order.objects.create(number=rnd_str, customer=None)
+        self.assertIn('no_name', str(order_no_user))
+        order = Order.objects.create(number=rnd_str, customer=self.user_not_staff)
+        self.assertIn(self.user_not_staff.username, str(order))
+        orderline_no_user = OrderLine.objects.create(parent_order=order_no_user, product=product)
+        self.assertIn('no_name | Line: 1', str(orderline_no_user))
+        orderline = OrderLine.objects.create(parent_order=order, product=product)
+        self.assertIn(f'{self.user_not_staff.username} | Line: 1', str(orderline))
 
-    def test_checkline_autoinc(self):
+    def test_orderline_autoinc(self):
         """Assert line auto-numering in checks work properly"""
-        check_no_user = Check.objects.create(number=1, customer=None)
-        checkline_1 = CheckLine.objects.create(parent_check=check_no_user, product=self.product_child)
-        self.assertEqual(checkline_1.line_number, check_no_user.check_lines.count())
-        checkline_2 = CheckLine.objects.create(parent_check=check_no_user, product=self.product_child)
-        self.assertEqual(checkline_2.line_number, check_no_user.check_lines.count())
+        order_no_user = Order.objects.create(number=1, customer=None)
+        orderline_1 = OrderLine.objects.create(parent_order=order_no_user, product=self.product_child)
+        self.assertEqual(orderline_1.line_number, order_no_user.order_lines.count())
+        orderline_2 = OrderLine.objects.create(parent_order=order_no_user, product=self.product_child)
+        self.assertEqual(orderline_2.line_number, order_no_user.order_lines.count())
 
     def test_auto_upload_dir_method(self):
         """Assert models.get_upload_dir function works properly"""
