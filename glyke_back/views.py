@@ -234,14 +234,12 @@ class ProductsView(ListView):
         return queryset
 
 class ProductsStaffView(UserIsStaff_Or404_Mixin, ListView):
+    # Paginating, ordering and filtering are done by JS DataTables
     http_method_names = ['get', ]
     model = Product
     queryset = model.objects.all()
-    # ordering = '-modified'
-    # paginate_by = 20
     template_name = 'products_staff.html'
     context_object_name = 'products'
-    # extra_context = {'no_image_url': DEFAULT_NO_IMAGE_URL}
 
 class ProductDetailView(DetailView):
     http_method_names = ['get', ]
@@ -251,7 +249,6 @@ class ProductDetailView(DetailView):
     template_name = 'product.html'
     context_object_name = 'product'
     extra_context={'no_image_url': DEFAULT_NO_IMAGE_URL}
-
 
 class Home(TemplateView):
     http_method_names = ['get', ]
@@ -268,3 +265,6 @@ class SignInView(LoginView):
     authentication_form = SignInForm
     template_name = 'sign_in.html'
 
+
+# TODO add cart view
+# TODO add cart header (add to user header??)

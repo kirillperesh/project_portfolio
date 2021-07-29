@@ -1,0 +1,34 @@
+#cart_panel {
+    background-color: tomato;
+    position: absolute;
+    width: 250px;
+    height: 50px;
+    left: 255px;
+    top: 250px;
+    /* line-height: 10px; */
+    padding: 0px;
+    margin: auto;
+}
+
+#cart_title {
+    margin-top: 1px !important;
+    margin-left: 5px !important;
+    font-size: 12px;
+    text-align: left;
+
+}
+
+#cart_panel p {
+    margin: 0px;
+    padding: 0px;
+
+}
+
+#cart_panel span {
+    padding: 0px;
+
+}
+
+#cart_info {
+    font-size: 16px;
+}

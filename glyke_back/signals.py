@@ -1,7 +1,9 @@
 from os import name
 from django.dispatch.dispatcher import receiver
 from django.db.models.signals import pre_delete, post_save
-from .models import Category, Product
+from django.contrib.auth.signals import user_logged_in
+from django.contrib.auth.models import User
+from .models import Category, Product, Order, OrderLine
 
 
 # when a category is deleted, switchs its children's parent attr to its own parent (or None)
@@ -12,3 +14,21 @@ def category_pre_delete_handler(sender, instance, **kwargs):
     new_parent = instance.parent if instance.parent else None
     Category.objects.filter(parent_id=instance.id).update(parent=new_parent)
     Product.objects.filter(category_id=instance.id).update(category=new_parent)
+
+
+@receiver(user_logged_in,
+          sender=User,
+          dispatch_uid='user_logs_in')
+def user_logs_in_handler(sender, request, user, **kwargs):
+    if not user.orders.all().exists():
+        Order.objects.create(customer=user)
+
+    user_orders = user.orders.all()
+    current_order = user_orders.first()
+
+    
+
+    print(user_orders)
+    print(current_order)
+    print(current_order.order_lines.all())
+
