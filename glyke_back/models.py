@@ -101,7 +101,7 @@ class Price(models.Model):
         self.end_user_price = self.selling_price * Decimal(1 - self.discount_percent / 100)
         self.end_user_price = Decimal(self.end_user_price).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         self.profit = self.end_user_price - self.cost_price
-        super(Price, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
 class Product(Price, TimeStampedModel):
     __original_name = None # an attribute to keep track on the previous name when changed
@@ -133,7 +133,7 @@ class Product(Price, TimeStampedModel):
         return self.name
 
     def __init__(self, *args, **kwargs):
-        super(Product, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.__original_name = self.name
 
     def save(self, *args, **kwargs):
@@ -151,10 +151,13 @@ class Product(Price, TimeStampedModel):
                 photo.slug = str(photo.slug).replace(self.__original_name, self.name)
                 photo.save()
             self.photos.save()
-        super(Product, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
         self.__original_name = self.name
 
 class Order(Price, TimeStampedModel):
+    """Prices represent the total value for an order
+    Discount is removed"""
+    discount_percent = None # inherited from Price, but no need for it for the Order model
     number = models.CharField(_('number'), max_length=100, blank=True)
     customer = models.ForeignKey(User,
                                  on_delete=models.SET_NULL,
@@ -162,6 +165,7 @@ class Order(Price, TimeStampedModel):
                                  related_name='orders',
                                  blank=False,
                                  null=True)
+    items_total = models.IntegerField(_('items total'), validators=[MinValueValidator(0)], default=0)
 
     class Meta:
         ordering = ['-created']
@@ -171,14 +175,28 @@ class Order(Price, TimeStampedModel):
         return f"{self.created.strftime('%H:%M:%S %d.%m.%y')} | {name}"
 
     def save(self, *args, **kwargs):
+        # generate order's number on creation
         if not self.pk:
-            time_stamp = dateformat.format(timezone.localtime(timezone.now()), 'His_dmy')
+            name_time_stamp = dateformat.format(timezone.localtime(timezone.now()), 'His_dmy')
             prefix = self.customer.username[:5] if self.customer else 'no_name'
-            self.number = f'{prefix}_{time_stamp}'
-        super(Order, self).save(*args, **kwargs)
+            self.number = f'{prefix}_{name_time_stamp}'
+
+        # update prices and items_total on save()
+        order_prices_sum = self.order_lines.all().aggregate(models.Sum('cost_price'), models.Sum('end_user_price'), models.Sum('selling_price'))
+        self.cost_price = order_prices_sum['cost_price__sum'] if order_prices_sum['cost_price__sum'] else 0
+        self.end_user_price = order_prices_sum['end_user_price__sum'] if order_prices_sum['end_user_price__sum'] else 0
+        self.selling_price = order_prices_sum['selling_price__sum'] if order_prices_sum['selling_price__sum'] else 0
+        self.profit = self.end_user_price - self.cost_price
+
+        items_sum = self.order_lines.all().aggregate(models.Sum('quantity'))
+        self.items_total = items_sum['quantity__sum'] if items_sum['quantity__sum'] else 0
+
+        TimeStampedModel.save(self, *args, **kwargs) # not calling super() here because the logic of price recounting for the Order model is different
 
 
 class OrderLine(Price):
+    """Prices represent the aggregate value for a line (product.price * quantity)
+    Discount stays untouched"""
     parent_order = models.ForeignKey(Order,
                                      on_delete=models.CASCADE,
                                      verbose_name=_('order'),
@@ -196,10 +214,18 @@ class OrderLine(Price):
         return f'{self.parent_order} | Line: {self.line_number}'
 
     def save(self, *args, **kwargs):
+        # numerate the line
         if not self.pk:
             lines_count = self.parent_order.order_lines.count()
             self.line_number = (lines_count + 1) if lines_count else 1
-        super(OrderLine, self).save(*args, **kwargs)
+        # update prices on save()
+        self.cost_price = self.product.cost_price * self.quantity
+        self.selling_price = self.product.selling_price * self.quantity
+        self.end_user_price = self.product.end_user_price * self.quantity
+        self.discount_percent = self.product.discount_percent
+        self.profit = self.end_user_price - self.cost_price
+
+        models.Model.save(self, *args, **kwargs) # not calling super() here because the logic of price recounting for the Order model is different
 
 
 # TODO add defaul no_image from defaults to category photo
