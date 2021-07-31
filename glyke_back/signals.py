@@ -1,6 +1,6 @@
 from os import name
 from django.dispatch.dispatcher import receiver
-from django.db.models.signals import pre_delete, post_save
+from django.db.models.signals import pre_delete, post_delete, post_save
 from django.contrib.auth.signals import user_logged_in
 from django.contrib.auth.models import User
 from .models import Category, Product, Order, OrderLine
@@ -20,6 +20,13 @@ def category_pre_delete_handler(sender, instance, **kwargs):
           sender=OrderLine,
           dispatch_uid='save_order_line')
 def order_line_post_save_handler(sender, instance, **kwargs):
+    instance.parent_order.save()
+
+# when an OrderLine is deleted, its parent Order has to be updated
+@receiver(post_delete,
+          sender=OrderLine,
+          dispatch_uid='delete_order_line')
+def order_line_post_delete_handler(sender, instance, **kwargs):
     instance.parent_order.save()
 
 
