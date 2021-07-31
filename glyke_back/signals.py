@@ -42,7 +42,7 @@ def order_line_post_delete_handler(sender, instance, **kwargs):
 
 
 
-    # print(user_orders)
-    # print(current_order)
-    # print(current_order.order_lines.all())
+#     print(user_orders)
+#     print(current_order)
+#     print(current_order.order_lines.all())
 

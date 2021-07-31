@@ -9,13 +9,13 @@
             </p>
             <p id='cart_info'>
                 <span id="cart_items">
-                    {{ user.orders.all.first.order_lines.count }} items
+                    {{ user.orders.all.first.items_total }} items
                 </span>
                 <span>
                     &nbsp;|&nbsp;
                 </span>
                 <span id="cart_price">
-                    Total: _NN_.NN $
+                    Total: {{ user.orders.all.first.end_user_price }} $
                 </span>
             </p>
         </div>
