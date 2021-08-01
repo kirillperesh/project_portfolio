@@ -1,23 +1,25 @@
 {% if user.is_authenticated %}
     <div id="cart_panel">
-        <div>
-            <p id='cart_title'>
-                <span>
-                    Your cart:
-                </span>
-                <span class="fas fa-shopping-cart"></span>
-            </p>
-            <p id='cart_info'>
-                <span id="cart_items">
-                    {{ user.orders.all.first.items_total }} items
-                </span>
-                <span>
-                    &nbsp;|&nbsp;
-                </span>
-                <span id="cart_price">
-                    Total: {{ user.orders.all.first.end_user_price }} $
-                </span>
-            </p>
-        </div>
+        <a href="{% url 'cart' %}">
+            <div>
+                <p id='cart_title'>
+                    <span>
+                        Your cart:
+                    </span>
+                    <span class="fas fa-shopping-cart"></span>
+                </p>
+                <p id='cart_info'>
+                    <span id="cart_items">
+                        {{ user.orders.all.first.items_total }} items
+                    </span>
+                    <span>
+                        &nbsp;|&nbsp;
+                    </span>
+                    <span id="cart_price">
+                        Total: {{ user.orders.all.first.end_user_price }} $
+                    </span>
+                </p>
+            </div>
+        </a>
     </div>
 {% endif %}
