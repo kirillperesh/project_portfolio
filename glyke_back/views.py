@@ -14,8 +14,8 @@ from django.contrib.auth.models import User
 from proj_folio.defaults import DEFAULT_NO_IMAGE_URL
 
 from photologue import models as photo_models
-from .forms import AddProductForm, PhotosForm, SelectCategoryProductForm, RegisterForm, SignInForm, OrderLineFormSet
-from .models import Category, Product
+from .forms import AddProductForm, PhotosForm, SelectCategoryProductForm, RegisterForm, SignInForm
+from .models import Category, OrderLine, Product
 from .decorators_mixins import user_is_staff_or_404, UserIsStaff_Or404_Mixin
 
 
@@ -268,6 +268,26 @@ class SignInView(LoginView):
 
 @require_http_methods(["GET", "POST"])
 def cart_view(request):
+
+
+
+    if request.method=='POST':
+        print(request.POST)
+
+        current_order = request.user.orders.all().first()
+        # current_order.order_lines.filter(product=Product.objects.get(id=request.POST['product_id']))
+
+
+        OrderLine.objects.create(parent_order=current_order,
+                                line_number = int(request.POST['line_number_48']),
+                                product=Product.objects.get(id='48'),
+                                quantity=int(request.POST['quantity_48'])
+                                )
+
+
+
+
+
     context = {}
     # order_line_forms = []
     # for order_line in request.user.orders.all().first().order_lines.all():
@@ -277,8 +297,13 @@ def cart_view(request):
     #                                        'end_user_price': order_line.end_user_price,
     #                                        })
 
-    context['order_line_forms'] = OrderLineFormSet
-    context['order'] = request.user.orders.all().first()
+    # context['order_line_forms'] = OrderLineFormSet
+
+
+
+    
+    # context['order'] = request.user.orders.all().first()
+    # context['order_lines'] = request.user.orders.all().first().order_lines.all()
     return render(request, "cart.html", context)
 
 

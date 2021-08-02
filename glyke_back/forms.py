@@ -110,7 +110,7 @@ class SignInForm(AuthenticationForm):
         #     self.fields['product'].disabled = True
         #     self.fields['end_user_price'].disabled = True
 
-from django.forms import modelformset_factory
-OrderLineFormSet = modelformset_factory(OrderLine,
-                                        fields=('product', 'quantity'),
-                                        extra=0)
+# from django.forms import modelformset_factory
+# OrderLineFormSet = modelformset_factory(OrderLine,
+#                                         fields=('product', 'quantity'),
+#                                         extra=0)
