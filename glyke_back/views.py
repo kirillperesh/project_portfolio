@@ -1,3 +1,4 @@
+from decimal import Context
 import inspect
 from django.db.models.query import InstanceCheckMeta
 from django.shortcuts import render, redirect, get_object_or_404, resolve_url
@@ -13,7 +14,7 @@ from django.contrib.auth.models import User
 from proj_folio.defaults import DEFAULT_NO_IMAGE_URL
 
 from photologue import models as photo_models
-from .forms import AddProductForm, PhotosForm, SelectCategoryProductForm, RegisterForm, SignInForm
+from .forms import AddProductForm, PhotosForm, SelectCategoryProductForm, RegisterForm, SignInForm, OrderLineFormSet
 from .models import Category, Product
 from .decorators_mixins import user_is_staff_or_404, UserIsStaff_Or404_Mixin
 
@@ -264,6 +265,22 @@ class SignInView(LoginView):
     http_method_names = ['get', 'post']
     authentication_form = SignInForm
     template_name = 'sign_in.html'
+
+@require_http_methods(["GET", "POST"])
+def cart_view(request):
+    context = {}
+    # order_line_forms = []
+    # for order_line in request.user.orders.all().first().order_lines.all():
+    #     order_line_forms += OrderLineForm({'line_number': order_line.line_number,
+    #                                        'product': order_line.product,
+    #                                        'quantity': order_line.quantity,
+    #                                        'end_user_price': order_line.end_user_price,
+    #                                        })
+
+    context['order_line_forms'] = OrderLineFormSet
+    context['order'] = request.user.orders.all().first()
+    return render(request, "cart.html", context)
+
 
 
 # TODO add cart view

@@ -226,7 +226,8 @@ class ModelsTest(TestCase):
 
     def test_order_update_on_orderline_save(self):
         """Check if Order's save() method is called on any of its orderlines' save() and if its prices are recalculated properly"""
-        initial_selling_price, multiplier = decimal.Decimal(random.randrange(100, 9999))/100, random.randint(1, 5)
+        initial_selling_price = decimal.Decimal(random.randrange(100, 9999))/100
+        multiplier = random.randint(1, 5)
         order = Order.objects.create()
         self.product_child.selling_price = initial_selling_price
         self.product_child.save()

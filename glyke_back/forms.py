@@ -5,7 +5,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.utils.translation import gettext_lazy as _
 
 # from photologue import models as photo_models
-from .models import Category, Product
+from .models import Category, Product, OrderLine
 
 class AddProductForm(forms.ModelForm):
     class Meta:
@@ -81,4 +81,36 @@ class SignInForm(AuthenticationForm):
         super(SignInForm, self).__init__(*args, **kwargs)
         self.fields['username'].widget = forms.TextInput(attrs={'class':'required', 'placeholder': 'Username'})
         self.fields['password'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Password'})
-        
+
+# class OrderLineForm(forms.ModelForm):
+#     class Meta:
+#         model = OrderLine
+#         fields = ['line_number', 'product', 'quantity', 'end_user_price']
+        # widgets = {
+        #     'name': forms.TextInput(attrs={'class': 'form-control',}),
+        #     'description': forms.Textarea(attrs={'class': 'form-control', 'rows': '3'}),
+        #     'tags': forms.TextInput(attrs={'class': 'form-control',}),
+        #     'stock': forms.NumberInput(attrs={'class': 'form-control', 'min': 0,}),
+        #     'cost_price': forms.NumberInput(attrs={'class': 'form-control', 'min': 0,}),
+        #     'selling_price': forms.NumberInput(attrs={'class': 'form-control', 'min': 0,}),
+        #     'discount_percent': forms.NumberInput(attrs={'class': 'form-control', 'min': 0,}),
+        # }
+        # labels = {
+        #     'name': _('Name'),
+        #     'description': _('Description'),
+        #     'tags': _('Tags'),
+        #     'stock': _('Stock'),
+        #     'cost_price': _('Cost price, $'),
+        #     'selling_price': _('Selling price, $'),
+        #     'discount_percent': _('Discount, %'),
+        # }
+        # def __init__(self):
+        #     super().__init__(self)
+        #     self.fields['line_number'].disabled = True
+        #     self.fields['product'].disabled = True
+        #     self.fields['end_user_price'].disabled = True
+
+from django.forms import modelformset_factory
+OrderLineFormSet = modelformset_factory(OrderLine,
+                                        fields=('product', 'quantity'),
+                                        extra=0)
