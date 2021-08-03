@@ -3,6 +3,11 @@
 
 {% block title %} Your cart {% endblock %}
 
+{% block additional_head %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/cart.css' %}"/>
+{% endblock %}
+
 {% block content %}
 <div class="row">
     <div class="col-xl-9 col-lg-10 col-md-12 col-sm-12 mx-auto">
@@ -13,24 +18,63 @@
         </div>
         <div class="row tm-edit-product-row">
             <!-- <div class="col-xl-6 col-lg-6 col-md-12"> -->
-                    <form id="main_product_form" role="form" action="" method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        {% for order_line in order_line_forms %}
-                            <p>
+            <table id="cart_table" class="display cell-border">
+              <thead id="cart_table_thead">
+                  <tr>
+                    <th class="col-50p-f">#</th>
+                    <th class="col-150p-f">Name</th>
+                    <th class="col-100p-f">Initial price, $</th>
+                    <th class="col-65p-f">Discount, %</th>
+                    <th class="col-185p-m">PPP, $</th>
+                    <th class="col-65p-f">Quantity</th>
+                    <th class="col-65p-f">Total price per item, $</th>
+                  </tr>
+              </thead>
+              <tbody>
+
+                <form id="cart_form" role="form" action="" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% for order_line in order_lines %}
+
+                      <tr>
+                        <td>{{ order_line.line_number }}</td>
+                        <td>{{ order_line.product }}</td>
+                        <td>{{ order_line.product.selling_price }}</td>
+                        <td>{{ order_line.product.discount_percent }}</td>
+                        <td>
+                          <span id='product_{{ order_line.product.id }}_end_user_price'>{{ order_line.product.end_user_price }}</span>
+                        </td>
+                        <td>
+                          <input type="number" id="quantity_{{ order_line.product.id }}" name="quantity_{{ order_line.product.id }}" value="{{ order_line.quantity }}">
+                        </td>
+                        <td>
+                          <span id='order_line_{{ order_line.line_number }}_end_user_price'>{{ order_line.end_user_price }}</span>
+                        </td>
+
+                        <input type="hidden" id="line_number_{{ order_line.product.id }}" name="line_number_{{ order_line.product.id }}" value="{{ order_line.line_number }}">
+                        <input type="hidden" id="product_id" name="product_id" value="{{ order_line.product.id }}">
+                      </tr>
+                    {% endfor %}
 
 
-                                <span>{{ order_line }}</span>
+                    <div class="col-12 trans02s">
+                        <input type="submit" value="Place order" class="btn-add btn-add-primary btn-add-block text-uppercase"></input>
+                    </div>
 
-                            </p>
-                        {% endfor %}
-                        <p>
-                            {{ order.end_user_price }}
-                        </p>
-                    </form>
+                </form>
+              </tbody>
+            </table>
+        </div>
+
+        <p>
+            {{ order.end_user_price }}
+        </p>
+
             <!-- </div> -->
 
     </div>
-  </div>
+
+</div>
 
 
 {% endblock %}
