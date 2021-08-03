@@ -295,7 +295,8 @@ def cart_view(request):
 
 
     context['order'] = request.user.orders.all().first()
-    context['order_lines'] = request.user.orders.all().first().order_lines.all()
+    if request.user.orders.all().exists():
+        context['order_lines'] = request.user.orders.all().first().order_lines.all()
     return render(request, "cart.html", context)
 
 
