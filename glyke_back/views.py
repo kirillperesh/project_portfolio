@@ -272,38 +272,30 @@ def cart_view(request):
 
 
     if request.method=='POST':
-        print(request.POST)
-
+        # print(request.POST)
+        # print(request.POST.getlist('products_id'))
+        products_id_list = request.POST.getlist('products_id')
         current_order = request.user.orders.all().first()
+        current_order.order_lines.all().delete()
+
+        for product_id in products_id_list:
+            OrderLine.objects.create(parent_order=current_order,
+                                     product=Product.objects.get(id=product_id),
+                                     quantity = int(request.POST[f'quantity_{product_id}']),
+                                     )
+
         # current_order.order_lines.filter(product=Product.objects.get(id=request.POST['product_id']))
-
-
-        OrderLine.objects.create(parent_order=current_order,
-                                line_number = int(request.POST['line_number_48']),
-                                product=Product.objects.get(id='48'),
-                                quantity=int(request.POST['quantity_48'])
-                                )
-
 
 
 
 
     context = {}
-    # order_line_forms = []
-    # for order_line in request.user.orders.all().first().order_lines.all():
-    #     order_line_forms += OrderLineForm({'line_number': order_line.line_number,
-    #                                        'product': order_line.product,
-    #                                        'quantity': order_line.quantity,
-    #                                        'end_user_price': order_line.end_user_price,
-    #                                        })
-
-    # context['order_line_forms'] = OrderLineFormSet
 
 
 
-    
-    # context['order'] = request.user.orders.all().first()
-    # context['order_lines'] = request.user.orders.all().first().order_lines.all()
+
+    context['order'] = request.user.orders.all().first()
+    context['order_lines'] = request.user.orders.all().first().order_lines.all()
     return render(request, "cart.html", context)
 
 
