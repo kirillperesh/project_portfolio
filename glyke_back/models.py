@@ -157,6 +157,28 @@ class Product(Price, TimeStampedModel):
 class Order(Price, TimeStampedModel):
     """Prices represent the total value for an order
     Discount is removed"""
+    CURRENT_ORDER = 'CUR'
+    PENDING = 'PEN'
+    CONFIRMED = 'CON'
+    DELIVERING = 'DNG'
+    DELIVERED = 'DED'
+    COMPLETED = 'COM'
+    ARCHIVED = 'ARC'
+    CANCELED = 'CAN'
+    ORDER_STATUS_CHOICES = [
+        (CURRENT_ORDER, 'Current order'),
+        (PENDING, 'Pending'),
+        (CONFIRMED, 'Confirmed'),
+        (DELIVERING, 'Delivering'),
+        (DELIVERED, 'Delivered'),
+        (COMPLETED, 'Completed'),
+        (ARCHIVED, 'Archived'),
+        (CANCELED, 'Canceled'),
+    ]
+    status = models.CharField(max_length=3,
+                              choices=ORDER_STATUS_CHOICES,
+                              default=CANCELED,
+                              )
     discount_percent = None # inherited from Price, but no need for it for the Order model
     number = models.CharField(_('number'), max_length=100, blank=True)
     customer = models.ForeignKey(User,
