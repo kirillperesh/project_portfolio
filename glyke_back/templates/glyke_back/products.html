@@ -62,7 +62,12 @@
                     <span class="product-discount discount-percent">{{product.discount_percent}}% OFF</span>
                   {% endif %}
                 </span>
-                <a href="/" class="u-btn u-button-style u-palette-5-dark-2 u-btn-1">add to cart</a>
+                <form action="{% url 'add_to_cart' %}" method="POST">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                  <input type="hidden" name="product_id" value="{{ product.id }}">
+                  <button type="submit" class="u-btn u-button-style u-palette-5-dark-2 u-btn-1">add to cart</button>
+                </form>
               </div>
             </div>
           {% endfor %}

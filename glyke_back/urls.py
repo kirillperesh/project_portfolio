@@ -19,5 +19,6 @@ urlpatterns = [
     path("products", views.ProductsView.as_view(), name="products"),
     path("products_staff", views.ProductsStaffView.as_view(), name="products_staff"),
     path("cart", views.cart_view, name="cart"),
+    path("add_to_cart", views.AddToCartView.as_view(), name="add_to_cart"),
 ]
 

@@ -9,8 +9,10 @@ from django.views.decorators.http import require_http_methods
 from django.utils.text import slugify
 from urllib.parse import urlencode
 from django.views.generic import ListView, DetailView, TemplateView, CreateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.models import User
+from django.views.generic.base import RedirectView
 from proj_folio.defaults import DEFAULT_NO_IMAGE_URL
 
 from photologue import models as photo_models
@@ -298,6 +300,39 @@ def cart_view(request):
     if request.user.orders.all().exists():
         context['order_lines'] = request.user.orders.all().first().order_lines.all()
     return render(request, "cart.html", context)
+
+
+
+
+class AddToCartView(LoginRequiredMixin, RedirectView):
+    """Creates a new OrderLine with product given or increments an existing one"""
+    http_method_names = ['post',]
+    query_string = False
+
+    def dispatch(self, request, *args, **kwargs):
+        # from LoginRequiredMixin.dispatch
+        if not request.user.is_authenticated: return self.handle_no_permission()
+
+        if not request.user.orders.filter(status='CUR').exists(): # check if there is a 'current' order
+            self.url = f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'current order'})}"
+        else:
+            self.url = request.POST.get('next', '/') # set redirect url
+            current_order = request.user.orders.filter(status='CUR').order_by('-created').first()
+            product_id = request.POST.get('product_id')
+            order_line, created = OrderLine.objects.get_or_create(parent_order=current_order,
+                                                                  product=Product.objects.get(id=product_id),
+                                                                  )
+            # increment order_line quantity by 1 if a line with such product alredy exists
+            if not created:
+                order_line.quantity += 1
+                order_line.save()
+
+        # return super().dispatch(request, *args, **kwargs)
+
+
+
+
+
 
 
 
