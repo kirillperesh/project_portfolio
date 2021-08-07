@@ -278,12 +278,15 @@ def cart_view(request):
         # print(request.POST.getlist('products_id'))
         products_id_list = request.POST.getlist('products_id')
         current_order = request.user.orders.all().first()
-        current_order.order_lines.all().delete()
+        # current_order.order_lines.all().delete()
 
         for product_id in products_id_list:
+            new_quantity = int(request.POST[f'quantity_{product_id}'])
+            print(type(request.POST.getlist(f'quantity_{product_id}')))
+            print(new_quantity)
             OrderLine.objects.create(parent_order=current_order,
                                      product=Product.objects.get(id=product_id),
-                                     quantity = int(request.POST[f'quantity_{product_id}']),
+                                     quantity = new_quantity,
                                      )
 
         # current_order.order_lines.filter(product=Product.objects.get(id=request.POST['product_id']))
@@ -326,10 +329,7 @@ class AddToCartView(LoginRequiredMixin, RedirectView):
             if not created:
                 order_line.quantity += 1
                 order_line.save()
-
-        # return super().dispatch(request, *args, **kwargs)
-
-
+        return RedirectView.dispatch(self, request, *args, **kwargs)
 
 
 

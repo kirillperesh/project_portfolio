@@ -203,6 +203,19 @@ class Order(Price, TimeStampedModel):
             prefix = self.customer.username[:5] if self.customer else 'no_name'
             self.number = f'{prefix}_{name_time_stamp}'
 
+        # sum up dublicating lines if any
+        # for order_line in self.order_lines.all():
+        #     duplicating_lines_quesryset = self.order_lines.filter(product=order_line.product)
+        #     if duplicating_lines_quesryset.count() > 1:
+        #         parent_order = order_line.parent_order
+        #         product = order_line.product
+        #         total_quantity = duplicating_lines_quesryset.aggregate(models.Sum('quantity'))
+        #         # duplicating_lines_quesryset.delete()
+        #         OrderLine.objects.create(parent_order=parent_order,
+        #                                  product=product,
+        #                                  quantity=total_quantity)
+        #         break
+
         # update prices and items_total on save()
         order_prices_sum = self.order_lines.all().aggregate(models.Sum('cost_price'), models.Sum('end_user_price'), models.Sum('selling_price'))
         self.cost_price = order_prices_sum['cost_price__sum'] if order_prices_sum['cost_price__sum'] else 0
