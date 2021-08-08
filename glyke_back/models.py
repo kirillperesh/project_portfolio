@@ -203,6 +203,19 @@ class Order(Price, TimeStampedModel):
             prefix = self.customer.username[:5] if self.customer else 'no_name'
             self.number = f'{prefix}_{name_time_stamp}'
 
+        # sum up dublicating lines if any
+        # for order_line in self.order_lines.all():
+        #     duplicating_lines_quesryset = self.order_lines.filter(product=order_line.product)
+        #     if duplicating_lines_quesryset.count() > 1:
+        #         parent_order = order_line.parent_order
+        #         product = order_line.product
+        #         total_quantity = duplicating_lines_quesryset.aggregate(models.Sum('quantity'))
+        #         # duplicating_lines_quesryset.delete()
+        #         OrderLine.objects.create(parent_order=parent_order,
+        #                                  product=product,
+        #                                  quantity=total_quantity)
+                # break
+
         # update prices and items_total on save()
         order_prices_sum = self.order_lines.all().aggregate(models.Sum('cost_price'), models.Sum('end_user_price'), models.Sum('selling_price'))
         self.cost_price = order_prices_sum['cost_price__sum'] if order_prices_sum['cost_price__sum'] else 0
@@ -236,18 +249,28 @@ class OrderLine(Price):
         return f'{self.parent_order} | Line: {self.line_number}'
 
     def save(self, *args, **kwargs):
-        # numerate the line
-        if not self.pk:
+        duplicating_line = self.parent_order.order_lines.filter(product=self.product).first()
+        print(duplicating_line)
+
+        if not self.pk: # on creation
+            # numerate the line
             lines_count = self.parent_order.order_lines.count()
             self.line_number = (lines_count + 1) if lines_count else 1
-        # update prices on save()
-        self.cost_price = self.product.cost_price * self.quantity
-        self.selling_price = self.product.selling_price * self.quantity
-        self.end_user_price = self.product.end_user_price * self.quantity
-        self.discount_percent = self.product.discount_percent
-        self.profit = self.end_user_price - self.cost_price
 
-        models.Model.save(self, *args, **kwargs) # not calling super() here because the logic of price recounting for the Order model is different
+        if duplicating_line:
+            # avoid duplicating
+            # doesn't save a new instance if duplicate already exists (only increments duplicate's quantity)
+            duplicating_line.quantity += self.quantity
+            duplicating_line.save()
+        else:
+            # update prices on save()
+            self.cost_price = self.product.cost_price * self.quantity
+            self.selling_price = self.product.selling_price * self.quantity
+            self.end_user_price = self.product.end_user_price * self.quantity
+            self.discount_percent = self.product.discount_percent
+            self.profit = self.end_user_price - self.cost_price
+
+            models.Model.save(self, *args, **kwargs) # not calling super() here because the logic of price recounting for the Order model is different
 
 
 # TODO add defaul no_image from defaults to category photo
