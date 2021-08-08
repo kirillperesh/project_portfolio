@@ -1,5 +1,6 @@
 from decimal import Context
 import inspect
+from logging import raiseExceptions
 from django.db.models.query import InstanceCheckMeta
 from django.shortcuts import render, redirect, get_object_or_404, resolve_url
 from django.urls import reverse
@@ -271,19 +272,18 @@ class SignInView(LoginView):
 @require_http_methods(["GET", "POST"])
 def cart_view(request):
 
-
-
     if request.method=='POST':
-        # print(request.POST)
-        # print(request.POST.getlist('products_id'))
-        products_id_list = request.POST.getlist('products_id')
+        products_id_set = set(request.POST.getlist('products_id'))
         current_order = request.user.orders.all().first()
-        # current_order.order_lines.all().delete()
+        current_order.order_lines.all().delete()
 
-        for product_id in products_id_list:
-            new_quantity = int(request.POST[f'quantity_{product_id}'])
-            print(type(request.POST.getlist(f'quantity_{product_id}')))
-            print(new_quantity)
+        for product_id in products_id_set:
+            quantity_list = request.POST.getlist(f'quantity_{product_id}')
+            if len(quantity_list) > 1:
+                new_quantity = sum([int(num) for num in quantity_list])
+            else:
+                new_quantity = int(quantity_list[0])
+
             OrderLine.objects.create(parent_order=current_order,
                                      product=Product.objects.get(id=product_id),
                                      quantity = new_quantity,
