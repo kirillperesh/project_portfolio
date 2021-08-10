@@ -15,9 +15,8 @@
                     <span>
                         &nbsp;|&nbsp;
                     </span>
-                    <span id="cart_price">
-                        Total: {{ user.orders.all.first.end_user_price }} $
-                    </span>
+                    Total: $
+                    <span id="cart_price">{{ user.orders.all.first.end_user_price }}</span>
                 </p>
             </div>
         </a>

@@ -279,7 +279,7 @@ def cart_view(request):
 
         for product_id in products_id_set:
             quantity_list = request.POST.getlist(f'quantity_{product_id}')
-            if len(quantity_list) > 1:
+            if len(quantity_list) > 1: # avoid duplicating
                 new_quantity = sum([int(num) for num in quantity_list])
             else:
                 new_quantity = int(quantity_list[0])
@@ -308,7 +308,7 @@ def cart_view(request):
 
 
 class AddToCartView(LoginRequiredMixin, RedirectView):
-    """Creates a new OrderLine with product given or increments an existing one"""
+    """Creates a new OrderLine of product given or increments an existing one"""
     http_method_names = ['post',]
     query_string = False
 
@@ -322,13 +322,9 @@ class AddToCartView(LoginRequiredMixin, RedirectView):
             self.url = request.POST.get('next', '/') # set redirect url
             current_order = request.user.orders.filter(status='CUR').order_by('-created').first()
             product_id = request.POST.get('product_id')
-            order_line, created = OrderLine.objects.get_or_create(parent_order=current_order,
-                                                                  product=Product.objects.get(id=product_id),
-                                                                  )
-            # increment order_line quantity by 1 if a line with such product alredy exists
-            if not created:
-                order_line.quantity += 1
-                order_line.save()
+            OrderLine.objects.create(parent_order=current_order,
+                                     product=Product.objects.get(id=product_id),
+                                     )
         return RedirectView.dispatch(self, request, *args, **kwargs)
 
 
