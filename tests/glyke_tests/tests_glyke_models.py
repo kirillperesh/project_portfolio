@@ -194,24 +194,31 @@ class ModelsTest(TestCase):
 
     def test_orderline_autoinc(self):
         """Assert line auto-numering in checks work properly"""
-        order_no_user = Order.objects.create(number=1, customer=None)
+        order_no_user = Order.objects.create()
         orderline_1 = OrderLine.objects.create(parent_order=order_no_user, product=self.product_child)
         self.assertEqual(orderline_1.line_number, order_no_user.order_lines.count())
-        orderline_2 = OrderLine.objects.create(parent_order=order_no_user, product=self.product_child)
+        orderline_2 = OrderLine.objects.create(parent_order=order_no_user, product=self.product_sub_parent) # has to be different product, because same product lines get summed up
         self.assertEqual(orderline_2.line_number, order_no_user.order_lines.count())
+        OrderLine.objects.create(parent_order=order_no_user, product=self.product_sub_parent)
+        self.assertEqual(orderline_2.line_number, order_no_user.order_lines.count()) # line count has stay the same, because same product lines get summed up
 
     def test_order_calculating(self):
-        """Check if Order's total prices are calculated properly"""
+        """Checks if Order's total prices are calculated properly"""
         expected_order_cost_price = 0
         expected_order_selling_price = 0
         expected_order_end_user_price = 0
         order = Order.objects.create()
         for i in range(3):
+            self.assertEqual(order.cost_price, expected_order_cost_price)
+            self.assertEqual(order.selling_price, expected_order_selling_price)
+            self.assertEqual(order.end_user_price, expected_order_end_user_price)
             # add 3 order_lines
-            self.product_child.cost_price = decimal.Decimal(random.randrange(100, 9999))/100
-            self.product_child.selling_price = decimal.Decimal(random.randrange((self.product_child.cost_price*100), 9999))/100
-            self.product_child.discount_percent = random.randint(0, 4) * 10
-            self.product_child.save()
+            # has to be different product each time, because same product lines get summed up
+            product = Product.objects.create(name=get_random_string(),
+                                             cost_price = decimal.Decimal(random.randrange(100, 9999))/100,
+                                             selling_price = decimal.Decimal(random.randrange((self.product_child.cost_price*100), 9999))/100,
+                                             discount_percent = random.randint(0, 4) * 10,
+                                             )
             rnd_quantity = random.randint(1, 4)
             OrderLine.objects.create(parent_order=order,
                                      product=self.product_child,
@@ -220,12 +227,9 @@ class ModelsTest(TestCase):
             expected_order_cost_price += self.product_child.cost_price * rnd_quantity
             expected_order_selling_price += self.product_child.selling_price * rnd_quantity
             expected_order_end_user_price += self.product_child.end_user_price * rnd_quantity
-        self.assertEqual(order.cost_price, expected_order_cost_price)
-        self.assertEqual(order.selling_price, expected_order_selling_price)
-        self.assertEqual(order.end_user_price, expected_order_end_user_price)
 
     def test_order_update_on_orderline_save(self):
-        """Check if Order's save() method is called on any of its orderlines' save() and if its prices are recalculated properly"""
+        """Checks if Order's save() method is called on any of its orderlines' save() and if its prices are recalculated properly"""
         initial_selling_price = decimal.Decimal(random.randrange(100, 9999))/100
         multiplier = random.randint(1, 5)
         order = Order.objects.create()
@@ -244,7 +248,7 @@ class ModelsTest(TestCase):
         self.assertEqual(order.selling_price, initial_selling_price*multiplier)
 
     def test_order_update_on_orderline_delete(self):
-        """Check if Order's save() method is called on any of its orderlines' delete() and if its prices are recalculated properly"""
+        """Checks if Order's save() method is called on any of its orderlines' delete() and if its prices are recalculated properly"""
         initial_selling_price = decimal.Decimal(random.randrange(100, 9999))/100
         order = Order.objects.create()
         self.product_child.selling_price = initial_selling_price

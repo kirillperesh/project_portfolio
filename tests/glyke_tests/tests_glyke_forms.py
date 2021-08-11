@@ -43,8 +43,8 @@ class AddProductFormTest(TestCase):
             self.assertEqual(invalid_form.errors[field], ['Ensure this value is greater than or equal to 0.'])
 
     def test_decimal_fields(self):
-        """Check that decimal fields work properly (2 decimal, 6 total)"""
-        decimal_cases = [1234567, 12345.1, 123.123]
+        """Check that decimal fields work properly (2 decimal, 7 total)"""
+        decimal_cases = [12345678, 123456.1, 123.123]
         for field in self.decimal_test_fields:
             for case in decimal_cases:
                 self.base_form_data[field] = case
