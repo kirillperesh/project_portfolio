@@ -73,12 +73,12 @@ class Category(TimeStampedModel):
 
 class Price(models.Model):
     cost_price = models.DecimalField(_('cost price'),
-                                     max_digits=6,
+                                     max_digits=7,
                                      decimal_places=2,
                                      validators=[MinValueValidator(0)],
                                      default=0)
     selling_price = models.DecimalField(_('selling price'),
-                                        max_digits=6,
+                                        max_digits=7,
                                         decimal_places=2,
                                         validators=[MinValueValidator(0)],
                                         default=0)
@@ -87,11 +87,11 @@ class Price(models.Model):
                                            MaxValueValidator(80)],
                                            default=0)
     end_user_price = models.DecimalField(_('end user price'),
-                                         max_digits=6,
+                                         max_digits=7,
                                          decimal_places=2,
                                          validators=[MinValueValidator(0)],
                                          default=0)
-    profit = models.DecimalField(_('profit'), max_digits=6, decimal_places=2, default=0)
+    profit = models.DecimalField(_('profit'), max_digits=7, decimal_places=2, default=0)
 
     class Meta:
         abstract = True
@@ -203,24 +203,8 @@ class Order(Price, TimeStampedModel):
             prefix = self.customer.username[:5] if self.customer else 'no_name'
             self.number = f'{prefix}_{name_time_stamp}'
 
-        # sum up dublicating lines if any
-        # for order_line in self.order_lines.all():
-        #     duplicating_lines_quesryset = self.order_lines.filter(product=order_line.product)
-        #     if duplicating_lines_quesryset.count() > 1:
-        #         parent_order = order_line.parent_order
-        #         product = order_line.product
-        #         total_quantity = duplicating_lines_quesryset.aggregate(models.Sum('quantity'))
-        #         # duplicating_lines_quesryset.delete()
-        #         OrderLine.objects.create(parent_order=parent_order,
-        #                                  product=product,
-        #                                  quantity=total_quantity)
-                # break
-
-        # update prices and items_total on save()
         order_prices_sum = self.order_lines.all().aggregate(models.Sum('cost_price'), models.Sum('end_user_price'), models.Sum('selling_price'))
         self.cost_price = order_prices_sum['cost_price__sum'] if order_prices_sum['cost_price__sum'] else 0
-        print(order_prices_sum['end_user_price__sum'], self)
-        return
         self.end_user_price = order_prices_sum['end_user_price__sum'] if order_prices_sum['end_user_price__sum'] else 0
         self.selling_price = order_prices_sum['selling_price__sum'] if order_prices_sum['selling_price__sum'] else 0
         self.profit = self.end_user_price - self.cost_price
