@@ -315,6 +315,8 @@ class AddToCartView(LoginRequiredMixin, RedirectView):
     def dispatch(self, request, *args, **kwargs):
         # from LoginRequiredMixin.dispatch
         if not request.user.is_authenticated: return self.handle_no_permission()
+        # from RedirectView.dispatch
+        if not request.method.lower() in self.http_method_names: return self.http_method_not_allowed(request, *args, **kwargs)
 
         if not request.user.orders.filter(status='CUR').exists(): # check if there is a 'current' order
             self.url = f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'current order'})}"
