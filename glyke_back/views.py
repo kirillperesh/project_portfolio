@@ -33,7 +33,7 @@ def get_category_fields(*, category=None):
     category_fields = {}
     if category:
         for filter in category.filters.all(): # these are django-taggit objects
-                    # TODO Add some king of validation here to select the right input field
+                    # TODO Add some kind of validation here to select the right input field
                     category_fields[str(filter)] = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control',},),
                                                                                           label=_(str(filter).capitalize()))
     return category_fields
@@ -271,11 +271,14 @@ class SignInView(LoginView):
 
 @require_http_methods(["GET", "POST"])
 def cart_view(request):
+    # get current order
+    if not request.user.orders.filter(status='CUR').exists(): # check if there is a 'current' order
+        return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'current order (probably there is none)'})}")
+    current_order = request.user.orders.filter(status='CUR').order_by('-created').first() # select newest current order
 
     if request.method=='POST':
         products_id_set = set(request.POST.getlist('products_id'))
-        current_order = request.user.orders.all().first()
-        current_order.order_lines.all().delete()
+        if products_id_set: current_order.order_lines.all().delete()
 
         for product_id in products_id_set:
             quantity_list = request.POST.getlist(f'quantity_{product_id}')
@@ -289,19 +292,11 @@ def cart_view(request):
                                      quantity = new_quantity,
                                      )
 
-        # current_order.order_lines.filter(product=Product.objects.get(id=request.POST['product_id']))
-
-
-
 
     context = {}
 
-
-
-
-    context['order'] = request.user.orders.all().first()
-    if request.user.orders.all().exists():
-        context['order_lines'] = request.user.orders.all().first().order_lines.all()
+    context['order'] = current_order
+    context['order_lines'] = current_order.order_lines.all()
     return render(request, "cart.html", context)
 
 
@@ -317,22 +312,16 @@ class AddToCartView(LoginRequiredMixin, RedirectView):
         if not request.user.is_authenticated: return self.handle_no_permission()
         # from RedirectView.dispatch
         if not request.method.lower() in self.http_method_names: return self.http_method_not_allowed(request, *args, **kwargs)
-
         if not request.user.orders.filter(status='CUR').exists(): # check if there is a 'current' order
-            self.url = f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'current order'})}"
-        else:
-            self.url = request.POST.get('next', '/') # set redirect url
-            current_order = request.user.orders.filter(status='CUR').order_by('-created').first()
-            product_id = request.POST.get('product_id')
-            OrderLine.objects.create(parent_order=current_order,
-                                     product=Product.objects.get(id=product_id),
-                                     )
+            return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'current order (probably there is none)'})}")
+        self.url = request.POST.get('next', '/') # set redirect url
+        current_order = request.user.orders.filter(status='CUR').order_by('-created').first() # select newest current order
+        product_id = request.POST.get('product_id')
+        OrderLine.objects.create(parent_order=current_order,
+                                    product=Product.objects.get(id=product_id),
+                                    )
         return RedirectView.dispatch(self, request, *args, **kwargs)
 
 
-
-
-
-
-# TODO add cart view
-# TODO add cart header (add to user header??)
+# TODO might need to add smth like 'check if orders of _ status exists()' global function
+# TODO something has to handler current_order creation before add_to_cart's and cart's views
