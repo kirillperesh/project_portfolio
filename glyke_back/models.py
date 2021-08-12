@@ -122,7 +122,7 @@ class Product(Price, TimeStampedModel):
                                   verbose_name=_('photos'),
                                   blank=True,
                                   null=True)
-    main_photo = models.OneToOneField(photo_models.Photo, # TODO add comment
+    main_photo = models.OneToOneField(photo_models.Photo, # Product's main photo, is chosen from its current photos
                                       on_delete=models.SET_NULL,
                                       verbose_name=_('main photo'),
                                       blank=True,
