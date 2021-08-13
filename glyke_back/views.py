@@ -52,6 +52,14 @@ def get_photo_from_img_src(*, img_src, model_instance, exclude = '_display'):
     photo_queryset = model_instance.photos.photos.filter(image__endswith = photo_image_substr)
     if photo_queryset.count() == 1: return photo_queryset.first()
 
+def get_order(request, *, status, order_by='-created'):
+    """Checks if there is an order of passed status, redirects to error 500 if not
+    status: status str as stated in model definition
+    order_by: generic django's ordering variable [default='-created']"""
+    if not request.user.orders.filter(status=status).exists(): # check if there is a 'current' order
+        return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'order (probably there is none)'})}")
+    return request.user.orders.filter(status=status).order_by(order_by).first()
+
 @user_is_staff_or_404()
 @require_http_methods(["GET", "POST"])
 def add_product_dynamic_view(request):
@@ -269,13 +277,10 @@ class SignInView(LoginView):
     authentication_form = SignInForm
     template_name = 'sign_in.html'
 
+
 @require_http_methods(["GET", "POST"])
 def cart_view(request):
-    # get current order
-    if not request.user.orders.filter(status='CUR').exists(): # check if there is a 'current' order
-        return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'current order (probably there is none)'})}")
-    current_order = request.user.orders.filter(status='CUR').order_by('-created').first() # select newest current order
-
+    current_order = get_order(request, status='CUR') # select the latest current order
     if request.method=='POST':
         products_id_set = set(request.POST.getlist('products_id'))
         if products_id_set: current_order.order_lines.all().delete()
@@ -300,8 +305,6 @@ def cart_view(request):
     return render(request, "cart.html", context)
 
 
-
-
 class AddToCartView(LoginRequiredMixin, RedirectView):
     """Creates a new OrderLine of product given or increments an existing one"""
     http_method_names = ['post',]
@@ -312,16 +315,13 @@ class AddToCartView(LoginRequiredMixin, RedirectView):
         if not request.user.is_authenticated: return self.handle_no_permission()
         # from RedirectView.dispatch
         if not request.method.lower() in self.http_method_names: return self.http_method_not_allowed(request, *args, **kwargs)
-        if not request.user.orders.filter(status='CUR').exists(): # check if there is a 'current' order
-            return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'current order (probably there is none)'})}")
+        current_order = get_order(request, status='CUR') # select the latest current order
         self.url = request.POST.get('next', '/') # set redirect url
-        current_order = request.user.orders.filter(status='CUR').order_by('-created').first() # select newest current order
         product_id = request.POST.get('product_id')
         OrderLine.objects.create(parent_order=current_order,
-                                    product=Product.objects.get(id=product_id),
-                                    )
+                                 product=Product.objects.get(id=product_id),
+                                 )
         return RedirectView.dispatch(self, request, *args, **kwargs)
 
 
-# TODO might need to add smth like 'check if orders of _ status exists()' global function
 # TODO something has to handler current_order creation before add_to_cart's and cart's views
