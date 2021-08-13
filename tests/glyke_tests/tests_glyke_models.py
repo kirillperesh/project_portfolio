@@ -1,3 +1,4 @@
+from types import prepare_class
 from django.test import TestCase, override_settings
 from django.db.models.signals import pre_delete
 from unittest.mock import MagicMock
@@ -202,6 +203,25 @@ class ModelsTest(TestCase):
         OrderLine.objects.create(parent_order=order_no_user, product=self.product_sub_parent)
         self.assertEqual(orderline_2.line_number, order_no_user.order_lines.count()) # line count has stay the same, because same product lines get summed up
 
+    def test_orderline_duplicating_avoiding(self):
+        """Checks if an existing order_line instance's quantity is incremented properly, if a new order_line instance of the same product is tried to be created. Also check if a duplicating instance of order_line is not created.
+        """
+        quantity_1 = random.randint(1, 100)
+        quantity_2 = random.randint(1, 100)
+        OrderLine.objects.all().delete()
+        order = Order.objects.create()
+        self.assertEqual(OrderLine.objects.all().count(), 0)
+        self.assertEqual(order.order_lines.count(), 0)
+        OrderLine.objects.create(parent_order=order, product=self.product_child, quantity=quantity_1)
+        self.assertEqual(OrderLine.objects.all().count(), 1)
+        self.assertEqual(order.order_lines.count(), 1)
+        self.assertEqual(order.order_lines.first().quantity, quantity_1)
+        OrderLine.objects.create(parent_order=order, product=self.product_child, quantity=quantity_2)
+        self.assertEqual(OrderLine.objects.all().count(), 1)
+        self.assertEqual(order.order_lines.count(), 1)
+        self.assertEqual(order.order_lines.first().quantity, quantity_1+quantity_2)
+        # TODO add comments
+
     def test_order_calculating(self):
         """Checks if Order's total prices are calculated properly"""
         expected_order_cost_price = 0
@@ -253,11 +273,36 @@ class ModelsTest(TestCase):
         order = Order.objects.create()
         self.product_child.selling_price = initial_selling_price
         self.product_child.save()
-        order_line= OrderLine.objects.create(parent_order=order, product=self.product_child)
+        order_line = OrderLine.objects.create(parent_order=order, product=self.product_child)
         self.assertEqual(order.selling_price, initial_selling_price)
         # case: no orderlines
         order_line.delete()
         self.assertEqual(order.selling_price, 0)
 
+    def test_order_items_total_update(self):
+        """Checks if Order's items_total is calculated properly"""
+        expected_items_total = 0
+        OrderLine.objects.all().delete()
+        order = Order.objects.create()
+        self.assertEqual(order.items_total, expected_items_total)
+        for i in range(10):
+            expected_order_lines_count = i + 1
+            rnd_product = Product.objects.create(name=get_random_string(), category = self.child_cat)
+            rnd_quantity = random.randint(1, 100)
+            expected_items_total += rnd_quantity
+            order_line = OrderLine.objects.create(parent_order=order, product=rnd_product, quantity=rnd_quantity)
+            self.assertEqual(OrderLine.objects.all().count(), expected_order_lines_count)
+            self.assertEqual(order.order_lines.count(), expected_order_lines_count)
+            self.assertEqual(order.items_total, expected_items_total)
+            new_rnd_quantity = random.randint(1, 100)
+            expected_items_total += new_rnd_quantity - rnd_quantity
+            order_line.quantity = new_rnd_quantity
+            order_line.save()
+            self.assertEqual(OrderLine.objects.all().count(), expected_order_lines_count)
+            self.assertEqual(order.order_lines.count(), expected_order_lines_count)
+            self.assertEqual(order.items_total, expected_items_total)
+
+
+        # TODO add comments
 
 
