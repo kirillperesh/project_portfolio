@@ -1,3 +1,4 @@
+from logging import raiseExceptions
 from types import prepare_class
 from django.test import TestCase, override_settings
 from django.db.models.signals import pre_delete
@@ -133,6 +134,33 @@ class ModelsTest(TestCase):
         self.assertEqual(gallery.slug, slugify(product.name + "_gallery"))
         self.assertEqual(product.main_photo, photo)
 
+    def test_photos_rename_on_product_rename(self):
+        """Checks if product's gallery & photos are renamed properly when the product is renamed"""
+        rnd_product_name = get_random_string(length=20)
+        gallery = create_gallery(title=rnd_product_name)
+        # create 4 random photos and add them to product's gallery
+        for _ in range(4):
+            rnd_photo_name = f'{get_random_string()}_{rnd_product_name}' # this part is usually done in the view
+            img_file = SimpleUploadedFile(rnd_photo_name, b"these are the file contents")
+            photo = photo_models.Photo.objects.create(image=img_file, title=rnd_photo_name, slug=slugify(rnd_photo_name))
+            gallery.photos.add(photo)
+        product = Product.objects.create(name=rnd_product_name, photos=gallery)
+        self.assertTrue(product.photos.photos.all().exists())
+        self.assertQuerysetEqual(product.photos.photos.all().order_by('id'), photo_models.Photo.objects.all().order_by('id'))
+        self.assertEqual(gallery.slug, slugify(product.name + "_gallery"))
+        for photo in product.photos.photos.all():
+            self.assertTrue(photo.title.endswith(f'_{rnd_product_name}'))
+            self.assertTrue(photo.slug.endswith(f'_{slugify(rnd_product_name)}'))
+        # rename the product, all of its photos and gallery has to be renamed on save() as well
+        rnd_product_name = get_random_string(length=20)
+        product.name = rnd_product_name
+        product.save()
+        self.assertQuerysetEqual(product.photos.photos.all().order_by('id'), photo_models.Photo.objects.all().order_by('id'))
+        self.assertEqual(gallery.slug, slugify(product.name + "_gallery"))
+        for photo in product.photos.photos.all():
+            self.assertTrue(photo.title.endswith(f'_{rnd_product_name}'))
+            self.assertTrue(photo.slug.endswith(f'_{slugify(rnd_product_name)}'))
+
     def test_product_save_profit_update(self):
         """Assert product save method updates profit attr"""
         def update_check_prices():
@@ -204,23 +232,23 @@ class ModelsTest(TestCase):
         self.assertEqual(orderline_2.line_number, order_no_user.order_lines.count()) # line count has stay the same, because same product lines get summed up
 
     def test_orderline_duplicating_avoiding(self):
-        """Checks if an existing order_line instance's quantity is incremented properly, if a new order_line instance of the same product is tried to be created. Also check if a duplicating instance of order_line is not created.
-        """
+        """Checks if an existing order_line instance's quantity is incremented properly, if a new order_line instance of the same product is tried to be created. Also check if a duplicating instance of order_line is not created."""
         quantity_1 = random.randint(1, 100)
         quantity_2 = random.randint(1, 100)
         OrderLine.objects.all().delete()
         order = Order.objects.create()
         self.assertEqual(OrderLine.objects.all().count(), 0)
         self.assertEqual(order.order_lines.count(), 0)
+        # creating 1 line of product A: 1 created
         OrderLine.objects.create(parent_order=order, product=self.product_child, quantity=quantity_1)
         self.assertEqual(OrderLine.objects.all().count(), 1)
         self.assertEqual(order.order_lines.count(), 1)
         self.assertEqual(order.order_lines.first().quantity, quantity_1)
+        # creating 2 line of product A: 0 created, line 1 updated
         OrderLine.objects.create(parent_order=order, product=self.product_child, quantity=quantity_2)
         self.assertEqual(OrderLine.objects.all().count(), 1)
         self.assertEqual(order.order_lines.count(), 1)
         self.assertEqual(order.order_lines.first().quantity, quantity_1+quantity_2)
-        # TODO add comments
 
     def test_order_calculating(self):
         """Checks if Order's total prices are calculated properly"""
@@ -285,15 +313,17 @@ class ModelsTest(TestCase):
         OrderLine.objects.all().delete()
         order = Order.objects.create()
         self.assertEqual(order.items_total, expected_items_total)
-        for i in range(10):
+        for i in range(5):
             expected_order_lines_count = i + 1
             rnd_product = Product.objects.create(name=get_random_string(), category = self.child_cat)
             rnd_quantity = random.randint(1, 100)
             expected_items_total += rnd_quantity
+            # creating a line of a random product: 1 created, order's total updated
             order_line = OrderLine.objects.create(parent_order=order, product=rnd_product, quantity=rnd_quantity)
             self.assertEqual(OrderLine.objects.all().count(), expected_order_lines_count)
             self.assertEqual(order.order_lines.count(), expected_order_lines_count)
             self.assertEqual(order.items_total, expected_items_total)
+            # updating previous line's quantity: 0 created, order's total updated
             new_rnd_quantity = random.randint(1, 100)
             expected_items_total += new_rnd_quantity - rnd_quantity
             order_line.quantity = new_rnd_quantity
@@ -301,8 +331,5 @@ class ModelsTest(TestCase):
             self.assertEqual(OrderLine.objects.all().count(), expected_order_lines_count)
             self.assertEqual(order.order_lines.count(), expected_order_lines_count)
             self.assertEqual(order.items_total, expected_items_total)
-
-
-        # TODO add comments
 
 
