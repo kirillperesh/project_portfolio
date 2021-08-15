@@ -4,9 +4,11 @@ from logging import raiseExceptions
 from django.db.models.query import InstanceCheckMeta
 from django.shortcuts import render, redirect, get_object_or_404, resolve_url
 from django.urls import reverse
+from django.http import HttpResponseRedirect
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required
 from django.utils.text import slugify
 from urllib.parse import urlencode
 from django.views.generic import ListView, DetailView, TemplateView, CreateView
@@ -277,10 +279,11 @@ class SignInView(LoginView):
     authentication_form = SignInForm
     template_name = 'sign_in.html'
 
-
+@login_required
 @require_http_methods(["GET", "POST"])
 def cart_view(request):
     current_order = get_order(request, status='CUR') # select the latest current order
+    if isinstance(current_order, HttpResponseRedirect): return current_order # return 500 if there is no current order
     if request.method=='POST':
         products_id_set = set(request.POST.getlist('products_id'))
         if products_id_set: current_order.order_lines.all().delete()
@@ -306,7 +309,8 @@ def cart_view(request):
 
 
 class AddToCartView(LoginRequiredMixin, RedirectView):
-    """Creates a new OrderLine of product given or increments an existing one"""
+    """Creates a new OrderLine of product given or increments an existing one
+    If there's none, a current_order is created via user_logs_in signal"""
     http_method_names = ['post',]
     query_string = False
 
@@ -315,7 +319,8 @@ class AddToCartView(LoginRequiredMixin, RedirectView):
         if not request.user.is_authenticated: return self.handle_no_permission()
         # from RedirectView.dispatch
         if not request.method.lower() in self.http_method_names: return self.http_method_not_allowed(request, *args, **kwargs)
-        current_order = get_order(request, status='CUR') # select the latest current order
+        current_order = get_order(request, status='CUR') # checks if there is and selects the latest current order
+        if isinstance(current_order, HttpResponseRedirect): return current_order # return 500 if there is no current order
         self.url = request.POST.get('next', '/') # set redirect url
         product_id = request.POST.get('product_id')
         OrderLine.objects.create(parent_order=current_order,
@@ -323,5 +328,3 @@ class AddToCartView(LoginRequiredMixin, RedirectView):
                                  )
         return RedirectView.dispatch(self, request, *args, **kwargs)
 
-
-# TODO something has to handler current_order creation before add_to_cart's and cart's views
