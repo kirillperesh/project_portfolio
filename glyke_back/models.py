@@ -148,7 +148,7 @@ class Product(Price, TimeStampedModel):
             self.photos.slug = slugify(self.name + _("_gallery"))
             for photo in self.photos.photos.all():
                 photo.title = str(photo.title).replace(self.__original_name, self.name)
-                photo.slug = str(photo.slug).replace(self.__original_name, self.name)
+                photo.slug = str(photo.slug).replace(slugify(self.__original_name), slugify(self.name))
                 photo.save()
             self.photos.save()
         super().save(*args, **kwargs)

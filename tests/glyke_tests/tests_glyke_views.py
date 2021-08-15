@@ -427,3 +427,90 @@ class ProductsStaffViewTest(TestPermissionsGETMixin, TestCase):
         view_products_queryset = response.context['products'].order_by('id')
         self.assertEqual(view_products_queryset.all().count(), products_count)
         self.assertQuerysetEqual(view_products_queryset, Product.objects.all())
+
+class AddToCartViewTest(TestPermissionsGETMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[302,405,405,405]) # from TestPermissionsGETMixin
+
+    def setUp(self):
+        self.client.force_login(self.test_user) # force_login before making requests because this is a logged-in-only view
+        self.product = Product.objects.create(name=get_random_string(length=10))
+        self.basic_url = reverse('add_to_cart')
+
+    def test_current_order_creation_on_user_log_in(self):
+        """Checks if a current order is created on user login, if there is none"""
+        # test_user is already logged in, so there has to be 1 'current_order'
+        self.assertEqual(Order.objects.all().count(), 1)
+        self.assertEqual(self.test_user.orders.filter(status='CUR').count(), 1)
+        self.client.logout()
+        self.assertEqual(Order.objects.all().count(), 1)
+        self.assertEqual(self.test_user.orders.filter(status='CUR').count(), 1)
+        self.client.force_login(self.test_user_staff) # its test_user_staff's first log-in so a 'current_order' has to be created for this user
+        self.assertEqual(Order.objects.all().count(), 2)
+        self.assertEqual(self.test_user_staff.orders.filter(status='CUR').count(), 1)
+        self.client.logout()
+        self.assertEqual(Order.objects.all().count(), 2)
+        self.assertEqual(self.test_user_staff.orders.filter(status='CUR').count(), 1)
+        self.client.force_login(self.test_user_staff)
+        self.assertEqual(Order.objects.all().count(), 2)
+        self.assertEqual(self.test_user_staff.orders.filter(status='CUR').count(), 1)
+
+    def test_order_line_creation(self):
+        """Checks if a product is being added to the cart properly"""
+        self.assertEqual(Product.objects.all().count(), 1)
+        self.assertEqual(Order.objects.all().count(), 1)
+        self.assertEqual(self.test_user.orders.filter(status='CUR').count(), 1)
+        self.assertEqual(self.test_user.orders.filter(status='CUR').first().order_lines.count(), 0)
+        context_data = urlencode({'product_id': self.product.id})
+        for i in range(3): # also checks if the addToCart url increments existing order_line's quantity
+            self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
+            self.assertEqual(Product.objects.all().count(), 1)
+            self.assertEqual(Order.objects.all().count(), 1)
+            self.assertEqual(self.test_user.orders.filter(status='CUR').count(), 1)
+            self.assertEqual(self.test_user.orders.filter(status='CUR').first().order_lines.count(), 1)
+            self.assertEqual(self.test_user.orders.filter(status='CUR').first().order_lines.first().quantity, i+1)
+            self.assertEqual(self.test_user.orders.filter(status='CUR').first().order_lines.first().product, self.product)
+
+    def test_add_to_cart_redirection(self):
+        """Checks if the view redirects properly"""
+        context_data = urlencode({'product_id': self.product.id})
+        response = self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/') # default redirection url
+        next_parameter = reverse('products')
+        context_data = urlencode({'product_id': self.product.id,
+                                  'next': next_parameter})
+        response = self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, next_parameter)
+
+    def test_no_current_order_response(self):
+        """Check if the view redirect correctly if there is no current order"""
+        Order.objects.all().delete()
+        context_data = urlencode({'product_id': self.product.id})
+        response = self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith(r'/oops/?error_suffix='))
+
+class CartViewTest(TestPermissionsGETMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[302,200,200,200]) # from TestPermissionsGETMixin
+
+    def setUp(self):
+        self.client.force_login(self.test_user) # force_login before making requests because this is a logged-in-only view
+        self.product = Product.objects.create(name=get_random_string(length=10))
+        self.basic_url = reverse('cart')
+
+    def test_no_current_order_response(self):
+        """Check if the view redirect correctly if there is no current order"""
+        Order.objects.all().delete()
+        response = self.client.get(self.basic_url)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith(r'/oops/?error_suffix='))
+
+
+
+
+
