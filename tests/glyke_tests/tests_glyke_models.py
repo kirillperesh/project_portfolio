@@ -1,4 +1,5 @@
 from logging import raiseExceptions
+from os import name
 from types import prepare_class
 from django.test import TestCase, override_settings
 from django.db.models.signals import pre_delete
@@ -224,12 +225,18 @@ class ModelsTest(TestCase):
     def test_orderline_autoinc(self):
         """Assert line auto-numering in checks work properly"""
         order_no_user = Order.objects.create()
-        orderline_1 = OrderLine.objects.create(parent_order=order_no_user, product=self.product_child)
-        self.assertEqual(orderline_1.line_number, order_no_user.order_lines.count())
-        orderline_2 = OrderLine.objects.create(parent_order=order_no_user, product=self.product_sub_parent) # has to be different product, because same product lines get summed up
-        self.assertEqual(orderline_2.line_number, order_no_user.order_lines.count())
-        OrderLine.objects.create(parent_order=order_no_user, product=self.product_sub_parent)
-        self.assertEqual(orderline_2.line_number, order_no_user.order_lines.count()) # line count has stay the same, because same product lines get summed up
+        for _ in range(5): # i'm guessing 5 lines is more than enough
+            product = Product.objects.create(name=get_random_string(length=12))
+            order_line = OrderLine.objects.create(parent_order=order_no_user, product=product)
+            self.assertEqual(order_line.line_number, order_no_user.order_lines.count())
+        # deletes all lines one by one, except for the last one
+        # the line_number of each following line has to be decremented by 1 (keeping the initial line order)
+        for _ in range(order_no_user.order_lines.count()-1):
+            order_no_user.order_lines.first().delete()
+            expected_line_number = 1
+            for order_line in order_no_user.order_lines.all():
+                self.assertEqual(order_line.line_number, expected_line_number)
+                expected_line_number += 1
 
     def test_orderline_duplicating_avoiding(self):
         """Checks if an existing order_line instance's quantity is incremented properly, if a new order_line instance of the same product is tried to be created. Also check if a duplicating instance of order_line is not created."""
