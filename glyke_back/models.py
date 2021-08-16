@@ -231,6 +231,9 @@ class OrderLine(Price):
                                 blank=False)
     quantity = models.PositiveIntegerField(_('quantity'), default=1)
 
+    class Meta:
+        ordering = ['line_number']
+
     def __str__(self):
         return f'{self.parent_order} | Line: {self.line_number}'
 
