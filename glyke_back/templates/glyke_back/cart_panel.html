@@ -15,10 +15,13 @@
                     <span>
                         &nbsp;|&nbsp;
                     </span>
-                    Total: $
-                    <span id="cart_price">{{ user.orders.all.first.end_user_price }}</span>
+                    Total:
+                    <span id="cart_price">{{ user.orders.all.first.end_user_price }}</span> $
                 </p>
             </div>
         </a>
     </div>
 {% endif %}
+
+
+<!-- TODO update selection of order to select the latest 'CUR' order -->

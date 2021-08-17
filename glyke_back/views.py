@@ -286,27 +286,23 @@ def cart_view(request):
     if isinstance(current_order, HttpResponseRedirect): return current_order # return 500 if there is no current order
     if request.method=='POST':
         products_id_set = set(request.POST.getlist('products_id'))
-        if products_id_set: current_order.order_lines.all().delete()
 
-        for product_id in products_id_set:
-            quantity_list = request.POST.getlist(f'quantity_{product_id}')
-            if len(quantity_list) > 1: # avoid duplicating
-                new_quantity = sum([int(num) for num in quantity_list])
+        for order_line in current_order.order_lines.all(): # ordered by line_number by default
+            if str(order_line.product.id) in products_id_set:
+                quantity_list = request.POST.getlist(f'quantity_{order_line.product.id}')
+                if len(quantity_list) > 1: # avoid duplicating
+                    new_quantity = sum([int(num) for num in quantity_list])
+                else:
+                    new_quantity = int(quantity_list[0])
+                if order_line.quantity != new_quantity:
+                    order_line.quantity = new_quantity
+                    order_line.save()
             else:
-                new_quantity = int(quantity_list[0])
-
-            OrderLine.objects.create(parent_order=current_order,
-                                     product=Product.objects.get(id=product_id),
-                                     quantity = new_quantity,
-                                     )
-
-
+                order_line.delete()
     context = {}
-
     context['order'] = current_order
     context['order_lines'] = current_order.order_lines.all()
     return render(request, "cart.html", context)
-
 
 class AddToCartView(LoginRequiredMixin, RedirectView):
     """Creates a new OrderLine of product given or increments an existing one
@@ -328,3 +324,5 @@ class AddToCartView(LoginRequiredMixin, RedirectView):
                                  )
         return RedirectView.dispatch(self, request, *args, **kwargs)
 
+
+# TODO finish and docstr and comment cart_view
