@@ -299,14 +299,10 @@ def cart_view(request):
                     order_line.save()
             else:
                 order_line.delete()
-
-
     context = {}
-
     context['order'] = current_order
     context['order_lines'] = current_order.order_lines.all()
     return render(request, "cart.html", context)
-
 
 class AddToCartView(LoginRequiredMixin, RedirectView):
     """Creates a new OrderLine of product given or increments an existing one
