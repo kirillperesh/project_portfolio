@@ -5,12 +5,6 @@
 
 {% block additional_head %}
 {% load static %}
-<!-- DataTables CDN -->
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.dataTables.min.css">
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.colVis.min.js"></script>
 
 <link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/cart.css' %}"/>
 {% endblock %}
@@ -18,65 +12,100 @@
 {% block content %}
 <div class="row">
     <div class="col-xl-9 col-lg-10 col-md-12 col-sm-12 mx-auto">
-        <div class="row">
-          <div class="col-12">
-            <h2 class="tm-block-title d-inline-block">Your cart</h2>
-          </div>
-        </div>
-        <div class="row">
-            <div class="col-6">
-                <form id="cart_form" role="form" action="" method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <table id="cart_table" class="display cell-border">
-                        <thead id="cart_table_thead">
-                            <tr>
-                                <th class="col-50p-f">#</th>
-                                <th class="col-150p-f">Name</th>
-                                <th class="col-100p-f">Initial price, $</th>
-                                <th class="col-65p-f">Discount, %</th>
-                                <th class="col-185p-m">PPP, $</th>
-                                <th class="col-65p-f">Quantity</th>
-                                <th class="col-65p-f">Total price per item, $</th>
-                                <th>delete_btn_row</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for order_line in order_lines %}
+        <div class="tm-bg-primary-dark tm-block tm-block-h-auto">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="tm-block-title d-inline-block">Placeholder</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-6 cart-col">
+                    <header id="site-header">
+                        <div class="cart-container">
+                            <h1>Shopping cart <span>[</span> <em><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank">Don't click</a></em> <span class="last-span is-open">]</span></h1>
+                        </div>
+                    </header>
+                    <form id="cart_form" role="form" action="" method="post" enctype="multipart/form-data">
 
-                            <tr id="cart_row_{{ order_line.line_number }}">
-                                <td>{{ order_line.line_number }}</td>
-                                <td>{{ order_line.product }}</td>
-                                <td>$ {{ order_line.product.selling_price }}</td>
-                                <td>{{ order_line.product.discount_percent }} %</td>
-                                <td>
-                                    $ <span id='product_{{ order_line.line_number }}_end_user_price'>{{ order_line.product.end_user_price }}</span>
-                                </td>
-                                <td>
-                                    <input type="number" id="quantity_{{ order_line.product.id }}" name="quantity_{{ order_line.product.id }}" value="{{ order_line.quantity }}" min="0" max="{% widthratio 9999.99 order_line.product.end_user_price 1 as almost_max %}{{ almost_max|add:'-1' }}">
-                                </td>
-                                <td>
-                                    $ <span id='order_line_{{ order_line.line_number }}_end_user_price'>{{ order_line.end_user_price }}</span>
-                                </td>
-                                <td>
-                                    <button onclick="delete_cart_row('cart_row_{{ order_line.line_number }}')" type="button" class=""><i class="fas fa-times"></i></button>
-                                </td>
+                        {% csrf_token %}
+                          <div class="cart-container">
 
-                                <input type="hidden" id="products_id" name="products_id" value="{{ order_line.product.id }}">
-                            </tr>
-                            {% endfor %}
+                            <section id="cart">
 
-                        </tbody>
-                    </table>
+                                {% for order_line in order_lines %}
 
-                    <p>
-                        Total: $ <span id='cart_price_bottom'>{{ order.end_user_price }}</span>
-                    </p>
+                                    <article id="cart_row_{{ order_line.line_number }}" class="product">
+                                        <header>
+                                            <a class="remove">
+                                                <img class="trans02s" src="{{ order_line.product.main_photo.image.url }}" alt="">
+                                                <h3>Remove</h3>
+                                            </a>
+                                        </header>
 
-                    <div class="trans02s">
-                        <input id='update_cart' type="submit" value="Update order" class="btn-add btn-add-primary text-uppercase"></input>
-                    </div>
+                                        <div class="product-content">
 
-                </form>
+                                            <h1>{{ order_line.line_number }}, {{ order_line.product }}</h1>
+
+                                            {{ order_line.product.description }}
+
+                                            <div title="You have selected this product to be shipped in the color yellow." style="top: 0" class="category-color bg-details-{% if order_line.product.category.bg_color %}{{ order_line.product.category.bg_color }}{% else %}default{% endif %}"></div>
+                                            <div style="top: 43px" class="type">XXL</div>
+                                        </div>
+
+                                        <footer class="footer-content">
+                                            <span class="qt-minus">-</span>
+                                            <span class="qt">
+                                                <input type="number" id="quantity_{{ order_line.product.id }}" name="quantity_{{ order_line.product.id }}" value="{{ order_line.quantity }}" min="1" max="{% widthratio 9999.99 order_line.product.end_user_price 1 as almost_max %}{{ almost_max|add:'-1' }}">
+                                            </span>
+                                            <span class="qt-plus">+</span>
+
+                                            <span class="full-price">
+                                                <span id='order_line_{{ order_line.line_number }}_end_user_price'>{{ order_line.end_user_price }}</span> $
+                                            </span>
+
+                                            <span class="price">
+                                                <span id='product_{{ order_line.line_number }}_end_user_price'>
+                                                {{ order_line.product.end_user_price }}</span> $
+                                            </span>
+                                        </footer>
+
+                                        <input type="hidden" id="products_id" name="products_id" value="{{ order_line.product.id }}">
+                                    </article>
+                                {% endfor %}
+                            </section>
+
+                          </div>
+
+                          <footer id="site-footer">
+                            <div class="cart-container clearfix">
+
+                              <div class="left">
+                                <h2 class="subtotal">Subtotal: <span id='cart_price_bottom'>{{ order.end_user_price }}</span>$</h2>
+                                <h3 class="tax">Taxes (0%): <span>0</span> $</h3>
+                                <h3 class="shipping">Shipping: <span>0</span> $</h3>
+                              </div>
+
+                              <div class="right">
+                                <h1 class="total">Total: <span id='cart_price_bottom'>{{ order.end_user_price }}</span> $</h1>
+                                <div class="trans02s">
+                                    <input id='update_cart' type="submit" value="Update order" class="btn"></input>
+                                </div>
+                              </div>
+
+                            </div>
+                          </footer>
+
+                        <!-- <div class="trans02s">
+                            <input id='update_cart' type="submit" value="Update order" class="btn-add btn-add-primary text-uppercase"></input>
+                        </div> -->
+
+                    </form>
+                </div>
+
+                <div class="col-xl-6">
+                    <span>Placeholder</span>
+
+                </div>
             </div>
         </div>
     </div>
