@@ -204,9 +204,9 @@ class Order(Price, TimeStampedModel):
             self.number = f'{prefix}_{name_time_stamp}'
 
         order_prices_sum = self.order_lines.all().aggregate(models.Sum('cost_price'), models.Sum('end_user_price'), models.Sum('selling_price'))
-        self.cost_price = order_prices_sum['cost_price__sum'] if order_prices_sum['cost_price__sum'] else 0
-        self.end_user_price = order_prices_sum['end_user_price__sum'] if order_prices_sum['end_user_price__sum'] else 0
-        self.selling_price = order_prices_sum['selling_price__sum'] if order_prices_sum['selling_price__sum'] else 0
+        self.cost_price = Decimal(order_prices_sum['cost_price__sum']).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) if order_prices_sum['cost_price__sum'] else 0
+        self.end_user_price = Decimal(order_prices_sum['end_user_price__sum']).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) if order_prices_sum['end_user_price__sum'] else 0
+        self.selling_price = Decimal(order_prices_sum['selling_price__sum']).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) if order_prices_sum['selling_price__sum'] else 0
         self.profit = self.end_user_price - self.cost_price
 
         items_sum = self.order_lines.all().aggregate(models.Sum('quantity'))
