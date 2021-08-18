@@ -43,10 +43,16 @@
                                         </header>
 
                                         <div class="product-content">
+                                            <!-- <span> -->
+                                                <span class="product-line-number"># {{ order_line.line_number }}</span>
+                                                <span class="product-name">
 
-                                            <h1>{{ order_line.line_number }}, {{ order_line.product }}</h1>
+                                                <a href="{% url 'product_details' id=order_line.product.id %}">{{ order_line.product }}</a></span>
+                                            <!-- </span> -->
 
-                                            {{ order_line.product.description }}
+                                            <p class="product-description">
+                                                {{ order_line.product.description }}
+                                            </p>
 
                                             <div title="You have selected this product to be shipped in the color yellow." style="top: 0" class="category-color bg-details-{% if order_line.product.category.bg_color %}{{ order_line.product.category.bg_color }}{% else %}default{% endif %}"></div>
                                             <div style="top: 43px" class="type">XXL</div>
@@ -58,6 +64,11 @@
                                                 <input type="number" id="quantity_{{ order_line.product.id }}" name="quantity_{{ order_line.product.id }}" value="{{ order_line.quantity }}" min="1" max="{% widthratio 9999.99 order_line.product.end_user_price 1 as almost_max %}{{ almost_max|add:'-1' }}">
                                             </span>
                                             <span class="qt-plus">+</span>
+
+                                            <span class="product-stock" {% if order_line.product.stock > 6 %} hidden {% endif %}>
+                                                <span class="stock-number">{{ order_line.product.stock }}</span>
+                                                <span> left</span>
+                                            </span>
 
                                             <span class="full-price">
                                                 <span id='order_line_{{ order_line.line_number }}_end_user_price'>{{ order_line.end_user_price }}</span> $
@@ -104,8 +115,8 @@
 
                 <div class="col-xl-6">
                     <span>Placeholder</span>
-
                 </div>
+
             </div>
         </div>
     </div>
