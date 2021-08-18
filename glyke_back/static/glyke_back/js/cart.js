@@ -45,6 +45,20 @@ $(document).ready(function() {
 
     $("[id^=quantity_]").change(function (event) { // update total price per position
         current_value = parseInt(event.target.value) // entered quantity value
+
+        // quantity cannot be more then stock
+        stock = $(this).parent().parent().children(".product-stock").children(".stock-number")[0].innerHTML; // number of products available
+        if (current_value > stock) {
+            event.target.value = stock
+            var myModal = new jBox('Modal', {
+                title: "Sorry, we're not able to ship more of this product yet",
+                content: "Only " + stock + " items available",
+                animation: 'zoomIn',
+                addClass: 'alert_no_stock',
+            });
+            myModal.open();
+            return;}
+
         max_value = parseInt(event.target.max) // max quantity value
         if (current_value < 0) { event.target.value = 0 }
         else if (current_value > max_value) { event.target.value = max_value }
@@ -66,11 +80,17 @@ $(document).ready(function() {
         total_end_user_price.innerHTML = (parseFloat(product_end_user_price.innerHTML) * current_value).toFixed(2)
         for (cart_total of $('[id^=cart_price]')) {cart_total.innerHTML = new_order_total_end_user_price}
 
-        // TODO add update items_total
+        // update items_total
+        new_items_total = 0
+        for (items_number of $("[id^=quantity_]")) {new_items_total += parseInt(items_number.value)}
+        for (items_total of $('#cart_items')) {items_total.innerHTML = new_items_total}
+
     });
 
     $(".remove").click(function(){
         var el = $(this);
+        // this makes total prices and items counters update on remove
+        el.parent().parent().children("footer").children(".qt").children("input").val(0).change()
         el.parent().parent().addClass("removed");
         window.setTimeout(
           function(){
@@ -84,9 +104,6 @@ $(document).ready(function() {
                 // }
               }
             //   changeTotal();
-
-
-            // TODO add my changetotal
             });
           }, 200);
       });
@@ -95,10 +112,9 @@ $(document).ready(function() {
         // $(this).parent().children(".qt").children("input").val(parseInt($(this).parent().children(".qt").children("input").val()) + 1);
         var el = $(this);
         child = el.parent().children(".qt").children("input");
+
         child.val(parseInt(child.val()) + 1).change();
-
         el.parent().children(".full-price").addClass("added");
-
         window.setTimeout(function(){el.parent().children(".full-price").removeClass("added");
         // changeVal(el)
         ;}, 150);
@@ -109,9 +125,7 @@ $(document).ready(function() {
 
         child = el.parent().children(".qt").children("input");
 
-        if(parseInt(child.val()) > 1) {
-          child.val(parseInt(child.val()) - 1).change();
-        }
+        if(parseInt(child.val()) > 1) {child.val(parseInt(child.val()) - 1).change();}
 
         el.parent().children(".full-price").addClass("minused");
         window.setTimeout(function(){el.parent().children(".full-price").removeClass("minused");
