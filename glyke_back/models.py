@@ -138,7 +138,7 @@ class Product(Price, TimeStampedModel):
 
     def save(self, *args, **kwargs):
         # main_photo block: update main_photo
-        try: # check if main_photo is None or has just been deleted (DoesNotExist is raised)
+        try:# check if main_photo is None or has just been deleted (DoesNotExist is raised)
             if not self.main_photo: raise photo_models.Photo.DoesNotExist
         except photo_models.Photo.DoesNotExist:
             if self.photos: self.main_photo = self.photos.photos.all().first() # sets main_photo to default value (first() for now)
@@ -151,6 +151,8 @@ class Product(Price, TimeStampedModel):
                 photo.slug = str(photo.slug).replace(slugify(self.__original_name), slugify(self.name))
                 photo.save()
             self.photos.save()
+        # status block: products with no selling price cannot be shown or added to cart, therefor should be marked as inactive
+        if self.selling_price <= 0: self.is_active = False
         super().save(*args, **kwargs)
         self.__original_name = self.name
 
