@@ -17,11 +17,16 @@
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/my_style.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/profile_style.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/old_styles.css' %}"/>
+    <!-- <link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/old_styles.css' %}"/> -->
     <link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/add_edit_product.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/category_colors.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/cart_panel.css' %}"/>
     <link rel="shortcut icon" type="image/png" href="{% static 'glyke_back/favicon.ico' %}"/>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/StephanWagner/jBox@v1.3.3/dist/jBox.all.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/gh/StephanWagner/jBox@v1.3.3/dist/jBox.all.min.css" rel="stylesheet">
 
     {% block additional_head %}
     {% endblock %}
@@ -48,10 +53,7 @@
         {% include "glyke_footer.html" %}
     {% endblock %}
 
-
     {% load static %}
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
     <script src="{% static 'glyke_back/js/main.js' %}"></script>
 
 </body>
