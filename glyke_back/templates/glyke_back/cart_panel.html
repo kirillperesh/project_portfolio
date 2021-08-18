@@ -9,19 +9,15 @@
                     <span class="fas fa-shopping-cart"></span>
                 </p>
                 <p id='cart_info'>
-                    <span id="cart_items">
-                        {{ user.orders.all.first.items_total }} items
-                    </span>
+                    <span id="cart_items">{{ order.items_total }}</span> items
                     <span>
                         &nbsp;|&nbsp;
                     </span>
                     Total:
-                    <span id="cart_price">{{ user.orders.all.first.end_user_price }}</span> $
+                    <span id="cart_price">{{ order.end_user_price }}</span> $
                 </p>
             </div>
         </a>
     </div>
 {% endif %}
 
-
-<!-- TODO update selection of order to select the latest 'CUR' order -->
