@@ -339,4 +339,13 @@ class ModelsTest(TestCase):
             self.assertEqual(order.order_lines.count(), expected_order_lines_count)
             self.assertEqual(order.items_total, expected_items_total)
 
+    def test_order_get_latest_methods(self):
+        """Checks if OrderFiltersManager.get_latest_.. methods work properly"""
+        # check only 'CUR' method for now
+        order_current_oldest = Order.objects.create(status='CUR')
+        order_current_latest = Order.objects.create(status='CUR')
+        order_canceled_latest = Order.objects.create(status='CAN')
+        self.assertNotEqual(Order.objects.get_latest_current(), order_current_oldest)
+        self.assertEqual(Order.objects.get_latest_current(), order_current_latest)
+
 
