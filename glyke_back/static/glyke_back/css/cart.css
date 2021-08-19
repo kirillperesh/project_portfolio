@@ -224,6 +224,7 @@ a {
 .product-stock .stock-number {
 	color: tomato;
 	font-size: 24px;
+	font-weight: 600;
 }
 
 .product footer .price {
@@ -231,13 +232,33 @@ a {
 	color: #000;
 	float: right;
 	line-height: 40px;
-	font-size: 15px;
-	font-weight: 300;
+	height: 40px;
+	font-size: 16px;
 	margin: 5px;
 	padding: 0px;
     width: 80px;
     text-align: center;
 }
+
+.product footer .price p{
+	margin: 0px;
+	height: 40px;
+}
+
+.product footer .price-discounted {
+	line-height: 17px;
+	font-size: 15px;
+}
+
+.product footer .price-discounted p{
+	height: 20px;
+}
+.product footer .price-discounted .old-price{
+	font-size: 13px;
+	font-weight: 700;
+	color: tomato;
+}
+
 
 .product footer .full-price {
 	background: #f5a523;
@@ -333,6 +354,14 @@ a {
 	margin: 15px 0;
 }
 
+.subtotal-selling-price {
+	text-align: right;
+	margin: 0px !important;
+	margin-top: -10px !important;
+	color: tomato;
+	height: 20px;
+}
+
 .left {
 	float: left;
 }
@@ -341,7 +370,7 @@ a {
 	float: right;
 }
 
-.btn {
+.cart-btn {
 	background: #f5a523;
 	border: 1px solid #999;
 	border-style: none none solid none;
@@ -361,7 +390,7 @@ a {
 	transition: all .2s linear;
 }
 
-.btn:hover {
+.cart-btn:hover {
 	color: #fff;
 	background: #f5a523;
 }
@@ -406,3 +435,7 @@ a {
 
 
 .alert_no_stock .jBox-container {border-radius: 0px !important;}
+
+.line-through {
+	text-decoration: line-through;
+}
