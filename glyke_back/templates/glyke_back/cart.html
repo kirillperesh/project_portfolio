@@ -1,7 +1,7 @@
 {% extends 'glyke_base.html' %}
 
 
-{% block title %} Your cart {% endblock %}
+{% block title %} Your shopping cart {% endblock %}
 
 {% block additional_head %}
 {% load static %}
@@ -26,99 +26,79 @@
                         </div>
                     </header>
                     <form id="cart_form" role="form" action="" method="post" enctype="multipart/form-data">
-
                         {% csrf_token %}
-                          <div class="cart-container">
-
-                            <section id="cart">
-
-                                {% for order_line in order_lines %}
-
-                                    <article id="cart_row_{{ order_line.line_number }}" class="product">
-                                        <header>
-                                            <a class="remove">
-                                                <img class="trans02s" src="{{ order_line.product.main_photo.image.url }}" alt="">
-                                                <h3>Remove</h3>
-                                            </a>
-                                        </header>
-
-                                        <div class="product-content">
-                                            <!-- <span> -->
+                            <div class="cart-container">
+                                <section id="cart">
+                                    {% for order_line in order_lines %}
+                                        <article id="cart_row_{{ order_line.line_number }}" class="product">
+                                            <header>
+                                                <a class="remove">
+                                                    <img class="trans02s" src="{{ order_line.product.main_photo.image.url }}" alt="">
+                                                    <h3>Remove</h3>
+                                                </a>
+                                            </header>
+                                            <div class="product-content">
                                                 <span class="product-line-number"># {{ order_line.line_number }}</span>
                                                 <span class="product-name">
+                                                    <a href="{% url 'product_details' id=order_line.product.id %}">{{ order_line.product }}</a>
+                                                </span>
+                                                <p class="product-description">
+                                                    {% if order_line.product.description %}
+                                                        {{ order_line.product.description }}
+                                                    {% else %}
+                                                        No description yet
+                                                    {% endif %}
+                                                </p>
+                                                <div title="'{{ order_line.product.category }}'" style="top: 0" class="category-color bg-details-{% if order_line.product.category.bg_color %}{{ order_line.product.category.bg_color }}{% else %}default{% endif %}"></div>
+                                                <div style="top: 40px" class="type">placeholder</div>
+                                            </div>
 
-                                                <a href="{% url 'product_details' id=order_line.product.id %}">{{ order_line.product }}</a></span>
-                                            <!-- </span> -->
+                                            <footer class="footer-content">
+                                                <span class="qt-minus">-</span>
+                                                <span class="qt">
+                                                    <input type="number" id="quantity_{{ order_line.line_number }}" name="quantity_{{ order_line.line_number }}" value="{{ order_line.quantity }}" min="1" max="{% widthratio 9999.99 order_line.product.end_user_price 1 as almost_max %}{{ almost_max|add:'-1' }}">
+                                                </span>
+                                                <span class="qt-plus">+</span>
 
-                                            <p class="product-description">
-                                                {% if order_line.product.description %}
-                                                    {{ order_line.product.description }}
-                                                {% else %}
-                                                    No description yet
-                                                {% endif %}
-                                            </p>
+                                                <span class="product-stock" {% if order_line.product.stock > 6 %} hidden {% endif %}>
+                                                    <span class="stock-number">{{ order_line.product.stock }}</span>
+                                                    <span> left</span>
+                                                </span>
 
-                                            <div title="'{{ order_line.product.category }}'" style="top: 0" class="category-color bg-details-{% if order_line.product.category.bg_color %}{{ order_line.product.category.bg_color }}{% else %}default{% endif %}"></div>
-                                            <div style="top: 40px" class="type">placeholder</div>
-                                        </div>
-
-                                        <footer class="footer-content">
-                                            <span class="qt-minus">-</span>
-                                            <span class="qt">
-                                                <input type="number" id="quantity_{{ order_line.line_number }}" name="quantity_{{ order_line.line_number }}" value="{{ order_line.quantity }}" min="1" max="{% widthratio 9999.99 order_line.product.end_user_price 1 as almost_max %}{{ almost_max|add:'-1' }}">
-                                            </span>
-                                            <span class="qt-plus">+</span>
-
-                                            <span class="product-stock" {% if order_line.product.stock > 6 %} hidden {% endif %}>
-                                                <span class="stock-number">{{ order_line.product.stock }}</span>
-                                                <span> left</span>
-                                            </span>
-
-                                            <span class="full-price">
-                                                <span id='order_line_{{ order_line.line_number }}_end_user_price'>{{ order_line.end_user_price }}</span> $
-                                            </span>
-
-                                            <span class="price {% if order_line.product.discount_percent %}price-discounted{% endif %}">
-                                                {% if order_line.product.discount_percent %}
-                                                    <p class="old-price line-through"><span id='product_{{ order_line.line_number }}_selling_price'> {{ order_line.product.selling_price }}</span> $ </p>
-                                                {% endif %}
-                                                <p><span id='product_{{ order_line.line_number }}_end_user_price'>{{ order_line.product.end_user_price }}</span> $</p>
-                                            </span>
-                                        </footer>
-
-                                        <input type="hidden" id="products_id" name="products_id" value="{{ order_line.product.id }}">
-                                    </article>
-                                {% endfor %}
-                            </section>
-
-                          </div>
-
-                          <footer id="site-footer">
-                            <div class="cart-container clearfix">
-
-                              <div class="left">
-                                {% if order.selling_price != order_line.end_user_price %}
-                                    <h3 class="subtotal-selling-price line-through"><span id='cart_selling_price_bottom'>{{ order.selling_price }}</span> $</h3>
-                                {% endif %}
-                                <h2 class="subtotal">Subtotal: <span id='cart_price_bottom'>{{ order.end_user_price }}</span> $</h2>
-                                <h3 class="tax">Taxes (0%): <span>0</span> $</h3>
-                                <h3 class="shipping">Shipping: <span>0</span> $</h3>
-                              </div>
-
-                              <div class="right">
-                                <h1 class="total">Total: <span id='cart_price_bottom'>{{ order.end_user_price }}</span> $</h1>
-                                <div class="trans02s">
-                                    <input id='update_cart' type="submit" value="Update order" class="cart-btn"></input>
-                                </div>
-                              </div>
-
+                                                <span class="full-price">
+                                                    <span id='order_line_{{ order_line.line_number }}_end_user_price'>{{ order_line.end_user_price }}</span> $
+                                                </span>
+                                                <span class="price {% if order_line.product.discount_percent %}price-discounted{% endif %}">
+                                                    {% if order_line.product.discount_percent %}
+                                                        <p class="old-price line-through"><span id='product_{{ order_line.line_number }}_selling_price'> {{ order_line.product.selling_price }}</span> $ </p>
+                                                    {% endif %}
+                                                    <p><span id='product_{{ order_line.line_number }}_end_user_price'>{{ order_line.product.end_user_price }}</span> $</p>
+                                                </span>
+                                            </footer>
+                                            <input type="hidden" id="products_id" name="products_id" value="{{ order_line.product.id }}">
+                                        </article>
+                                    {% endfor %}
+                                </section>
                             </div>
-                          </footer>
 
-                        <!-- <div class="trans02s">
-                            <input id='update_cart' type="submit" value="Update order" class="cart-btn-add cart-btn-add-primary text-uppercase"></input>
-                        </div> -->
-
+                            <footer id="site-footer">
+                                <div class="cart-container clearfix">
+                                    <div class="left">
+                                        {% if order.selling_price != order_line.end_user_price %}
+                                            <h3 class="subtotal-selling-price line-through"><span id='cart_selling_price_bottom'>{{ order.selling_price }}</span> $</h3>
+                                        {% endif %}
+                                        <h2 class="subtotal">Subtotal: <span id='cart_price_bottom'>{{ order.end_user_price }}</span> $</h2>
+                                        <h3 class="tax">Taxes (0%): <span>0</span> $</h3>
+                                        <h3 class="shipping">Shipping: <span>0</span> $</h3>
+                                    </div>
+                                    <div class="right">
+                                        <h1 class="total">Total: <span id='cart_price_bottom'>{{ order.end_user_price }}</span> $</h1>
+                                        <div class="trans02s">
+                                            <input id='update_cart' type="submit" value="Update order" class="cart-btn"></input>
+                                        </div>
+                                    </div>
+                                </div>
+                            </footer>
                     </form>
                 </div>
 
