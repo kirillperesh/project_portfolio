@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from decimal import Decimal, ROUND_HALF_UP
 
 from photologue import models as photo_models
+from .managers import OrderFiltersManager
 
 
 def get_deleted_instance(model):
@@ -159,6 +160,8 @@ class Product(Price, TimeStampedModel):
 class Order(Price, TimeStampedModel):
     """Prices represent the total value for an order
     Discount is removed"""
+    objects = OrderFiltersManager() # this manager adds get_latest_current method, which is needed for the order_panel template
+
     CURRENT_ORDER = 'CUR'
     PENDING = 'PEN'
     CONFIRMED = 'CON'
@@ -215,7 +218,6 @@ class Order(Price, TimeStampedModel):
         self.items_total = items_sum['quantity__sum'] if items_sum['quantity__sum'] else 0
 
         TimeStampedModel.save(self, *args, **kwargs) # not calling super() here because the logic of price recounting for the Order model is different
-
 
 class OrderLine(Price):
     """Prices represent the aggregate value for a line (product.price * quantity)
