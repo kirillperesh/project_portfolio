@@ -38,12 +38,8 @@ a {
 	transition: color .2s linear;
 }
 
-a:hover {
-	color: #53b5aa;
-}
-
 #site-header h1 span {
-	color: #53b5aa;
+	color: #f5a523;
 }
 
 #site-header h1 span.last-span {
@@ -83,7 +79,7 @@ a:hover {
 }
 
 #cart a {
-	color: #53b5aa;
+	color: #f5a523;
 	text-decoration: none;
 
 	-webkit-transition: color .2s linear;
@@ -94,7 +90,8 @@ a:hover {
 }
 
 #cart a:hover {
-	color: #000;
+	color: #435c70  !important;
+	font-weight: 400;
 }
 
 .product.removed {
@@ -149,7 +146,7 @@ a:hover {
 }
 
 .product header h3 {
-	background: #53b5aa;
+	background: #f5a523;
 	color: #fff;
 	font-size: 22px;
 	font-weight: 300;
@@ -181,11 +178,27 @@ a:hover {
     overflow: auto;
 }
 
-.product h1 {
-	color: #53b5aa;
+.product .product-name {
+	color: #f5a523;
 	font-size: 25px;
 	font-weight: 300;
-	margin: 10px 0 5px 0;
+	line-height: 50px;
+}
+
+.product .product-description {
+	margin-top: 0px;
+}
+
+.product .product-line-number {
+	position: absolute;
+	left: 27%;
+	font-size: 18px;
+	line-height: 30px;
+	margin: 6px 0 0px 0;
+	padding-right: 7px;
+	border-right: 2px solid #435c7052;
+	/* border-bottom-right-radius: 15px;
+	border-bottom: 2px solid #435c7052; */
 }
 
 .product footer.footer-content {
@@ -194,21 +207,61 @@ a:hover {
 	padding: 0;
 }
 
+.product footer .product-stock {
+	background: #fcfcfc;
+	color: #000;
+	float: left;
+	border: 3px solid rgba(255, 99, 71, 0.3);
+	line-height: 34px;
+	height: 40px;
+	font-size: 15px;
+	margin: 5px 0px 0px 5px;
+	font-weight: 400;
+    text-align: center;
+	padding: 0px 5px 0px 5px;
+}
+
+.product-stock .stock-number {
+	color: tomato;
+	font-size: 24px;
+	font-weight: 600;
+}
+
 .product footer .price {
 	background: #fcfcfc;
 	color: #000;
 	float: right;
 	line-height: 40px;
-	font-size: 15px;
-	font-weight: 300;
+	height: 40px;
+	font-size: 16px;
 	margin: 5px;
 	padding: 0px;
-    width: 90px;
+    width: 80px;
     text-align: center;
 }
 
+.product footer .price p{
+	margin: 0px;
+	height: 40px;
+}
+
+.product footer .price-discounted {
+	line-height: 17px;
+	font-size: 15px;
+}
+
+.product footer .price-discounted p{
+	height: 20px;
+}
+.product footer .price-discounted .old-price{
+	font-size: 13px;
+	font-weight: 700;
+	color: tomato;
+}
+
+
 .product footer .full-price {
-	background: #53b5aa;
+	background: #f5a523;
 	color: #fff;
 	float: right;
 	font-size: 22px;
@@ -230,12 +283,13 @@ a:hover {
 .qt input, .qt-plus, .qt-minus {
 	display: block;
 	float: left;
+	width: 50px;
+	text-align: center;
 }
 
 .qt input{
 	font-size: 19px;
 	line-height: 50px;
-	width: 70px;
 	text-align: center;
     border: none !important;
     padding: 0px;
@@ -247,7 +301,7 @@ a:hover {
 	font-size: 30px;
 	font-weight: 300;
 	height: 100%;
-	padding: 0 20px;
+	/* padding: 0 20px; */
 	-webkit-transition: background .2s linear;
 	-moz-transition: background .2s linear;
 	-ms-transition: background .2s linear;
@@ -256,7 +310,7 @@ a:hover {
 }
 
 .qt-plus:hover, .qt-minus:hover {
-	background: #53b5aa;
+	background: #f5a523;
 	color: #fff;
 	cursor: pointer;
 }
@@ -300,6 +354,14 @@ a:hover {
 	margin: 15px 0;
 }
 
+.subtotal-selling-price {
+	text-align: right;
+	margin: 0px !important;
+	margin-top: -10px !important;
+	color: tomato;
+	height: 20px;
+}
+
 .left {
 	float: left;
 }
@@ -308,8 +370,8 @@ a:hover {
 	float: right;
 }
 
-.btn {
-	background: #53b5aa;
+.cart-btn {
+	background: #f5a523;
 	border: 1px solid #999;
 	border-style: none none solid none;
 	cursor: pointer;
@@ -328,9 +390,9 @@ a:hover {
 	transition: all .2s linear;
 }
 
-.btn:hover {
+.cart-btn:hover {
 	color: #fff;
-	background: #429188;
+	background: #f5a523;
 }
 
 .type, .category-color {
@@ -357,17 +419,23 @@ a:hover {
 }
 
 .minused {
-	margin: 0 50px 0 0 !important;
+	margin: 0 20px 0 0 !important;
 }
 
 .added {
-	margin: 0 -50px 0 0 !important;
+	margin: 0 -20px 0 0 !important;
 }
-
 
 .qt input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
     margin: 0;
+}
+
+
+.alert_no_stock .jBox-container {border-radius: 0px !important;}
+
+.line-through {
+	text-decoration: line-through;
 }

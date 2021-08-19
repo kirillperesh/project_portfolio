@@ -1,7 +1,11 @@
 <header>
     {% if user.is_authenticated %}
         <div id="profile_pannel_dropdown">
-            <a href="/">{% if user.first_name %}{{user.first_name}} {% if user.last_name %}{{user.last_name}}{% endif %}{% else %}{{user.username}}{% endif %}</a>
+            <a href="{% url 'products_staff' %}">{% if user.first_name %}{{user.first_name}} {% if user.last_name %}{{user.last_name}}{% endif %}{% else %}{{user.username}}{% endif %}</a>
+            
+            {% block cart_panel %}
+                {% include "cart_panel.html" %}
+            {% endblock %}
         </div>
         <nav id="profile_pannel" >
             <div class="profile-menu">
@@ -27,10 +31,6 @@
                 <a href="{% url 'logout'%}"><span class="fas fa-times mr-3"></span>Log out</a>
             </li>
             </ul>
-
-            {% block cart_panel %}
-                {% include "cart_panel.html" %}
-            {% endblock %}
         </nav>
 
     {% else %}

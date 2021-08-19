@@ -73,6 +73,7 @@ var setMainPhoto = function(event) {
     document.getElementById('main_product_form').appendChild(new_main_photo)
 }
 
+
 new jBox('Confirm', {
     title: 'Confirm deletion/recovery',
     confirmButton: "I'm sure",
