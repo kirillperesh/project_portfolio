@@ -9,12 +9,12 @@
                     <span class="fas fa-shopping-cart"></span>
                 </p>
                 <p id='cart_info'>
-                    <span id="cart_items">{{ request.user.orders.get_latest_current.items_total }}</span> items
+                    Total:&nbsp;&nbsp;
+                    <span id="cart_price">{{ request.user.orders.get_latest_current.end_user_price }}</span> $
                     <span>
                         &nbsp;|&nbsp;
                     </span>
-                    Total:
-                    <span id="cart_price">{{ request.user.orders.get_latest_current.end_user_price }}</span> $
+                    <span id="cart_items">{{ request.user.orders.get_latest_current.items_total }}</span> items
                 </p>
             </div>
         </a>
