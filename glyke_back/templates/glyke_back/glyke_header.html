@@ -2,7 +2,7 @@
     {% if user.is_authenticated %}
         <div id="profile_pannel_dropdown">
             <a href="{% url 'products_staff' %}">{% if user.first_name %}{{user.first_name}} {% if user.last_name %}{{user.last_name}}{% endif %}{% else %}{{user.username}}{% endif %}</a>
-            
+
             {% block cart_panel %}
                 {% include "cart_panel.html" %}
             {% endblock %}
@@ -19,7 +19,7 @@
                 <a href="https://kirillperesh.github.io/page_resume/"><span class="fas fa-id-badge mr-3"></span>Portfolio</a>
             </li>
             <li>
-                <a href="{% url 'products' %}"><span class="fas fa-clone mr-3"></span>Products</a>
+                <a href="{% url 'products' %}"><span class="fas fa-clone mr-3"></span>Catalogue</a>
             </li>
             <li>
                 <a href="{% url 'add_product' %}"><span class="fas fa-clone mr-3"></span>Add product</a>
