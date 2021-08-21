@@ -1,5 +1,6 @@
 from django.core.validators import validate_comma_separated_integer_list
 from django.db.models.expressions import Value
+from django.db.models.query_utils import Q
 from django.http import response
 from django.test import TestCase
 from django.urls import reverse
@@ -103,8 +104,8 @@ class AddProductViewTest(TestPermissionsGETMixin, TestCase):
                         'cost_price': '0','selling_price': '0', 'discount_percent': '0', 'tags': 'test_tag', 'stock': '1',
                         'photos': [test_file,]}
         response = self.client.post(self.basic_url, context_data)
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, r'/oops/?error_suffix=photos+%28or+photos+form%29')
+        expected_url = f"{reverse('smth_went_wrong')}?{'error_suffix=photos+%28or+photos+form%29'}"
+        self.assertRedirects(response=response, expected_url=expected_url, target_status_code=200, status_code=302)
         self.assertEqual(Product.objects.all().count(), 1)
         product = Product.objects.get(name=f'product_{self.category_0_filters.id}')
         self.assertEqual(product.photos.title, f'product_{self.category_0_filters.id}_gallery')
@@ -362,6 +363,7 @@ class DeleteProductViewTest(TestPermissionsGETMixin, TestCase):
     def setUpTestData(cls):
         cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,302,302]) # from TestPermissionsGETMixin
         cls.category_0_filters = Category.objects.create(name='category_0_filters')
+        cls.expected_error_url = f"{reverse('smth_went_wrong')}?{'error_suffix=product+deletion+%28status+has+not+change%29'}"
 
     def setUp(self):
         self.client.force_login(self.test_user_staff) # force_login before making requests because this is a staff-only view
@@ -400,14 +402,14 @@ class DeleteProductViewTest(TestPermissionsGETMixin, TestCase):
         Product.objects.all().update(is_active=False)
         self.assertEqual(Product.objects.all().first().is_active, False)
         response = self.client.get(self.basic_url)
-        self.assertTrue(str(response.url).startswith(reverse('smth_went_wrong')))
+        self.assertRedirects(response=response, expected_url=self.expected_error_url, target_status_code=200, status_code=302)
 
     def test_recover_active_product(self):
         """Checks redirect on trying to recover active product"""
         self.assertEqual(Product.objects.all().count(), 1)
         self.assertEqual(Product.objects.all().first().is_active, True)
         response = self.client.get(self.basic_url + "?recover=y")
-        self.assertTrue(str(response.url).startswith(reverse('smth_went_wrong')))
+        self.assertRedirects(response=response, expected_url=self.expected_error_url, target_status_code=200, status_code=302)
 
 class ProductsStaffViewTest(TestPermissionsGETMixin, TestCase):
     @classmethod
@@ -490,8 +492,8 @@ class AddToCartViewTest(TestPermissionsGETMixin, TestCase):
         Order.objects.all().delete()
         context_data = urlencode({'product_id': self.product.id})
         response = self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.startswith(r'/oops/?error_suffix='))
+        expected_url = f"{reverse('smth_went_wrong')}?{'error_suffix=order+%28probably+there+is+none%29'}"
+        self.assertRedirects(response=response, expected_url=expected_url, target_status_code=200, status_code=302)
 
 class CartViewTest(TestPermissionsGETMixin, TestCase):
     @classmethod
@@ -509,6 +511,107 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
         response = self.client.get(self.basic_url)
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith(r'/oops/?error_suffix='))
+
+class ClearCartViewTest(TestPermissionsGETMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[302,302,302,302]) # from TestPermissionsGETMixin
+        cls.test_user_2 = User.objects.create(username='test_user_2', is_staff=False)
+        cls.number_of_order_lines = 3
+
+    def setUp(self):
+        self.client.force_login(self.test_user) # force_login before making requests because this is a logged-in-only view
+        self.order = Order.objects.create(customer=self.test_user)
+        # self.product = Product.objects.create(name=get_random_string(length=10))
+        self.basic_url = reverse('clear_cart', kwargs={'id': self.order.id})
+
+    def test_clear_cart_permissions(self):
+        """Checks if clear_cart_view permissions work properly.
+        A cart can be cleared only by its owner or a staff user"""
+        Order.objects.all().delete()
+        self.order_user_1 = Order.objects.create(customer=self.test_user, status='CUR')
+        self.basic_url_user_1 = reverse('clear_cart', kwargs={'id': self.order_user_1.id})
+        self.order_user_2 = Order.objects.create(customer=self.test_user_2, status='CUR')
+        self.basic_url_user_2 = reverse('clear_cart', kwargs={'id': self.order_user_2.id})
+        self.order_staff = Order.objects.create(customer=self.test_user_staff, status='CUR')
+        self.basic_url_staff = reverse('clear_cart', kwargs={'id': self.order_staff.id})
+
+        for user in (self.test_user, self.test_user_2, self.test_user_staff):
+            # setting up for every user
+            OrderLine.objects.all().delete()
+            self.client.logout()
+            self.client.force_login(user)
+            for _ in range(self.number_of_order_lines):
+                rnd_product = Product.objects.create(name=get_random_string(length=10))
+                OrderLine.objects.create(parent_order=self.order_user_1, product = rnd_product)
+                OrderLine.objects.create(parent_order=self.order_user_2, product = rnd_product)
+                OrderLine.objects.create(parent_order=self.order_staff, product = rnd_product)
+            # case: regular user's order
+            # only the owner (user) and the staff should be able to clear it
+            self.assertEqual(Order.objects.filter(customer=self.test_user, status='CUR').count(), 1)
+            self.assertEqual(self.order_user_1.order_lines.count(), self.number_of_order_lines)
+            response = self.client.get(self.basic_url_user_1)
+            self.assertEqual(Order.objects.filter(customer=self.test_user, status='CUR').count(), 1)
+            if user == self.test_user_2:
+                self.assertEqual(self.order_user_1.order_lines.count(), self.number_of_order_lines)
+                self.assertEqual(response.status_code, 404)
+            else:
+                self.assertFalse(self.order_user_1.order_lines.exists())
+                self.assertRedirects(response=response, expected_url=reverse('products'), target_status_code=200, status_code=302)
+            # case: regular user_2's order
+            # only the owner (user_2) and the staff should be able to clear it
+            self.assertEqual(Order.objects.filter(customer=self.test_user_2, status='CUR').count(), 1)
+            self.assertEqual(self.order_user_2.order_lines.count(), self.number_of_order_lines)
+            response = self.client.get(self.basic_url_user_2)
+            self.assertEqual(Order.objects.filter(customer=self.test_user_2, status='CUR').count(), 1)
+            if user == self.test_user:
+                self.assertEqual(self.order_user_2.order_lines.count(), self.number_of_order_lines)
+                self.assertEqual(response.status_code, 404)
+            else:
+                self.assertFalse(self.order_user_2.order_lines.exists())
+                self.assertRedirects(response=response, expected_url=reverse('products'), target_status_code=200, status_code=302)
+            # case: staff user's order
+            # only the staff should be able to clear this order
+            self.assertEqual(Order.objects.filter(customer=self.test_user_staff, status='CUR').count(), 1)
+            self.assertEqual(self.order_staff.order_lines.count(), self.number_of_order_lines)
+            response = self.client.get(self.basic_url_staff)
+            self.assertEqual(Order.objects.filter(customer=self.test_user_staff, status='CUR').count(), 1)
+            if user == self.test_user_staff:
+                self.assertFalse(self.order_staff.order_lines.exists())
+                self.assertRedirects(response=response, expected_url=reverse('products'), target_status_code=200, status_code=302)
+            else:
+                self.assertEqual(self.order_staff.order_lines.count(), self.number_of_order_lines)
+                self.assertEqual(response.status_code, 404)
+
+    def test_clear_cart_failure_handling(self):
+        """Checks if the view redirect correctly to 'smth_went_wrong' if order_lines' deletion failed"""
+        from django.dispatch.dispatcher import receiver
+        from django.db.models.signals import post_delete
+        @receiver(post_delete,
+                  sender=OrderLine,
+                  dispatch_uid='save_order_line_test_1')
+        def order_line_post_delete_erroneous_handler(sender, instance, **kwargs):
+            """A signal handler that add an order_line to the Order that had to be cleared for testing purposes"""
+            if instance.parent_order.order_lines.count() == 0:
+                rnd_product = Product.objects.create(name=get_random_string(length=10))
+                OrderLine.objects.create(parent_order=self.order, product = rnd_product)
+            instance.parent_order.save() # this is a part of the original non-erroneous handler
+
+        rnd_product = Product.objects.create(name=get_random_string(length=10))
+        OrderLine.objects.create(parent_order=self.order, product = rnd_product)
+        response = self.client.get(self.basic_url)
+        self.assertTrue(self.order.order_lines.exists())
+        expected_url = f"{reverse('smth_went_wrong')}?{'error_suffix=cart+%28tried+to+clear+it%2C+but+it+did+not+become+empty%29'}"
+        self.assertRedirects(response=response, expected_url=expected_url, target_status_code=200, status_code=302)
+
+
+
+
+
+
+
+
+
 
 
 
