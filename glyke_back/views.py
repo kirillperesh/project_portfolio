@@ -279,6 +279,8 @@ class SignInView(LoginView):
 @login_required()
 @require_http_methods(["GET", "POST"])
 def cart_view(request):
+    """
+    TODO"""
     current_order = get_order(request, status='CUR') # select the latest current order
     if isinstance(current_order, HttpResponseRedirect): return current_order # return 500 if there is no current order
     if request.method=='POST':
