@@ -20,5 +20,6 @@ urlpatterns = [
     path("products_staff", views.ProductsStaffView.as_view(), name="products_staff"),
     path("cart", views.cart_view, name="cart"),
     path("add_to_cart", views.AddToCartView.as_view(), name="add_to_cart"),
+    path("clear_cart/<int:id>", views.clear_cart_view, name="clear_cart"),
 ]
 

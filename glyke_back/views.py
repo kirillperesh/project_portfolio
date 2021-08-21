@@ -1,10 +1,8 @@
-from decimal import Context
-import inspect
 from logging import raiseExceptions
-from django.db.models.query import InstanceCheckMeta
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404, resolve_url
 from django.urls import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_http_methods
@@ -20,7 +18,7 @@ from proj_folio.defaults import DEFAULT_NO_IMAGE_URL
 
 from photologue import models as photo_models
 from .forms import AddProductForm, PhotosForm, SelectCategoryProductForm, RegisterForm, SignInForm
-from .models import Category, OrderLine, Product
+from .models import Category, Order, OrderLine, Product
 from .decorators_mixins import user_is_staff_or_404, UserIsStaff_Or404_Mixin
 
 
@@ -235,8 +233,7 @@ class ProductsView(ListView):
     extra_context = {'no_image_url': DEFAULT_NO_IMAGE_URL}
 
     def get_queryset(self):
-        queryset = self.model.objects.filter(is_active=True) # basic queryset
-        queryset = queryset.order_by('-modified') # basic ordering
+        queryset = self.model.objects.filter(is_active=True).order_by('-discount_percent', '-stock') # basic queryset
         # category filter block
         if self.request.GET.get('category'):
             category_filter = self.request.GET.get('category')
@@ -279,9 +276,11 @@ class SignInView(LoginView):
     authentication_form = SignInForm
     template_name = 'sign_in.html'
 
-@login_required
+@login_required()
 @require_http_methods(["GET", "POST"])
 def cart_view(request):
+    """
+    TODO"""
     current_order = get_order(request, status='CUR') # select the latest current order
     if isinstance(current_order, HttpResponseRedirect): return current_order # return 500 if there is no current order
     if request.method=='POST':
@@ -324,5 +323,22 @@ class AddToCartView(LoginRequiredMixin, RedirectView):
                                  )
         return RedirectView.dispatch(self, request, *args, **kwargs)
 
+@login_required()
+@require_http_methods(["GET",])
+def clear_cart_view(request, id):
+    """Clears an order (deletes all its order_line)
+    Also checks if the user has the permission (order instance belongs to the user or is_staff)"""
+    order_to_clear = get_object_or_404(Order, id=id)
+    # check user permissions to clear this cart
+    if not (request.user.is_staff or order_to_clear.customer == request.user): raise Http404
+    for order_line in order_to_clear.order_lines.all():
+        order_line.delete()
+    redirect_url = f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'cart (tried to clear it, but it did not become empty)'})}" if order_to_clear.order_lines.exists() else reverse('products')
+    return redirect(redirect_url)
+
+
+
+
 
 # TODO finish and docstr and comment cart_view
+# TODO add lacking tests

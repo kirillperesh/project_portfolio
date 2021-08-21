@@ -94,8 +94,13 @@
                                     <div class="right">
                                         <h1 class="total">Total: <span id='cart_price_bottom'>{{ order.end_user_price }}</span> $</h1>
                                         <div class="trans02s">
-                                            <input id='update_cart' type="submit" value="Update order" class="cart-btn"></input>
+                                            <input id='update_cart' type="submit" value="Update cart" class="cart-btn"></input>
                                         </div>
+                                        {% if order.order_lines %}
+                                            <div class="trans02s">
+                                                <a href="{% url 'clear_cart' id=order.id %}" class="btn-add btn-delete-primary btn-add-block text-uppercase" data-confirm="Are you sure you want to DELETE this product?">Clear cart</a>
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </footer>
