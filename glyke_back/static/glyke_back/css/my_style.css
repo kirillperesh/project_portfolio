@@ -206,14 +206,6 @@ footer, header {
 }
 .hidden{visibility: hidden;}
 
-#cart_panel a {
-	color: rgba(255, 255, 255, .8) !important;
-}
-#cart_panel a:hover {
-	color: rgba(255, 255, 255, 1) !important;
-}
-
-
 /*! CSS Used from: http://127.0.0.1:8000/static/glyke_back/css/old_styles.css */
 *,*::before,*::after{-webkit-box-sizing:border-box!important;box-sizing:border-box!important;}
 footer,header,nav{display:block;}
