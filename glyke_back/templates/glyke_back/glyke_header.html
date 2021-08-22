@@ -1,10 +1,14 @@
 <header>
     {% if user.is_authenticated %}
         <div id="profile_pannel_dropdown">
-            <a href="{% url 'products_staff' %}">{% if user.first_name %}{{user.first_name}} {% if user.last_name %}{{user.last_name}}{% endif %}{% else %}{{user.username}}{% endif %}</a>
+            <a href="">{% if user.first_name %}{{user.first_name}} {% if user.last_name %}{{user.last_name}}{% endif %}{% else %}{{user.username}}{% endif %}</a>
 
             {% block cart_panel %}
                 {% include "cart_panel.html" %}
+            {% endblock %}
+
+            {% block resume_panel %}
+                {% include "resume_panel.html" %}
             {% endblock %}
         </div>
         <nav id="profile_pannel" >
@@ -16,17 +20,14 @@
             </div>
             <ul class="list-unstyled components mb-5">
             <li>
-                <a href="https://kirillperesh.github.io/page_resume/"><span class="fas fa-id-badge mr-3"></span>Portfolio</a>
+                <a href="{% url 'products' %}"><span class="fas fa-grip-horizontal mr-3"></span>Catalogue</a>
             </li>
             <li>
-                <a href="{% url 'products' %}"><span class="fas fa-clone mr-3"></span>Catalogue</a>
+                <a href="{% url 'products_staff' %}"><span class="fas fa-th-list mr-3"></span>Products DB (staff)</a>
             </li>
             <li>
-                <a href="{% url 'add_product' %}"><span class="fas fa-clone mr-3"></span>Add product</a>
+                <a href="{% url 'add_product' %}"><span class="fas fa-plus mr-3"></span>Add product (staff)</a>
             </li>
-            <!-- <li>
-                <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"><span class="fas fa-microphone-alt mr-3"></span>Get rolled</a>
-            </li> -->
             <li>
                 <a href="{% url 'logout'%}"><span class="fas fa-times mr-3"></span>Log out</a>
             </li>
@@ -36,6 +37,10 @@
     {% else %}
         <div id="profile_pannel_dropdown">
             <a href="{% url 'sign_in'%}">Log In</a>
+
+            {% block resume_panel_right %}
+                {% include "resume_panel.html" %}
+            {% endblock %}
         </div>
         <nav id="profile_pannel" >
             <div class="profile-menu">
