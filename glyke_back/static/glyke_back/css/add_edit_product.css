@@ -99,7 +99,7 @@ h2{page-break-after:avoid;}
 }
 /*! CSS Used from: https://technext.github.io/product-admin/css/templatemo-style.css */
 button:focus{outline:0;}
-.tm-block{padding:40px;-webkit-box-shadow:1px 1px 5px 0 #455c71;-moz-box-shadow:1px 1px 5px 0 #455c71;box-shadow:1px 1px 5px 0 #455c71;min-height:350px;height:100%;max-height:450px;}
+.tm-block{padding:60px 40px 40px;-webkit-box-shadow:1px 1px 5px 0 #455c71;-moz-box-shadow:1px 1px 5px 0 #455c71;box-shadow:1px 1px 5px 0 #455c71;min-height:350px;height:100%;max-height:450px;}
 .tm-block-h-auto{min-height:1px;max-height:none;height:auto;}
 .tm-block-title{font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:30px;}
 .form-control{background-color:#54657d;color:#fff;border:0;}
@@ -124,7 +124,10 @@ label{color:#fff;margin-bottom:10px;}
 ::-webkit-scrollbar-thumb{background:#6d8da6;}
 ::-webkit-scrollbar-thumb:hover{background:#8ab5d6;}
 @media (max-width: 991px){
-.tm-block{padding:30px;}
+.tm-block{padding:60px 30px 30px;}
+}
+@media (max-width: 768px){
+.tm-block{padding:115px 30px 30px;}
 }
 @media (max-width: 633px){
 .custom-select{background-position:96%;}

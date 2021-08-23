@@ -23,7 +23,7 @@
 #profile_pannel{
   position: fixed;
   z-index: 2;
-  height: 236px;
+  height: calc((4 * 55px) + (55px / 2)); /* 4 is the number of rows */
   min-width: 250px;
   max-width: 250px;
   background: #202020d0;

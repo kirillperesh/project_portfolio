@@ -4,17 +4,18 @@
             <div>
                 <p id='cart_title'>
                     <span>
-                        Your shopping cart:&nbsp;&nbsp;&nbsp;
+                        Your <span class='hide-768'> shopping </span>cart:&nbsp;&nbsp;&nbsp;
                     </span>
                     <span class="fas fa-shopping-cart"></span>
                 </p>
                 <p id='cart_info'>
-                    Total:&nbsp;&nbsp;
+                    <span class='hide-768'>Total:&nbsp;&nbsp;</span>
                     <span id="cart_price">{{ request.user.orders.get_latest_current.end_user_price }}</span> $
                     <span>
                         &nbsp;|&nbsp;
                     </span>
-                    <span id="cart_items">{{ request.user.orders.get_latest_current.items_total }}</span> items
+                    <span id="cart_items">{{ request.user.orders.get_latest_current.items_total }}</span>
+                    <span class='hide-768'> items</span>
                 </p>
             </div>
         </a>

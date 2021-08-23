@@ -1,7 +1,7 @@
 from logging import raiseExceptions
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404, resolve_url
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, Http404
 from django import forms
 from django.utils.translation import gettext_lazy as _
@@ -225,8 +225,6 @@ def delete_product_view(request, id):
 class ProductsView(ListView):
     http_method_names = ['get', ]
     model = Product
-    # queryset = model.objects.filter(is_active=True)
-    # ordering = '-modified'
     paginate_by = 9
     template_name = 'products.html'
     context_object_name = 'products'
@@ -261,9 +259,9 @@ class ProductDetailView(DetailView):
     context_object_name = 'product'
     extra_context={'no_image_url': DEFAULT_NO_IMAGE_URL}
 
-class Home(TemplateView):
+class Home(RedirectView):
     http_method_names = ['get', ]
-    template_name = 'home.html'
+    url = reverse_lazy('products') # 'trying to reverse something at import time before the URLs are ready to be reversed'
 
 class SignUpView(CreateView):
     http_method_names = ['get', 'post']
@@ -339,6 +337,4 @@ def clear_cart_view(request, id):
 
 
 
-
 # TODO finish and docstr and comment cart_view
-# TODO add lacking tests
