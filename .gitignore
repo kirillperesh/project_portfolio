@@ -116,3 +116,7 @@ media/
 */migrations/
 */migrations
 
+# old_portfolio app
+folio_back/
+# old_portfolio app's tests
+tests/folio_tests/
