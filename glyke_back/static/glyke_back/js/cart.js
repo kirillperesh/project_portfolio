@@ -90,6 +90,13 @@ $(document).ready(function() {
 } );
 
 
+new jBox('Confirm', {
+    title: 'Confirm removal of all items from your cart',
+    confirmButton: "I'm sure",
+    cancelButton: 'Cancel',
+    addClass: 'trans02s clear_cart_confirm',
+    offset: {x: 0, y:-100},
+});
 
 
 
