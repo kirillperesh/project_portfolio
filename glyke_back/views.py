@@ -277,13 +277,15 @@ class SignInView(LoginView):
 @login_required()
 @require_http_methods(["GET", "POST"])
 def cart_view(request):
-    """
-    TODO"""
+    """Returns 500 if there is no CUR (current) order
+    Update order_lines' quantity properies via save() or deletes an order_line instance if there is no corresponding product's id in POST parameters"""
     current_order = get_order(request, status='CUR') # select the latest current order
-    if isinstance(current_order, HttpResponseRedirect): return current_order # return 500 if there is no current order
+    # return 500 if there is no current order, because get_order function returns an Order instance or redirects to oops/
+    if isinstance(current_order, HttpResponseRedirect): return current_order
     if request.method=='POST':
         products_id_set = set(request.POST.getlist('products_id'))
-
+        # for each order_live checks if its quantity has changed. if so, updates that instance
+        # if there is no order_line's product's id in POST parameters, deletes that order_line
         for order_line in current_order.order_lines.all(): # ordered by line_number by default
             if str(order_line.product.id) in products_id_set:
                 quantity_list = request.POST.getlist(f'quantity_{order_line.product.id}')
@@ -335,6 +337,3 @@ def clear_cart_view(request, id):
     return redirect(redirect_url)
 
 
-
-
-# TODO finish and docstr and comment cart_view
