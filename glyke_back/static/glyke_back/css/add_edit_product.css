@@ -225,7 +225,8 @@ label{color:#fff;margin-bottom:10px;}
 
 .delete_confirm .jBox-container {border-radius: 0px !important;}
 .delete_confirm .jBox-Confirm-button-submit {background-color: #f5a623;border-radius: 0px !important;}
-.delete_confirm .jBox-Confirm-button-cancel:hover {background-color: rgba(255, 99, 71, 0.8);border-radius: 0px !important;}
+.delete_confirm .jBox-Confirm-button-submit:hover {background-color: rgb(54, 170, 0);}
+.delete_confirm .jBox-Confirm-button-cancel:hover {background-color: rgb(255, 80, 49);border-radius: 0px !important;}
 
 .is-active-status {
     position: absolute;

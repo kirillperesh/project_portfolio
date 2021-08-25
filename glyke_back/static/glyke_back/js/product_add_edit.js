@@ -78,6 +78,6 @@ new jBox('Confirm', {
     title: 'Confirm deletion/recovery',
     confirmButton: "I'm sure",
     cancelButton: 'Cancel',
-    addClass: 'delete_confirm',
+    addClass: 'trans02s delete_confirm',
     offset: {x: 0, y:-100},
 });
