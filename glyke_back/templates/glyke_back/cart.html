@@ -83,7 +83,7 @@
 
                             <footer id="site-footer">
                                 <div class="cart-container clearfix">
-                                    <div class="left">
+                                    <div class="float-left cart-total-left">
                                         {% if order.selling_price != order_line.end_user_price %}
                                             <h3 class="subtotal-selling-price line-through"><span id='cart_selling_price_bottom'>{{ order.selling_price }}</span> $</h3>
                                         {% endif %}
@@ -91,14 +91,14 @@
                                         <h3 class="tax">Taxes (0%): <span>0</span> $</h3>
                                         <h3 class="shipping">Shipping: <span>0</span> $</h3>
                                     </div>
-                                    <div class="right">
+                                    <div class="float-right cart-total-right">
                                         <h1 class="total">Total: <span id='cart_price_bottom'>{{ order.end_user_price }}</span> $</h1>
-                                        <div class="trans02s">
+                                        <div class="trans02s cart-btn-container">
                                             <input id='update_cart' type="submit" value="Update cart" class="cart-btn"></input>
                                         </div>
                                         {% if order.order_lines %}
-                                            <div class="trans02s">
-                                                <a href="{% url 'clear_cart' id=order.id %}" class="btn-add btn-delete-primary btn-add-block text-uppercase" data-confirm="Are you sure you want to DELETE this product?">Clear cart</a>
+                                            <div class="trans02s cart-btn-container">
+                                                <a href="{% url 'clear_cart' id=order.id %}" class="cart-btn clear-cart-btn" data-confirm="Are you sure you want to REMOVE ALL ITEMS from your cart?">Clear cart</a>
                                             </div>
                                         {% endif %}
                                     </div>

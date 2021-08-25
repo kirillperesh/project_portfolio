@@ -362,14 +362,22 @@ a {
 	height: 20px;
 }
 
-.left {
+.float-left {
 	float: left;
 }
 
-.right {
+.float-right {
 	float: right;
 }
 
+.cart-total-right {
+	margin-top: -15px;
+}
+
+.cart-btn-container {
+	margin: 10px 0 10px;
+
+}
 .cart-btn {
 	background: #f5a523;
 	border: 1px solid #999;
@@ -390,9 +398,17 @@ a {
 	transition: all .2s linear;
 }
 
+.clear-cart-btn {
+	padding: 5px 0;
+}
+
 .cart-btn:hover {
 	color: #fff;
-	background: #f5a523;
+	background: rgb(54, 170, 0);
+}
+
+.clear-cart-btn:hover {
+	background: rgb(255, 80, 49);
 }
 
 .type, .category-color {
@@ -439,3 +455,8 @@ a {
 .line-through {
 	text-decoration: line-through;
 }
+
+.clear_cart_confirm .jBox-container {border-radius: 0px !important;}
+.clear_cart_confirm .jBox-Confirm-button-submit {background-color: #f5a623;border-radius: 0px !important;}
+.clear_cart_confirm .jBox-Confirm-button-submit:hover {background-color: rgb(54, 170, 0);}
+.clear_cart_confirm .jBox-Confirm-button-cancel:hover {background-color: rgb(255, 80, 49);border-radius: 0px !important;}
