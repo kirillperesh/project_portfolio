@@ -288,8 +288,8 @@ def cart_view(request):
         # if there is no order_line's product's id in POST parameters, deletes that order_line
         for order_line in current_order.order_lines.all(): # ordered by line_number by default
             if str(order_line.product.id) in products_id_set:
-                quantity_list = request.POST.getlist(f'quantity_{order_line.product.id}')
-                if len(quantity_list) > 1: # avoid duplicating
+                quantity_list = request.POST.getlist(f'quantity_{order_line.line_number}')
+                if len(quantity_list) > 1: # to avoid duplicating
                     new_quantity = sum([int(num) for num in quantity_list])
                 else:
                     new_quantity = int(quantity_list[0])
@@ -337,3 +337,4 @@ def clear_cart_view(request, id):
     return redirect(redirect_url)
 
 
+# TODO add cart view tests
