@@ -604,16 +604,50 @@ class ClearCartViewTest(TestPermissionsGETMixin, TestCase):
         expected_url = f"{reverse('smth_went_wrong')}?{'error_suffix=cart+%28tried+to+clear+it%2C+but+it+did+not+become+empty%29'}"
         self.assertRedirects(response=response, expected_url=expected_url, target_status_code=200, status_code=302)
 
+class CartViewTest(TestPermissionsGETMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[302,200,200,200]) # from TestPermissionsGETMixin
+
+    def setUp(self):
+        self.client.force_login(self.test_user) # force_login before making requests because this is a staff-only view
+        self.basic_url = reverse('cart')
+
+    def create_rnd_product(self, parent_order, stock=random.randint(1,5)):
+        """"""
+        rnd_product = Product.objects.create(name=get_random_string(),
+                                             stock=stock,
+                                             selling_price = decimal.Decimal(random.randrange(100, 9999))/100,
+                                             discount_percent = random.choice((0, 10, 20)),
+                                             )
+        rnd_order_line = OrderLine.objects.create(parent_order=parent_order,
+                                                  product = rnd_product,
+                                                  quantity = random.randint(1, stock)
+                                                  )
+        return rnd_order_line
+
+    def test_current_order_orderlines(self):
+        """Checks if the view receives all the order_line instances needed
+        TODO"""
+        for i in range(100):
+            print(i)
+            current_order = self.test_user.orders.filter(status='CUR').order_by('-created').first()
+            order_lines_count = random.randint(3, 6)
+            for _ in range(order_lines_count):
+                order_line = self.create_rnd_product(parent_order = current_order)
+
+            response = self.client.get(self.basic_url)
+            view_current_order = response.context['order']
+            view_order_lines_queryset = response.context['order_lines']
+            self.assertEqual(view_current_order, current_order)
+            self.assertQuerysetEqual(view_order_lines_queryset, current_order.order_lines.all())
 
 
 
 
-
-
-
-
-
-
-
+# TODO update test_current_order_orderlines
+# TODO docstr and comment update test_current_order_orderlines
+# TODO add other cart_view tests
+# TODO test 10000 times (something broke once)
 
 
