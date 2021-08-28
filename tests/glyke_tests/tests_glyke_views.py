@@ -4,7 +4,7 @@ from django.db.models.query_utils import Q
 from django.http import response
 from django.test import TestCase
 from django.urls import reverse
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 import decimal
@@ -604,16 +604,93 @@ class ClearCartViewTest(TestPermissionsGETMixin, TestCase):
         expected_url = f"{reverse('smth_went_wrong')}?{'error_suffix=cart+%28tried+to+clear+it%2C+but+it+did+not+become+empty%29'}"
         self.assertRedirects(response=response, expected_url=expected_url, target_status_code=200, status_code=302)
 
+class CartViewTest(TestPermissionsGETMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[302,200,200,200]) # from TestPermissionsGETMixin
+
+    def setUp(self):
+        self.client.force_login(self.test_user) # force_login before making requests because this is a staff-only view
+        self.basic_url = reverse('cart')
+
+    def create_rnd_order_line(self, parent_order, stock=random.randint(1,9)):
+        """Return a random (rnd_order_line, rnd_product) tuple"""
+        rnd_product = Product.objects.create(name=get_random_string(),
+                                             stock=stock,
+                                             selling_price = decimal.Decimal(random.randrange(100, 9999))/100,
+                                             discount_percent = random.choice((0, 10, 20)),
+                                             )
+        rnd_order_line = OrderLine.objects.create(parent_order=parent_order,
+                                                  product = rnd_product,
+                                                  quantity = random.randint(1, stock)
+                                                  )
+        return (rnd_order_line, rnd_product)
+
+    def test_current_order_orderlines(self):
+        """Checks if the view receives all the order_line instances needed"""
+        current_order = self.test_user.orders.filter(status='CUR').order_by('-created').first()
+        # tests different order_lines number cases: (0, 1, 2, 5, 20)
+        for order_lines_count in (0, 1, 2, 5, 20):
+            OrderLine.objects.all().delete()
+            for _ in range(order_lines_count):
+                self.create_rnd_order_line(parent_order = current_order)
+            response = self.client.get(self.basic_url)
+            view_current_order = response.context['order']
+            view_order_lines_queryset = response.context['order_lines']
+            self.assertEqual(view_current_order, current_order)
+            self.assertQuerysetEqual(view_order_lines_queryset, current_order.order_lines.all())
+
+    def test_current_order_instance(self):
+        """Checks if the view receives the right instance of the Order model"""
+        Order.objects.create(status='CUR', customer=self.test_user) # right status, right user
+        Order.objects.create(status='CAN', customer=self.test_user) # wrong status, right user
+        Order.objects.create(status='CAN', customer=self.test_user_staff) # wrong status, wrong user
+        self.assertEqual(Order.objects.filter(status='CUR').count(), 2)
+        self.assertEqual(Order.objects.all().count(), 4)
+        current_order = self.test_user.orders.filter(status='CUR').order_by('-created').first()
+        for _ in range(3): self.create_rnd_order_line(parent_order = current_order)
+        response = self.client.get(self.basic_url)
+        view_current_order = response.context['order']
+        view_order_lines_queryset = response.context['order_lines']
+        self.assertEqual(view_current_order, current_order)
+        self.assertQuerysetEqual(view_order_lines_queryset, current_order.order_lines.all())
+
+    def test_remove_order_line(self):
+        """Checks if removing order_lines works as expected. Also tests if the view avoids duplicating lines properly"""
+        current_order = self.test_user.orders.filter(status='CUR').order_by('-created').first()
+        context_data = dict()
+        products_id_list = list()
+        initial_lines_count = 6 # it's 6 so that different numbers of lines to delete can be tested
+        for line_num in range(initial_lines_count):
+            rnd_order_line, rnd_product = self.create_rnd_order_line(parent_order = current_order)
+            products_id_list.append(str(rnd_product.id))
+            # sometimes add an additiontal copy of a parameter to test duplicating avoidance
+            if line_num % 2 == 0: products_id_list.append(str(rnd_product.id))
+            context_data[f'quantity_{rnd_order_line.line_number}'] = rnd_order_line.quantity
+        context_data['products_id'] = products_id_list
+
+        self.assertEqual(current_order.order_lines.count(), initial_lines_count)
+        response = self.client.post(self.basic_url, context_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(current_order.order_lines.count(), initial_lines_count)
+
+        products_id_list = list(set(products_id_list)) # set() is not working with random.choice() below
+        expected_lines_count = initial_lines_count
+        # check diffent numbers of lines deleted at a time (1, 2, the rest)
+        for lines_to_delete_count in (1, 2, initial_lines_count-3):
+            for _ in range(lines_to_delete_count):
+                rnd_line_to_delete_product_id = random.choice(products_id_list)
+                products_id_list.remove(rnd_line_to_delete_product_id) # remove a rnd id from POST parameters
+
+            context_data['products_id'] = products_id_list
+            self.assertEqual(current_order.order_lines.count(), expected_lines_count)
+            expected_lines_count -= lines_to_delete_count
+            response = self.client.post(self.basic_url, context_data)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(current_order.order_lines.count(), expected_lines_count)
 
 
 
 
-
-
-
-
-
-
-
-
-
+# TODO add test that changes line's quantity
+# # TODO add checks that quantity and id paarmeters have to be passed at POST
