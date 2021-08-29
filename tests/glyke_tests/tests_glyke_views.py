@@ -648,7 +648,7 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
         self.assertEqual(Order.objects.filter(status='CUR').count(), 2)
         self.assertEqual(Order.objects.all().count(), 4)
         current_order = self.test_user.orders.filter(status='CUR').order_by('-created').first()
-        for _ in range(3): self.create_rnd_order_line(parent_order = current_order)
+        for _ in range(3): self.create_rnd_order_line(parent_order=current_order)
         response = self.client.get(self.basic_url)
         view_current_order = response.context['order']
         view_order_lines_queryset = response.context['order_lines']
@@ -662,7 +662,7 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
         products_id_list = list()
         initial_lines_count = 6 # it's 6 so that different numbers of lines to delete can be tested
         for line_num in range(initial_lines_count):
-            rnd_order_line, rnd_product = self.create_rnd_order_line(parent_order = current_order)
+            rnd_order_line, rnd_product = self.create_rnd_order_line(parent_order=current_order)
             products_id_list.append(str(rnd_product.id))
             # sometimes add an additiontal copy of a parameter to test duplicating avoidance
             if line_num % 2 == 0: products_id_list.append(str(rnd_product.id))
@@ -678,9 +678,15 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
         expected_lines_count = initial_lines_count
         # check diffent numbers of lines deleted at a time (1, 2, the rest)
         for lines_to_delete_count in (1, 2, initial_lines_count-3):
+            context_data = dict()
             for _ in range(lines_to_delete_count):
                 rnd_line_to_delete_product_id = random.choice(products_id_list)
-                products_id_list.remove(rnd_line_to_delete_product_id) # remove a rnd id from POST parameters
+                products_id_list.remove(rnd_line_to_delete_product_id) # remove this rnd id from POST parameters
+    # TODO comment
+            for product_left_id in products_id_list:
+                order_line_left = current_order.order_lines.filter(product__id=product_left_id).first()
+                context_data[f'quantity_{order_line_left.line_number}'] = order_line_left.quantity
+# TODO comment
 
             context_data['products_id'] = products_id_list
             self.assertEqual(current_order.order_lines.count(), expected_lines_count)
@@ -689,8 +695,63 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(current_order.order_lines.count(), expected_lines_count)
 
+    def test_order_lines_quantity_update(self):
+        """Checks if each order_line's quantity can be updated properly"""
+        current_order = self.test_user.orders.filter(status='CUR').order_by('-created').first()
+        context_data = dict()
+        products_id_list = list()
+        initial_lines_count = 4 # it's 4 so that different numbers of lines to update can be tested (1, 2, the rest)
+        for _ in range(initial_lines_count):
+            rnd_order_line, rnd_product = self.create_rnd_order_line(parent_order=current_order)
+            products_id_list.append(str(rnd_product.id))
+            context_data[f'quantity_{rnd_order_line.line_number}'] = rnd_order_line.quantity
+        context_data['products_id'] = products_id_list
+        # initial check
+        response = self.client.get(self.basic_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['order_lines'])
+        for order_line in response.context['order_lines'].all().order_by('line_number'):
+            self.assertEqual(order_line.quantity, context_data[f'quantity_{order_line.line_number}'])
+        # check diffent numbers of lines update at a time (0, 1, 2, the rest)
+        for changed_lines_count in (0, 1, 2, initial_lines_count):
+            changed_lines_numbers = list()
+            for _ in range(changed_lines_count):
+                while True: # making sure the same line won't get updated more than once
+                    rnd_order_line_number = random.randint(1, initial_lines_count)
+                    if rnd_order_line_number not in changed_lines_numbers:
+                        changed_lines_numbers.append(rnd_order_line_number)
+                        break
+                while True: # making sure the new_quantity is different from the old one
+                    new_quantity = random.randint(1, 9)
+                    if new_quantity != context_data[f'quantity_{rnd_order_line_number}']:
+                        context_data[f'quantity_{rnd_order_line_number}'] = new_quantity
+                        break
+            # check eache set of updated lines
+            response = self.client.post(self.basic_url, context_data)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(response.context['order_lines'])
+            for order_line in response.context['order_lines'].all().order_by('line_number'):
+                self.assertEqual(order_line.quantity, context_data[f'quantity_{order_line.line_number}'])
 
+    def test_post_parameters(self):
+        """
+        TODO"""
 
+        current_order = self.test_user.orders.filter(status='CUR').order_by('-created').first()
+        context_data = dict()
+        products_id_list = list()
+        initial_lines_count = 3 # it's 6 so that different numbers of lines to delete can be tested
+        for line_num in range(initial_lines_count):
+            rnd_order_line, rnd_product = self.create_rnd_order_line(parent_order=current_order)
+            products_id_list.append(str(rnd_product.id))
+            # sometimes add an additiontal copy of a parameter to test duplicating avoidance
+            if line_num % 2 == 0: products_id_list.append(str(rnd_product.id))
+            context_data[f'quantity_{rnd_order_line.line_number}'] = rnd_order_line.quantity
+        # context_data['products_id'] = products_id_list
 
-# TODO add test that changes line's quantity
+        self.assertEqual(current_order.order_lines.count(), initial_lines_count)
+        response = self.client.post(self.basic_url, context_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(current_order.order_lines.count(), initial_lines_count)
+
 # # TODO add checks that quantity and id paarmeters have to be passed at POST
