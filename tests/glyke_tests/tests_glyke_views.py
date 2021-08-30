@@ -682,11 +682,10 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
             for _ in range(lines_to_delete_count):
                 rnd_line_to_delete_product_id = random.choice(products_id_list)
                 products_id_list.remove(rnd_line_to_delete_product_id) # remove this rnd id from POST parameters
-    # TODO comment
+            # recollect 'quantity_' parameters, so that there is no extra parameters left
             for product_left_id in products_id_list:
                 order_line_left = current_order.order_lines.filter(product__id=product_left_id).first()
                 context_data[f'quantity_{order_line_left.line_number}'] = order_line_left.quantity
-# TODO comment
 
             context_data['products_id'] = products_id_list
             self.assertEqual(current_order.order_lines.count(), expected_lines_count)
@@ -734,24 +733,64 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
                 self.assertEqual(order_line.quantity, context_data[f'quantity_{order_line.line_number}'])
 
     def test_post_parameters(self):
-        """
-        TODO"""
-
+        """Checks if the view reacts properly if 'quantity_' or 'products_id' POST parameters got corrupted or unmatched"""
         current_order = self.test_user.orders.filter(status='CUR').order_by('-created').first()
         context_data = dict()
         products_id_list = list()
-        initial_lines_count = 3 # it's 6 so that different numbers of lines to delete can be tested
-        for line_num in range(initial_lines_count):
+        initial_lines_count = 3 # it just seemed to be enough
+        for _ in range(initial_lines_count):
             rnd_order_line, rnd_product = self.create_rnd_order_line(parent_order=current_order)
             products_id_list.append(str(rnd_product.id))
-            # sometimes add an additiontal copy of a parameter to test duplicating avoidance
-            if line_num % 2 == 0: products_id_list.append(str(rnd_product.id))
             context_data[f'quantity_{rnd_order_line.line_number}'] = rnd_order_line.quantity
-        # context_data['products_id'] = products_id_list
-
-        self.assertEqual(current_order.order_lines.count(), initial_lines_count)
+        context_data['products_id'] = products_id_list
+        # case: initial
         response = self.client.post(self.basic_url, context_data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(current_order.order_lines.count(), initial_lines_count)
+        # case: unmatching 'quantity_' parameters
+        # all unmatched order_lines have to be left unchanged
+        del context_data['quantity_1']
+        del context_data['quantity_2']
+        # 'quantity_3' parameter is left unchanged
+        context_data['quantity_4'] = random.randint(5, 10) # line doesn't exist
+        context_data['quantity_5'] = random.randint(5, 10) # line doesn't exist
+        response = self.client.post(self.basic_url, context_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(current_order.order_lines.count(), initial_lines_count)
+        # case: no 'quantity_'
+        # nothing has to change for the current_order
+        context_data = dict()
+        context_data['products_id'] = products_id_list
+        response = self.client.post(self.basic_url, context_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(current_order.order_lines.count(), initial_lines_count)
+        # case: unmatching 'products_id' parameters
+        # all unmatched ids have to be deleted
+        context_data['quantity_1'] = random.randint(1, 5)
+        context_data['quantity_2'] = random.randint(1, 5)
+        context_data['quantity_3'] = random.randint(1, 5)
+        context_data['products_id'] = [3, 4, 5] # ids #4 and #5 don't exist
+        response = self.client.post(self.basic_url, context_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(current_order.order_lines.count(), 1)
+        # case: no 'products_id' parameters
+        # all the order_lines has to be deleted
+        del context_data['products_id']
+        # recreate order_lines
+        current_order.order_lines.all().delete()
+        for _ in range(initial_lines_count):
+            self.create_rnd_order_line(parent_order=current_order)
+        self.assertEqual(current_order.order_lines.count(), initial_lines_count)
+        response = self.client.post(self.basic_url, context_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(current_order.order_lines.count(), 0)
+        # case: no parameters
+        # same as no 'products_id' parameters
+        context_data = dict()
+        for _ in range(initial_lines_count): # recreate order_lines
+            self.create_rnd_order_line(parent_order=current_order)
+        self.assertEqual(current_order.order_lines.count(), initial_lines_count)
+        response = self.client.post(self.basic_url, context_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(current_order.order_lines.count(), 0)
 
-# # TODO add checks that quantity and id paarmeters have to be passed at POST
