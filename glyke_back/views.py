@@ -289,7 +289,7 @@ def cart_view(request):
         for order_line in current_order.order_lines.all(): # ordered by line_number by default
             if str(order_line.product.id) in products_id_set:
                 quantity_list = request.POST.getlist(f'quantity_{order_line.line_number}')
-                if quantity_list: # to deal with erronous 'product_id' or 'quantity_' parameters
+                if quantity_list: # to deal with unmatching 'product_id' or 'quantity_' parameters
                     if len(quantity_list) > 1: # to avoid duplicating
                         new_quantity = sum([int(num) for num in quantity_list])
                     else:
