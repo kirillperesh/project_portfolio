@@ -290,12 +290,10 @@ def cart_view(request):
             if str(order_line.product.id) in products_id_set:
                 quantity_list = request.POST.getlist(f'quantity_{order_line.line_number}')
                 if quantity_list: # to deal with unmatching 'product_id' or 'quantity_' parameters
-                    if len(quantity_list) > 1: # to avoid duplicating
-                        new_quantity = sum([int(num) for num in quantity_list])
-                    else:
-                        new_quantity = int(quantity_list[0])
+                    if len(quantity_list) != 1: continue # to avoid duplicating
                     # making sure the quality has changed before accessing DB
                     # also order_line's quantity has to be less than its product's stock
+                    new_quantity = int(quantity_list[0])
                     if order_line.quantity != new_quantity and new_quantity <= order_line.product.stock:
                         order_line.quantity = new_quantity
                         order_line.save()
