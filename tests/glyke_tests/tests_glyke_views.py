@@ -768,6 +768,25 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
             else:
                 self.assertEqual(order_line.quantity, context_data[f'quantity_{order_line.line_number}'])
 
+    def test_quantity_duplicate_avoiding(self):
+        """
+        TODO"""
+        current_order = self.test_user.orders.filter(status='CUR').order_by('-created').first()
+        context_data = dict()
+        # this one's gonna be gt stock
+        order_line, product = self.create_rnd_order_line(parent_order=current_order)
+        products_id_list = [product.id,]
+        old_expected_quantity = order_line.quantity
+        context_data[f'quantity_1'] = (random.randint(1,9), random.randint(1,9))
+        context_data['products_id'] = products_id_list
+
+        response = self.client.post(self.basic_url, context_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['order_lines'])
+        for order_line in response.context['order_lines'].all().order_by('line_number'):
+            self.assertEqual(order_line.quantity, old_expected_quantity)
+
+
     def test_post_parameters(self):
         """Checks if the view reacts properly if 'quantity_' or 'products_id' POST parameters got corrupted or unmatched"""
         current_order = self.test_user.orders.filter(status='CUR').order_by('-created').first()
