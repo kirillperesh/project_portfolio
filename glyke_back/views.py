@@ -289,13 +289,14 @@ def cart_view(request):
         for order_line in current_order.order_lines.all(): # ordered by line_number by default
             if str(order_line.product.id) in products_id_set:
                 quantity_list = request.POST.getlist(f'quantity_{order_line.line_number}')
-                if len(quantity_list) > 1: # to avoid duplicating
-                    new_quantity = sum([int(num) for num in quantity_list])
-                else:
+                if quantity_list: # to deal with unmatching 'product_id' or 'quantity_' parameters
+                    if len(quantity_list) != 1: continue # to avoid duplicating
+                    # making sure the quality has changed before accessing DB
+                    # also order_line's quantity has to be less than its product's stock
                     new_quantity = int(quantity_list[0])
-                if order_line.quantity != new_quantity:
-                    order_line.quantity = new_quantity
-                    order_line.save()
+                    if order_line.quantity != new_quantity and new_quantity <= order_line.product.stock:
+                        order_line.quantity = new_quantity
+                        order_line.save()
             else:
                 order_line.delete()
     context = {}
@@ -337,4 +338,5 @@ def clear_cart_view(request, id):
     return redirect(redirect_url)
 
 
-# TODO add cart view tests
+# TODO add filters for the products view
+# TODO add tests for products view after that

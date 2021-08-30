@@ -1,7 +1,3 @@
-from django.core.validators import validate_comma_separated_integer_list
-from django.db.models.expressions import Value
-from django.db.models.query_utils import Q
-from django.http import response
 from django.test import TestCase
 from django.urls import reverse
 from urllib.parse import urlencode, urlparse
@@ -32,7 +28,7 @@ class TestPermissionsGETMixin:
         test_users_list = [None, cls.test_user, cls.test_user_staff, cls. test_user_superuser]
         # Checks if the number of expected status codes is correct
         if len(test_users_list) != len(expected_permissions_status_codes):
-            raise AssertionError(f'Incorrect number of users or status codes ({cls.__name__})')
+            raise ValueError(f"Incorrect 'expected_permissions_status_codes' agrument value (or number of users) [{cls.__name__}]") # pragma: no cover
         # Maps users to their expected status codes (GET requests)
         cls.user_to_expected_status_dict = dict(zip(test_users_list, expected_permissions_status_codes))
 
@@ -45,6 +41,7 @@ class TestPermissionsGETMixin:
                 self.client.force_login(user)
             response = self.client.get(self.basic_url)
             self.assertEqual(response.status_code, expected_status_code)
+
 
 class AddProductViewTest(TestPermissionsGETMixin, TestCase):
     @classmethod
@@ -274,7 +271,7 @@ class EditProductViewTest(TestPermissionsGETMixin, TestCase):
         self.assertEqual(actual_data, expected_data)
 
     def test_edit_product_category(self):
-        """Checks if products category if changed properly"""
+        """Checks if product's category can be switched properly"""
         actual_data = {}
         expected_data = {'filter_2': 'changed_filter_2',
                          'filter_3': 'changed_filter_3',
@@ -291,7 +288,7 @@ class EditProductViewTest(TestPermissionsGETMixin, TestCase):
                 actual_data[field] = self.product.attributes[field]
             elif field.startswith('category'):
                 actual_data[field] = getattr(self.product, field).id
-            else: pass
+            else: raise KeyError("Unexpected key. Must be 'filter_' or 'category'") # pragma: no cover
         self.assertEqual(actual_data, expected_data)
 
     def test_edit_product_name(self):
@@ -495,23 +492,6 @@ class AddToCartViewTest(TestPermissionsGETMixin, TestCase):
         expected_url = f"{reverse('smth_went_wrong')}?{'error_suffix=order+%28probably+there+is+none%29'}"
         self.assertRedirects(response=response, expected_url=expected_url, target_status_code=200, status_code=302)
 
-class CartViewTest(TestPermissionsGETMixin, TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[302,200,200,200]) # from TestPermissionsGETMixin
-
-    def setUp(self):
-        self.client.force_login(self.test_user) # force_login before making requests because this is a logged-in-only view
-        self.product = Product.objects.create(name=get_random_string(length=10))
-        self.basic_url = reverse('cart')
-
-    def test_no_current_order_response(self):
-        """Check if the view redirect correctly if there is no current order"""
-        Order.objects.all().delete()
-        response = self.client.get(self.basic_url)
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.startswith(r'/oops/?error_suffix='))
-
 class ClearCartViewTest(TestPermissionsGETMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -613,7 +593,7 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
         self.client.force_login(self.test_user) # force_login before making requests because this is a staff-only view
         self.basic_url = reverse('cart')
 
-    def create_rnd_order_line(self, parent_order, stock=random.randint(1,9)):
+    def create_rnd_order_line(self, parent_order, stock=15):
         """Return a random (rnd_order_line, rnd_product) tuple"""
         rnd_product = Product.objects.create(name=get_random_string(),
                                              stock=stock,
@@ -622,9 +602,17 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
                                              )
         rnd_order_line = OrderLine.objects.create(parent_order=parent_order,
                                                   product = rnd_product,
-                                                  quantity = random.randint(1, stock)
+                                                  quantity = random.randint(1, stock-1)
                                                   )
         return (rnd_order_line, rnd_product)
+
+    def test_no_current_order_response(self):
+        """Check if the view redirect correctly if there is no current order"""
+        self.test_user.orders.all().delete() # because an instance of an Order (with 'CUR') status is created on user login (if there is none yet)
+        self.assertFalse(self.test_user.orders.exists())
+        response = self.client.get(self.basic_url)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith(r'/oops/?error_suffix='))
 
     def test_current_order_orderlines(self):
         """Checks if the view receives all the order_line instances needed"""
@@ -648,7 +636,7 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
         self.assertEqual(Order.objects.filter(status='CUR').count(), 2)
         self.assertEqual(Order.objects.all().count(), 4)
         current_order = self.test_user.orders.filter(status='CUR').order_by('-created').first()
-        for _ in range(3): self.create_rnd_order_line(parent_order = current_order)
+        for _ in range(3): self.create_rnd_order_line(parent_order=current_order)
         response = self.client.get(self.basic_url)
         view_current_order = response.context['order']
         view_order_lines_queryset = response.context['order_lines']
@@ -662,7 +650,7 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
         products_id_list = list()
         initial_lines_count = 6 # it's 6 so that different numbers of lines to delete can be tested
         for line_num in range(initial_lines_count):
-            rnd_order_line, rnd_product = self.create_rnd_order_line(parent_order = current_order)
+            rnd_order_line, rnd_product = self.create_rnd_order_line(parent_order=current_order)
             products_id_list.append(str(rnd_product.id))
             # sometimes add an additiontal copy of a parameter to test duplicating avoidance
             if line_num % 2 == 0: products_id_list.append(str(rnd_product.id))
@@ -678,9 +666,14 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
         expected_lines_count = initial_lines_count
         # check diffent numbers of lines deleted at a time (1, 2, the rest)
         for lines_to_delete_count in (1, 2, initial_lines_count-3):
+            context_data = dict()
             for _ in range(lines_to_delete_count):
                 rnd_line_to_delete_product_id = random.choice(products_id_list)
-                products_id_list.remove(rnd_line_to_delete_product_id) # remove a rnd id from POST parameters
+                products_id_list.remove(rnd_line_to_delete_product_id) # remove this rnd id from POST parameters
+            # recollect 'quantity_' parameters, so that there is no extra parameters left
+            for product_left_id in products_id_list:
+                order_line_left = current_order.order_lines.filter(product__id=product_left_id).first()
+                context_data[f'quantity_{order_line_left.line_number}'] = order_line_left.quantity
 
             context_data['products_id'] = products_id_list
             self.assertEqual(current_order.order_lines.count(), expected_lines_count)
@@ -689,8 +682,172 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(current_order.order_lines.count(), expected_lines_count)
 
+    def test_order_lines_quantity_update(self):
+        """Checks if each order_line's quantity can be updated properly"""
+        current_order = self.test_user.orders.filter(status='CUR').order_by('-created').first()
+        context_data = dict()
+        products_id_list = list()
+        initial_lines_count = 4 # it's 4 so that different numbers of lines to update can be tested (1, 2, the rest)
+        for _ in range(initial_lines_count):
+            rnd_order_line, rnd_product = self.create_rnd_order_line(parent_order=current_order)
+            products_id_list.append(str(rnd_product.id))
+            context_data[f'quantity_{rnd_order_line.line_number}'] = rnd_order_line.quantity
+        context_data['products_id'] = products_id_list
+        # initial check
+        response = self.client.get(self.basic_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['order_lines'])
+        for order_line in response.context['order_lines'].all().order_by('line_number'):
+            self.assertEqual(order_line.quantity, context_data[f'quantity_{order_line.line_number}'])
+        # check diffent numbers of lines update at a time (0, 1, 2, the rest)
+        for changed_lines_count in (0, 1, 2, initial_lines_count):
+            changed_lines_numbers = list()
+            for _ in range(changed_lines_count):
+                while True: # making sure the same line won't get updated more than once
+                    rnd_order_line_number = random.randint(1, initial_lines_count)
+                    if rnd_order_line_number not in changed_lines_numbers:
+                        changed_lines_numbers.append(rnd_order_line_number)
+                        break
+                while True: # making sure the new_quantity is different from the old one
+                    new_quantity = random.randint(1, 9)
+                    if new_quantity != context_data[f'quantity_{rnd_order_line_number}']:
+                        context_data[f'quantity_{rnd_order_line_number}'] = new_quantity
+                        break
+            # check eache set of updated lines
+            response = self.client.post(self.basic_url, context_data)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(response.context['order_lines'])
+            for order_line in response.context['order_lines'].all().order_by('line_number'):
+                self.assertEqual(order_line.quantity, context_data[f'quantity_{order_line.line_number}'])
+
+    def test_quantity_gt_stock(self):
+        """Checks that nothing breaks if order_line's quantity exceeds its product's stock"""
+        current_order = self.test_user.orders.filter(status='CUR').order_by('-created').first()
+        context_data = dict()
+        products_id_list = list()
+        initial_lines_count = 3 # 3 because: gt stock, lte stock, unchanged
+        initial_stock = 5
+        # this one's gonna be gt stock
+        order_line_1, product_1 = self.create_rnd_order_line(parent_order=current_order,
+                                                             stock=initial_stock)
+        products_id_list.append(str(product_1.id))
+        context_data[f'quantity_{order_line_1.line_number}'] = order_line_1.quantity
+        # this one's gonna be lte stock
+        order_line_2, product_2 = self.create_rnd_order_line(parent_order=current_order,
+                                                             stock=initial_stock)
+        products_id_list.append(str(product_2.id))
+        context_data[f'quantity_{order_line_2.line_number}'] = order_line_2.quantity
+        # the control one
+        order_line_3, product_3 = self.create_rnd_order_line(parent_order=current_order,
+                                                             stock=initial_stock)
+        products_id_list.append(str(product_3.id))
+        context_data[f'quantity_{order_line_3.line_number}'] = order_line_3.quantity
+        # initial check
+        context_data['products_id'] = products_id_list
+        response = self.client.post(self.basic_url, context_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['order_lines'])
+        for order_line in response.context['order_lines'].all().order_by('line_number'):
+            self.assertEqual(order_line.quantity, context_data[f'quantity_{order_line.line_number}'])
+        # update quantity parameters
+        # 1: gt stock
+        expected_old_quantity = context_data[f'quantity_1']
+        context_data[f'quantity_1'] = order_line_1.quantity + initial_stock
+        # 2: lte stock
+        while True:
+            new_quantity_2 = random.randint(1, initial_stock)
+            if new_quantity_2 != context_data[f'quantity_2']: break
+        context_data[f'quantity_2'] = new_quantity_2
+        # 3: the third one is left as is
+        response = self.client.post(self.basic_url, context_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['order_lines'])
+        for order_line in response.context['order_lines'].all().order_by('line_number'):
+            if order_line.line_number == 1:
+                self.assertEqual(order_line.quantity, expected_old_quantity)
+            else:
+                self.assertEqual(order_line.quantity, context_data[f'quantity_{order_line.line_number}'])
+
+    def test_quantity_duplicate_avoiding(self):
+        """
+        TODO"""
+        current_order = self.test_user.orders.filter(status='CUR').order_by('-created').first()
+        context_data = dict()
+        # this one's gonna be gt stock
+        order_line, product = self.create_rnd_order_line(parent_order=current_order)
+        products_id_list = [product.id,]
+        old_expected_quantity = order_line.quantity
+        context_data[f'quantity_1'] = (random.randint(1,9), random.randint(1,9))
+        context_data['products_id'] = products_id_list
+
+        response = self.client.post(self.basic_url, context_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['order_lines'])
+        for order_line in response.context['order_lines'].all().order_by('line_number'):
+            self.assertEqual(order_line.quantity, old_expected_quantity)
 
 
+    def test_post_parameters(self):
+        """Checks if the view reacts properly if 'quantity_' or 'products_id' POST parameters got corrupted or unmatched"""
+        current_order = self.test_user.orders.filter(status='CUR').order_by('-created').first()
+        context_data = dict()
+        products_id_list = list()
+        initial_lines_count = 3 # it just seemed to be enough
+        for _ in range(initial_lines_count):
+            rnd_order_line, rnd_product = self.create_rnd_order_line(parent_order=current_order)
+            products_id_list.append(str(rnd_product.id))
+            context_data[f'quantity_{rnd_order_line.line_number}'] = rnd_order_line.quantity
+        context_data['products_id'] = products_id_list
+        # case: initial
+        response = self.client.post(self.basic_url, context_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(current_order.order_lines.count(), initial_lines_count)
+        # case: unmatching 'quantity_' parameters
+        # all unmatched order_lines have to be left unchanged
+        del context_data['quantity_1']
+        del context_data['quantity_2']
+        # 'quantity_3' parameter is left unchanged
+        context_data['quantity_4'] = random.randint(5, 10) # line doesn't exist
+        context_data['quantity_5'] = random.randint(5, 10) # line doesn't exist
+        response = self.client.post(self.basic_url, context_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(current_order.order_lines.count(), initial_lines_count)
+        # case: no 'quantity_'
+        # nothing has to change for the current_order
+        context_data = dict()
+        context_data['products_id'] = products_id_list
+        response = self.client.post(self.basic_url, context_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(current_order.order_lines.count(), initial_lines_count)
+        # case: unmatching 'products_id' parameters
+        # all unmatched ids have to be deleted
+        context_data['quantity_1'] = random.randint(1, 5)
+        context_data['quantity_2'] = random.randint(1, 5)
+        context_data['quantity_3'] = random.randint(1, 5)
+        context_data['products_id'] = [3, 4, 5] # ids #4 and #5 don't exist
+        response = self.client.post(self.basic_url, context_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(current_order.order_lines.count(), 1)
+        # case: no 'products_id' parameters
+        # all the order_lines has to be deleted
+        del context_data['products_id']
+        # recreate order_lines
+        current_order.order_lines.all().delete()
+        for _ in range(initial_lines_count):
+            self.create_rnd_order_line(parent_order=current_order)
+        self.assertEqual(current_order.order_lines.count(), initial_lines_count)
+        response = self.client.post(self.basic_url, context_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(current_order.order_lines.count(), 0)
+        # case: no parameters
+        # same as no 'products_id' parameters
+        context_data = dict()
+        for _ in range(initial_lines_count): # recreate order_lines
+            self.create_rnd_order_line(parent_order=current_order)
+        self.assertEqual(current_order.order_lines.count(), initial_lines_count)
+        response = self.client.post(self.basic_url, context_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(current_order.order_lines.count(), 0)
 
-# TODO add test that changes line's quantity
-# # TODO add checks that quantity and id paarmeters have to be passed at POST
+
+# TODO add a test for this 'new_quantity = sum([int(num) for num in quantity_list])' line 294 views
