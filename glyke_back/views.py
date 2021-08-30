@@ -294,7 +294,9 @@ def cart_view(request):
                         new_quantity = sum([int(num) for num in quantity_list])
                     else:
                         new_quantity = int(quantity_list[0])
-                    if order_line.quantity != new_quantity:
+                    # making sure the quality has changed before accessing DB
+                    # also order_line's quantity has to be less than its product's stock
+                    if order_line.quantity != new_quantity and new_quantity <= order_line.product.stock:
                         order_line.quantity = new_quantity
                         order_line.save()
             else:
@@ -338,4 +340,5 @@ def clear_cart_view(request, id):
     return redirect(redirect_url)
 
 
-# TODO add cart view tests
+# TODO add filters for the products view
+# TODO add tests for products view after that
