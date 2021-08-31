@@ -3,6 +3,9 @@
 {% block additional_head %}
 {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/products.css' %}"/>
+
+<!-- additional template tags -->
+{% load glyke_back_extras %}
 {% endblock %}
 
 {% block title %} Products {% endblock %}
@@ -12,8 +15,27 @@
       <div class="u-clearfix u-sheet u-valign-middle u-sheet-1">
         <h1 class="u-text u-text-default u-text-1">Catalogue</h1>
         <h5 class="u-text u-text-default u-text-2">Handcrafted little pieces of art</h5>
-        <div class="u-list u-repeater u-list-1">
 
+        {{request.GET.urlencode}}
+        <select name="select_category" onchange="location = this.value;" selected>
+          {% for category in categories %}
+            <option value="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:'category' }}&category={{ category }}"
+            {% if category|urlencode in request.get_full_path %} selected {% endif %}
+            >{{ category }}</option>
+          {% endfor %}
+        </select>
+
+        {% for tag in tag_filters %}
+          <div>
+            {{ tag }}
+            {% with 'tag='|addstr:tag as tag_param %}
+              <a href="{{ request.get_full_path|remove_first_occ_url_param:tag_param }}">remove {{ tag }}</a>
+            {% endwith %}
+          </div>
+        {% endfor %}
+
+
+        <div class="u-list u-repeater u-list-1">
           {% for product in products %}
             <div class="u-align-center-md u-align-center-sm u-align-center-xl u-align-center-xs u-container-style u-list-item u-repeater-item u-video-cover u-list-item-1">
               <div class="u-container-layout u-similar-container u-container-layout-1">
@@ -39,14 +61,16 @@
                 <div class="u-align-center u-container-style u-group u-opacity u-opacity-85 u-group-1 bg-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
                   <div class="u-container-layout u-valign-middle u-container-layout-2">
                     <h2 class="u-align-center u-custom-font u-text u-text-3 product-name">{{ product.name }}</h2>
-                    <a href="{% url 'products'%}?category={{ product.category }}">
-                      <span class="product-namebox-bottom-category">{{ product.category }}</span></a>
+                    <a href="{% url 'products'%}?{{ request.GET.urlencode }}&category={{ product.category }}"><span class="product-namebox-bottom-category">{{ product.category }}</span></a>
                   </div>
                 </div>
                 <div>
                   <span class="u-text-tags product-tags">
                     {% for tag in product.tags.all %}
-                        <a href="{% url 'products'%}?only_tag={{ tag }}">{{ tag }}</a>{% if tag != product.tags.all.last %}, {% endif %}
+                        {% with 'tag='|addstr:tag as tag_param %}
+                          {% if tag_param not in request.GET.urlencode %}
+                            <a href="{% url 'products'%}?{{ request.GET.urlencode }}&{{ tag_param }}">{{ tag }}</a>{% else %}{{ tag }}{% endif %}{% if tag != product.tags.all.last %}, {% endif %}
+                        {% endwith %}
                     {% endfor %}
                   </span>
                 </div>
