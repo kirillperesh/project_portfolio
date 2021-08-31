@@ -751,13 +751,13 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
             self.assertEqual(order_line.quantity, context_data[f'quantity_{order_line.line_number}'])
         # update quantity parameters
         # 1: gt stock
-        expected_old_quantity = context_data[f'quantity_1']
-        context_data[f'quantity_1'] = order_line_1.quantity + initial_stock
+        expected_old_quantity = context_data['quantity_1']
+        context_data['quantity_1'] = order_line_1.quantity + initial_stock
         # 2: lte stock
         while True:
             new_quantity_2 = random.randint(1, initial_stock)
-            if new_quantity_2 != context_data[f'quantity_2']: break
-        context_data[f'quantity_2'] = new_quantity_2
+            if new_quantity_2 != context_data['quantity_2']: break
+        context_data['quantity_2'] = new_quantity_2
         # 3: the third one is left as is
         response = self.client.post(self.basic_url, context_data)
         self.assertEqual(response.status_code, 200)
@@ -769,23 +769,28 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
                 self.assertEqual(order_line.quantity, context_data[f'quantity_{order_line.line_number}'])
 
     def test_quantity_duplicate_avoiding(self):
-        """
-        TODO"""
+        """Checks if assigning more than 1 argument to any "quantity_" parameter makes view ignore it"""
         current_order = self.test_user.orders.filter(status='CUR').order_by('-created').first()
         context_data = dict()
-        # this one's gonna be gt stock
-        order_line, product = self.create_rnd_order_line(parent_order=current_order)
-        products_id_list = [product.id,]
-        old_expected_quantity = order_line.quantity
-        context_data[f'quantity_1'] = (random.randint(1,9), random.randint(1,9))
+        order_line_1, product_1 = self.create_rnd_order_line(parent_order=current_order)
+        order_line_2, product_2 = self.create_rnd_order_line(parent_order=current_order)
+        products_id_list = [product_1.id, product_2.id]
+        old_expected_quantity_1 = order_line_1.quantity
+        # assigning more than 1 argument to any "quantity_" parameter makes view ignore it
+        context_data['quantity_1'] = (random.randint(1,9), random.randint(1,9))
+        # updated orderline has to be updated though
+        while True:
+            new_quantity_2 = random.randint(1, 9)
+            if new_quantity_2 != order_line_2.quantity: break
+        context_data['quantity_2'] = new_quantity_2
         context_data['products_id'] = products_id_list
-
         response = self.client.post(self.basic_url, context_data)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['order_lines'])
-        for order_line in response.context['order_lines'].all().order_by('line_number'):
-            self.assertEqual(order_line.quantity, old_expected_quantity)
-
+        quantity_1 = response.context['order_lines'].filter(line_number=1).first().quantity
+        quantity_2 = response.context['order_lines'].filter(line_number=2).first().quantity
+        self.assertEqual(quantity_1, old_expected_quantity_1)
+        self.assertEqual(quantity_2, context_data['quantity_2'])
 
     def test_post_parameters(self):
         """Checks if the view reacts properly if 'quantity_' or 'products_id' POST parameters got corrupted or unmatched"""
@@ -849,5 +854,3 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(current_order.order_lines.count(), 0)
 
-
-# TODO add a test for this 'new_quantity = sum([int(num) for num in quantity_list])' line 294 views
