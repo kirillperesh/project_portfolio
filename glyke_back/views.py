@@ -1,6 +1,7 @@
 from logging import raiseExceptions
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404, resolve_url
+from django.template import context
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, Http404
 from django import forms
@@ -233,14 +234,25 @@ class ProductsView(ListView):
     def get_queryset(self):
         queryset = self.model.objects.filter(is_active=True).order_by('-discount_percent', '-stock') # basic queryset
         # category filter block
-        if self.request.GET.get('category'):
+        if self.request.GET.get('category'): # to be able to make a queryset
             category_filter = self.request.GET.get('category')
             queryset = queryset.filter(category__name=category_filter)
-        # only_tag filter block
-        if self.request.GET.get('only_tag'):
-            only_tag_filter = self.request.GET.get('only_tag')
-            queryset = queryset.filter(tags__name=only_tag_filter)
+        # tag_filters block
+        tag_filters = set(self.request.GET.getlist('tag'))
+        if tag_filters: # to be able to make a queryset
+            tag_q = Q()
+            for tag in tag_filters:
+                tag_q = tag_q | Q(tags__name=tag)
+            queryset = queryset.filter(tag_q)
         return queryset
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = [category.name for category in Category.objects.all()]
+        context['category'] = self.request.GET.get('category')
+        context['tag_filters'] = set(self.request.GET.getlist('tag'))
+        return context
+
 
 class ProductsStaffView(UserIsStaff_Or404_Mixin, ListView):
     # Paginating, ordering and filtering are done by JS DataTables
@@ -340,3 +352,5 @@ def clear_cart_view(request, id):
 
 # TODO add filters for the products view
 # TODO add tests for products view after that
+
+# TODO fix filters in products template
