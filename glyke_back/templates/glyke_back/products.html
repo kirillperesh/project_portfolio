@@ -19,7 +19,7 @@
         {{request.GET.urlencode}}
         <select name="select_category" onchange="location = this.value;" selected>
           {% for category in categories %}
-            <option value="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:'category' }}&category={{ category }}"
+            <option value="{% url 'products'%}?{{ request.GET.urlencode|remove_first_occ_url_param:'category' }}&category={{ category }}"
             {% if category|urlencode in request.get_full_path %} selected {% endif %}
             >{{ category }}</option>
           {% endfor %}
@@ -28,8 +28,8 @@
         {% for tag in tag_filters %}
           <div>
             {{ tag }}
-            {% with 'tag='|addstr:tag as tag_param %}
-              <a href="{{ request.get_full_path|remove_first_occ_url_param:tag_param }}">remove {{ tag }}</a>
+            {% with 'tag='|append_url_param_value:tag as tag_param %}
+              <a href="{% url 'products'%}?{{ request.GET.urlencode|remove_first_occ_url_param:tag_param }}">remove {{ tag }}</a>
             {% endwith %}
           </div>
         {% endfor %}
@@ -65,14 +65,14 @@
                   </div>
                 </div>
                 <div>
-                  <span class="u-text-tags product-tags">
-                    {% for tag in product.tags.all %}
-                        {% with 'tag='|addstr:tag as tag_param %}
-                          {% if tag_param not in request.GET.urlencode %}
-                            <a href="{% url 'products'%}?{{ request.GET.urlencode }}&{{ tag_param }}">{{ tag }}</a>{% else %}{{ tag }}{% endif %}{% if tag != product.tags.all.last %}, {% endif %}
-                        {% endwith %}
-                    {% endfor %}
-                  </span>
+                    <span class="u-text-tags product-tags">
+                        {% for tag in product.tags.all %}
+                            {% with 'tag='|append_url_param_value:tag as tag_param %}
+                                {% if tag_param not in request.GET.urlencode %}
+                                    <a href="{% url 'products'%}?{{ request.GET.urlencode|remove_first_occ_url_param:'page' }}&{{ tag_param }}">{{ tag }}</a>{% else %}{{ tag }}{% endif %}{% if tag != product.tags.all.last %}, {% endif %}
+                            {% endwith %}
+                        {% endfor %}
+                    </span>
                 </div>
                 {% if product.description %}
                   <p class="u-align-center-lg u-text u-text-default product-desc">{{ product.description }}</p>
