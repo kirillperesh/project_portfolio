@@ -242,8 +242,12 @@ class ProductsView(ListView):
         if tag_filters: # to be able to make a queryset
             tag_q = Q()
             for tag in tag_filters:
-                tag_q = tag_q | Q(tags__name=tag)
+                print(dir(tag_q.OR))
+                # TODO fix here. found instances duplicate each time
+                if Q(tags__name=tag) not in tag_q:
+                    tag_q = tag_q | Q(tags__name=tag)
             queryset = queryset.filter(tag_q)
+            print(queryset)
         return queryset
 
     def get_context_data(self, *, object_list=None, **kwargs):
