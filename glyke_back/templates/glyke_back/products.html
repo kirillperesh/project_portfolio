@@ -16,12 +16,12 @@
         <h1 class="u-text u-text-default u-text-1">Catalogue</h1>
         <h5 class="u-text u-text-default u-text-2">Handcrafted little pieces of art</h5>
 
-        {{request.GET.urlencode}}
         <select name="select_category" onchange="location = this.value;" selected>
           {% for category in categories %}
-            <option value="{% url 'products'%}?{{ request.GET.urlencode|remove_first_occ_url_param:'category' }}&category={{ category }}"
-            {% if category|urlencode in request.get_full_path %} selected {% endif %}
-            >{{ category }}</option>
+            <option value="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:'category' }}&category={{ category }}"
+            {% if 'category='|append_url_param_value:category in request.GET.urlencode %} selected {% endif %}>
+              {{ category }}
+            </option>
           {% endfor %}
         </select>
 
@@ -29,7 +29,7 @@
           <div>
             {{ tag }}
             {% with 'tag='|append_url_param_value:tag as tag_param %}
-              <a href="{% url 'products'%}?{{ request.GET.urlencode|remove_first_occ_url_param:tag_param }}">remove {{ tag }}</a>
+              <a href="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:tag_param }}">remove {{ tag }}</a>
             {% endwith %}
           </div>
         {% endfor %}
@@ -61,7 +61,7 @@
                 <div class="u-align-center u-container-style u-group u-opacity u-opacity-85 u-group-1 bg-{% if product.category.bg_color %}{{ product.category.bg_color }}{% else %}default{% endif %}">
                   <div class="u-container-layout u-valign-middle u-container-layout-2">
                     <h2 class="u-align-center u-custom-font u-text u-text-3 product-name">{{ product.name }}</h2>
-                    <a href="{% url 'products'%}?{{ request.GET.urlencode }}&category={{ product.category }}"><span class="product-namebox-bottom-category">{{ product.category }}</span></a>
+                    <a href="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:'category' }}&category={{ product.category }}"><span class="product-namebox-bottom-category">{{ product.category }}</span></a>
                   </div>
                 </div>
                 <div>
@@ -69,7 +69,7 @@
                         {% for tag in product.tags.all %}
                             {% with 'tag='|append_url_param_value:tag as tag_param %}
                                 {% if tag_param not in request.GET.urlencode %}
-                                    <a href="{% url 'products'%}?{{ request.GET.urlencode|remove_first_occ_url_param:'page' }}&{{ tag_param }}">{{ tag }}</a>{% else %}{{ tag }}{% endif %}{% if tag != product.tags.all.last %}, {% endif %}
+                                    <a href="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:'page' }}&{{ tag_param }}">{{ tag }}</a>{% else %}{{ tag }}{% endif %}{% if tag != product.tags.all.last %}, {% endif %}
                             {% endwith %}
                         {% endfor %}
                     </span>
