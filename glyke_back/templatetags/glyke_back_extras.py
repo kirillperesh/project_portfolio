@@ -1,5 +1,6 @@
 from django import template
-from django.utils.http import urlencode
+# from django.utils.http import urlencode
+from urllib.parse import quote_plus, urlparse
 # TODO this might help
 
 register = template.Library()
@@ -10,44 +11,33 @@ def addstr(str1, str2):
     return str(str1) + str(str2)
 
 @register.filter
-def append_url_param_value(param_name, param_value):
-    """Concatenate strings param_name & param_value, escaping spaces"""
-    param_value = str(param_value).replace(' ', '+')
-    return str(param_name) + param_value
-
-@register.filter
 def remove_first_occ_substr(str1, str2):
     """Remove the first occurence of str2 from str1"""
     return str(str1).replace(str(str2), '', 1)
 
 @register.filter
-def remove_first_occ_url_param(current_params, param):
+def append_url_param_value(param_name, param_value):
+    """Concatenate strings param_name & param_value, escaping spaces"""
+    param_value = quote_plus(str(param_value), encoding='utf-8')
+    return str(param_name) + str(param_value)
+
+@register.filter
+def remove_all_occ_url_param(current_params, param_to_remove):
     """Remove the first occurence of param from path"""
-    # if '&' not in str(path): return ''
     current_params = str(current_params)
-    if str(param) not in current_params:
+    param_to_remove = str(param_to_remove)
+    if param_to_remove not in current_params:
         return current_params
-    if '&' not in current_params:
-        return ''
-    new_params = current_params.replace(str(param), '', 1)
-    while '&&' in new_params: new_params = new_params.replace('&&', '&')
+    param_list = current_params.split('&')
+    new_params = str()
+    for param in param_list:
+        if param_to_remove in param: continue
+        new_params += param + '&'
+    # new_params = current_params.replace(param, '', 1)
+    # if '&' not in current_params:
+    #     return ''
+    # while '&&' in new_params: new_params = new_params.replace('&&', '&')
+    # new_params = new_params[1:] if new_params.startswith('&') else new_params
     new_params = new_params[:-1] if new_params.endswith('&') else new_params
-    new_params = new_params[1:] if new_params.startswith('&') else new_params
     return new_params
-
-# @register.filter
-# def remove_all_occ_url_param(path, param_start):
-#     """Remove all occurence of param from path"""
-#     param_start = str(param_start)
-#     new_path = str(path)
-#     while True:
-#         if param_start not in new_path: break
-#         new_path, new_path_end = new_path.split(param_start, 1)
-#         if '&' in new_path_end:
-#             new_path += new_path_end.split('&', 1)[1]
-#     new_path = new_path.replace('?&', '?')
-#     # new_path = new_path.replace('&&', '&')
-#     return new_path[:-1] if new_path.endswith('&') else new_path
-
-
 
