@@ -52,6 +52,13 @@ class Category(TimeStampedModel):
                                related_name='child_categories',
                                blank=True,
                                null=True)
+    child_level = models.IntegerField(_('child level'),
+                                      validators=[MinValueValidator(0)],
+                                      default=0) # 0 level is top_lvl_category
+    ordering_index = models.IntegerField(_('ordering index'), # ordering index for templates' select options
+                                      validators=[MinValueValidator(1)],
+                                      blank=True,
+                                      null=True)
     is_active = models.BooleanField(_('is active'), default=True)
     picture = models.ImageField(_('picture'),
                                 default = get_upload_dir('category', no_file_name='no_image.png'),
@@ -65,11 +72,30 @@ class Category(TimeStampedModel):
                                 blank=True,
                                 null=True)
 
+
     class Meta:
         verbose_name_plural = "categories"
+        ordering = ["ordering_index",]
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        """Update instance's child_level before calling super().save()"""
+        self.child_level = int()
+        current_parent = self.parent
+        while True:
+            if current_parent:
+                self.child_level += 1
+                if current_parent.parent:
+                    current_parent = current_parent.parent
+                    continue
+            break
+
+
+
+
+        return super().save(*args, **kwargs)
 
 
 class Price(models.Model):
@@ -266,3 +292,5 @@ class OrderLine(Price):
 
 # TODO add defaul no_image from defaults to category photo
 # TODO if any category filter has been renamed or deleted, corresponding product attributes have to be renamed or delete either
+
+# TODO update category's save() to update all ordering indices
