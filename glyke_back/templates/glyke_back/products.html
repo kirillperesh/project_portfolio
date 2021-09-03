@@ -16,13 +16,27 @@
         <h1 class="u-text u-text-default u-text-1">Catalogue</h1>
         <h5 class="u-text u-text-default u-text-2">Handcrafted little pieces of art</h5>
 
-        <select name="select_category" onchange="location = this.value;" selected>
-          {% for category in categories %}
+        <select id="select_category" name="select_category" onchange="location = this.value;" selected>
+          <option value="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:'category' }}"{% if 'category=' not in request.GET.urlencode %} selected {% endif %}>
+            Any category
+          </option>
+          {% for category in top_lvl_categories %}
             <option value="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:'category' }}&category={{ category }}"
             {% if 'category='|append_url_param_value:category in request.GET.urlencode %} selected {% endif %}>
               {{ category }}
             </option>
+            {% if category.child_categories %}
+            {% else %}
+            {% endif %}
+
+
           {% endfor %}
+          <!-- {% for category in sub_categories %}
+            <option value="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:'category' }}&category={{ category }}"
+            {% if 'category='|append_url_param_value:category in request.GET.urlencode %} selected {% endif %}>
+              {{ category }}
+            </option>
+          {% endfor %} -->
         </select>
 
         {% for tag in tag_filters %}
