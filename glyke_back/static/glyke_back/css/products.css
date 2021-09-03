@@ -323,5 +323,9 @@ a:hover,a:focus{text-decoration:none!important;outline:none!important;-webkit-bo
     margin-top: 2em;
 }
 
+#select_category {
+    width: 200px;
+}
+
 
 

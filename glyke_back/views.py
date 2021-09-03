@@ -239,16 +239,38 @@ class ProductsView(ListView):
             queryset = queryset.filter(category__name=category_filter)
         # tag_filters block
         tag_filters = set(self.request.GET.getlist('tag'))
-        if tag_filters: # to be able to make a queryset
-            tag_q = Q()
-            for tag in tag_filters:
-                tag_q = tag_q | Q(tags__name=tag)
-            queryset = queryset.filter(tag_q)
+        if tag_filters: # check if there are any tag parameters
+            # this was expensive
+            # tag_q = Q()
+            # for tag in tag_filters: tag_q = tag_q | Q(tags__name=tag)
+            # queryset = queryset.filter(tag_q)
+            queryset = queryset.filter(tags__name__in=tag_filters).distinct()
         return queryset
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['categories'] = [category.name for category in Category.objects.all()]
+        context['top_lvl_categories'] = [category.name for category in Category.objects.filter(parent__isnull=True)]
+        # context['sub_categories'] = [category.name for category in Category.objects.filter(parent__isnull=False)]
+
+        self.next_index = 1
+        def numerate_category_recur(current_parrent_cat):
+            current_parrent_cat.ordering_index = self.next_index
+            current_parrent_cat.save()
+            # print(current_parrent_cat, self.next_index)
+            self.next_index += 1
+
+            if current_parrent_cat.child_categories.exists():
+                for child_category in current_parrent_cat.child_categories.order_by('name'):
+                    numerate_category_recur(child_category)
+
+        for parent_category in Category.objects.filter(parent__isnull=True).order_by('name'):
+            numerate_category_recur(parent_category)
+
+
+
+
+
+
         context['category'] = self.request.GET.get('category')
         context['tag_filters'] = set(self.request.GET.getlist('tag'))
         return context
@@ -354,3 +376,6 @@ def clear_cart_view(request, id):
 # TODO add tests for products view after that
 
 # TODO fix filters in products template
+
+
+# TODO update products page - add left margin or whatever based on category index and child lvl
