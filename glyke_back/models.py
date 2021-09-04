@@ -88,6 +88,7 @@ class Category(TimeStampedModel):
         """Update instance's child_level before calling super().save()"""
         self.child_level = int()
         current_parent = self.parent
+        # TODO comment
         while True:
             if current_parent:
                 self.child_level += 1
