@@ -252,19 +252,17 @@ class ProductsView(ListView):
         context['top_lvl_categories'] = [category.name for category in Category.objects.filter(parent__isnull=True)]
         # context['sub_categories'] = [category.name for category in Category.objects.filter(parent__isnull=False)]
 
-        self.next_index = 1
-        def numerate_category_recur(current_parrent_cat):
-            current_parrent_cat.ordering_index = self.next_index
-            current_parrent_cat.save()
-            # print(current_parrent_cat, self.next_index)
-            self.next_index += 1
+        # self.next_index = 1
+        # def numerate_category_recur(current_parrent_cat):
+        #     current_parrent_cat.ordering_index = self.next_index
+        #     current_parrent_cat.save()
+        #     self.next_index += 1
+        #     if current_parrent_cat.child_categories.exists():
+        #         for child_category in current_parrent_cat.child_categories.order_by('name'):
+        #             numerate_category_recur(child_category)
 
-            if current_parrent_cat.child_categories.exists():
-                for child_category in current_parrent_cat.child_categories.order_by('name'):
-                    numerate_category_recur(child_category)
-
-        for parent_category in Category.objects.filter(parent__isnull=True).order_by('name'):
-            numerate_category_recur(parent_category)
+        # for parent_category in Category.objects.filter(parent__isnull=True).order_by('name'):
+        #     numerate_category_recur(parent_category)
 
 
 
