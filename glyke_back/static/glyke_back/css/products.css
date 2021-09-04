@@ -327,5 +327,16 @@ a:hover,a:focus{text-decoration:none!important;outline:none!important;-webkit-bo
     width: 200px;
 }
 
+.child-lvl {
+    font-size: 14px;
+    background-color: rgb(245, 245, 245);
+}
+.child-lvl-0 {
+    font-weight: 1000;
+    background-color: rgb(230, 230, 230);
+}
+.child-lvl-1 {
+    font-weight: 800;
+}
 
 
