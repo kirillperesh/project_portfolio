@@ -44,6 +44,7 @@ def get_upload_dir(base_dir, no_file_name=''):
 
 
 class Category(TimeStampedModel):
+    __original_name = None # an attribute to keep track on the previous name when changed
     name = models.CharField(_('name'), max_length=255, unique=True)
     description = models.TextField(_('description'), max_length=1000, blank=True)
     parent = models.ForeignKey('self',
@@ -72,13 +73,16 @@ class Category(TimeStampedModel):
                                 blank=True,
                                 null=True)
 
-
     class Meta:
         verbose_name_plural = "categories"
         ordering = ["ordering_index",]
 
     def __str__(self):
         return self.name
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__original_name = self.name
 
     def save(self, *args, **kwargs):
         """Update instance's child_level before calling super().save()"""
@@ -92,7 +96,19 @@ class Category(TimeStampedModel):
                     continue
             break
 
+        # if not self.pk or not self.ordering_index or self.name != self.__original_name:
+        #     self.next_index = 1
+        #     def numerate_category_recur(current_parrent_cat):
+        #         if current_parrent_cat.ordering_index != self.next_index:
+        #             current_parrent_cat.ordering_index = self.next_index
+        #             current_parrent_cat.save()
+        #         self.next_index += 1
+        #         if current_parrent_cat.child_categories.exists():
+        #             for child_category in current_parrent_cat.child_categories.order_by('name'):
+        #                 numerate_category_recur(child_category)
 
+        #     for parent_category in Category.objects.filter(parent__isnull=True).order_by('name'):
+        #         numerate_category_recur(parent_category)
 
 
         return super().save(*args, **kwargs)
