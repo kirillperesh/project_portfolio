@@ -232,11 +232,24 @@ class ProductsView(ListView):
     extra_context = {'no_image_url': DEFAULT_NO_IMAGE_URL}
 
     def get_queryset(self):
-        queryset = self.model.objects.filter(is_active=True).order_by('-discount_percent', '-stock') # basic queryset
+        base_queryset = self.model.objects.filter(is_active=True).order_by('-discount_percent', '-stock') # basic queryset
         # category filter block
         if self.request.GET.get('category'): # to be able to make a queryset
             category_filter = self.request.GET.get('category')
-            queryset = queryset.filter(category__name=category_filter)
+            current_category = Category.objects.get(name = category_filter)
+            queryset = base_queryset.filter(category=current_category)
+
+            # TODO comment
+            def add_children_to_queryset(current_parent_category):
+                nonlocal queryset
+                if current_parent_category.child_categories.exists():
+                    for child_category in current_parent_category.child_categories.order_by('ordering_index'):
+                        new_items = base_queryset.filter(category=child_category)
+                        queryset = queryset | new_items
+                        add_children_to_queryset(child_category)
+            add_children_to_queryset(current_category)
+
+
         # tag_filters block
         tag_filters = set(self.request.GET.getlist('tag'))
         if tag_filters: # check if there are any tag parameters
@@ -249,7 +262,8 @@ class ProductsView(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['top_lvl_categories'] = [category.name for category in Category.objects.filter(parent__isnull=True)]
+        context['categories'] = [category for category in Category.objects.all().order_by('ordering_index')]
+        # context['top_lvl_categories'] = [category.name for category in Category.objects.filter(parent__isnull=True)]
         # context['sub_categories'] = [category.name for category in Category.objects.filter(parent__isnull=False)]
 
         # self.next_index = 1
