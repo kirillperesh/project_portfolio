@@ -16,32 +16,45 @@
         <h1 class="u-text u-text-default u-text-1">Catalogue</h1>
         <h5 class="u-text u-text-default u-text-2">Handcrafted little pieces of art</h5>
 
-        <select id="select_category" name="select_category" onchange="location = this.value;">
-          <option value="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:'category' }}"{% if 'category=' not in request.GET.urlencode %} selected {% endif %}>
-            Any category
-          </option>
-          {% for category in categories %}
-            <option class="child-lvl child-lvl-{{ category.child_level }}" value="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:'category' }}&category={{ category }}"
-            {% if 'category='|append_url_param_value:category in request.GET.urlencode %} selected {% endif %}>
-              {% with ''|center:category.child_level as indent_range %}
-                {% for _ in indent_range %}
-                  <span class='select-indent'>&nbsp;&nbsp;&nbsp;&nbsp;</span>
-                {% endfor %}
-              {% endwith %}
-              {{ category }}
-            </option>
-          {% endfor %}
-        </select>
-
-        {% for tag in tag_filters %}
-          <div>
-            {{ tag }}
-            {% with 'tag='|append_url_param_value:tag as tag_param %}
-              <a href="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:tag_param }}">remove {{ tag }}</a>
-            {% endwith %}
+        <div class="filters-container">
+          <div class="select-category-container">
+            <span class="filter-title">Select category</span>
+            <select id="select_category" name="select_category" title="Select category" onchange="location = this.value;">
+              <option value="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:'category' }}"{% if 'category=' not in request.GET.urlencode %} selected {% endif %}>
+                Show all
+              </option>
+              {% for category in categories %}
+                <option class="child-lvl child-lvl-{{ category.child_level }}" title="{{ category.description }}" value="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:'category' }}&category={{ category }}"
+                {% if 'category='|append_url_param_value:category in request.GET.urlencode %} selected {% endif %}>
+                  {% with ''|center:category.child_level as indent_range %}
+                    {% for _ in indent_range %}
+                      <span class='select-indent'>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    {% endfor %}
+                  {% endwith %}
+                  {{ category }}
+                </option>
+              {% endfor %}
+            </select>
           </div>
-        {% endfor %}
-
+          <div class="tag-filter-container">
+            <span>
+              <span class="filter-title filter-title-tag">
+                {% if tag_filters %}
+                  <a href="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:'tag' }}" title='Clear tag filter'>Show tags</a>
+                {% endif %}
+              </span>
+              <div id="tag_filters_container">
+                {% for tag in tag_filters %}
+                  <span>
+                    {% with 'tag='|append_url_param_value:tag as tag_param %}
+                    <span class="tag-filter"><a href="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:tag_param }}" title='Remove "{{ tag }}" tag'>{{ tag }}</a></span>{% if not forloop.last %}, {% endif %}
+                    {% endwith %}
+                  </span>
+                {% endfor %}
+              </div>
+            </span>
+          </div>
+        </div>
 
         <div class="u-list u-repeater u-list-1">
           {% for product in products %}
@@ -77,7 +90,7 @@
                         {% for tag in product.tags.all %}
                             {% with 'tag='|append_url_param_value:tag as tag_param %}
                                 {% if tag_param not in request.GET.urlencode %}
-                                    <a href="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:'page' }}&{{ tag_param }}">{{ tag }}</a>{% else %}{{ tag }}{% endif %}{% if tag != product.tags.all.last %}, {% endif %}
+                                    <a href="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:'page' }}&{{ tag_param }}">{{ tag }}</a>{% else %}{{ tag }}{% endif %}{% if not forloop.last %}, {% endif %}
                             {% endwith %}
                         {% endfor %}
                     </span>
