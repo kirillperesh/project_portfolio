@@ -97,22 +97,23 @@ class Category(TimeStampedModel):
                     continue
             break
 
-        # if not self.pk or not self.ordering_index or self.name != self.__original_name:
-        #     self.next_index = 1
-        #     def numerate_category_recur(current_parrent_cat):
-        #         if current_parrent_cat.ordering_index != self.next_index:
-        #             current_parrent_cat.ordering_index = self.next_index
-        #             current_parrent_cat.save()
-        #         self.next_index += 1
-        #         if current_parrent_cat.child_categories.exists():
-        #             for child_category in current_parrent_cat.child_categories.order_by('name'):
-        #                 numerate_category_recur(child_category)
+        super().save(*args, **kwargs)
+        # TODO comment
+        if not self.pk or self.name != self.__original_name:
+            self.next_index = 1
+            def numerate_category_recur(current_parrent_cat):
+                if current_parrent_cat.ordering_index != self.next_index:
+                    current_parrent_cat.ordering_index = self.next_index
+                    current_parrent_cat.save()
+                self.next_index += 1
+                if current_parrent_cat.child_categories.exists():
+                    for child_category in current_parrent_cat.child_categories.order_by('name'):
+                        numerate_category_recur(child_category)
 
-        #     for parent_category in Category.objects.filter(parent__isnull=True).order_by('name'):
-        #         numerate_category_recur(parent_category)
+            for parent_category in Category.objects.filter(parent__isnull=True).order_by('name'):
+                numerate_category_recur(parent_category)
 
 
-        return super().save(*args, **kwargs)
 
 
 class Price(models.Model):
