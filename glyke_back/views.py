@@ -232,7 +232,7 @@ class ProductsView(ListView):
     extra_context = {'no_image_url': DEFAULT_NO_IMAGE_URL}
 
     def get_queryset(self):
-        base_queryset = self.model.objects.filter(is_active=True).order_by('-discount_percent', '-stock') # basic queryset
+        queryset = base_queryset = self.model.objects.filter(is_active=True).order_by('-discount_percent', '-stock') # basic queryset
         # category filter block
         if self.request.GET.get('category'): # to be able to make a queryset
             category_filter = self.request.GET.get('category')
@@ -263,26 +263,6 @@ class ProductsView(ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context['categories'] = [category for category in Category.objects.all().order_by('ordering_index')]
-        # context['top_lvl_categories'] = [category.name for category in Category.objects.filter(parent__isnull=True)]
-        # context['sub_categories'] = [category.name for category in Category.objects.filter(parent__isnull=False)]
-
-        # self.next_index = 1
-        # def numerate_category_recur(current_parrent_cat):
-        #     current_parrent_cat.ordering_index = self.next_index
-        #     current_parrent_cat.save()
-        #     self.next_index += 1
-        #     if current_parrent_cat.child_categories.exists():
-        #         for child_category in current_parrent_cat.child_categories.order_by('name'):
-        #             numerate_category_recur(child_category)
-
-        # for parent_category in Category.objects.filter(parent__isnull=True).order_by('name'):
-        #     numerate_category_recur(parent_category)
-
-
-
-
-
-
         context['category'] = self.request.GET.get('category')
         context['tag_filters'] = set(self.request.GET.getlist('tag'))
         return context
