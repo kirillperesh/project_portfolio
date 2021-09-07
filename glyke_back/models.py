@@ -81,14 +81,17 @@ class Category(TimeStampedModel):
         return self.name
 
     def __init__(self, *args, **kwargs):
+        """__init__ is overridden to track self.name changes"""
         super().__init__(*args, **kwargs)
         self.__original_name = self.name
 
     def save(self, *args, **kwargs):
-        """Update instance's child_level before calling super().save()"""
-        self.child_level = int()
+        """Updates child_level based on how many ancestor "levels" does the current instance have.
+        Ordering_index is used for sorting in templates (basically categories are numerated top down as if they were in a fully unrolled list 1 -> 1.1 -> 1.2 -> 1.2.1 -> 1.3 -> 2)
+        Update instance's ordering_index aftercalling super().save()"""
+        # child_level block
+        self.child_level = 0 # top-lvl-categories are 0
         current_parent = self.parent
-        # TODO comment
         while True:
             if current_parent:
                 self.child_level += 1
@@ -96,25 +99,25 @@ class Category(TimeStampedModel):
                     current_parent = current_parent.parent
                     continue
             break
-
         super().save(*args, **kwargs)
-        # TODO comment
-        if not self.pk or self.name != self.__original_name:
-            self.next_index = 1
+
+        # ordering_index block
+        if not self.pk or self.name != self.__original_name: # update all ordering_indices if a new category was created or any category got renamed
+            indiced_order_by = 'name' # basic ordering for ordering_indices
+            self.next_index = 1 # starting from 1
             def numerate_category_recur(current_parrent_cat):
                 if current_parrent_cat.ordering_index != self.next_index:
+                    # do not disturb the DB if an instance's ordering_index doesn't have to be updated
                     current_parrent_cat.ordering_index = self.next_index
                     current_parrent_cat.save()
                 self.next_index += 1
                 if current_parrent_cat.child_categories.exists():
-                    for child_category in current_parrent_cat.child_categories.order_by('name'):
+                    for child_category in current_parrent_cat.child_categories.order_by(indiced_order_by):
                         numerate_category_recur(child_category)
 
-            for parent_category in Category.objects.filter(parent__isnull=True).order_by('name'):
+            # start from top-lvl-categories and proceed recursively through all their children
+            for parent_category in Category.objects.filter(parent__isnull=True).order_by(indiced_order_by):
                 numerate_category_recur(parent_category)
-
-
-
 
 class Price(models.Model):
     cost_price = models.DecimalField(_('cost price'),
@@ -178,6 +181,7 @@ class Product(Price, TimeStampedModel):
         return self.name
 
     def __init__(self, *args, **kwargs):
+        """__init__ is overridden to track self.name changes"""
         super().__init__(*args, **kwargs)
         self.__original_name = self.name
 
@@ -310,5 +314,3 @@ class OrderLine(Price):
 
 # TODO add defaul no_image from defaults to category photo
 # TODO if any category filter has been renamed or deleted, corresponding product attributes have to be renamed or delete either
-
-# TODO update category's save() to update all ordering indices
