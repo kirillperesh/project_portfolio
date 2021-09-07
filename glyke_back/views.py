@@ -364,10 +364,4 @@ def clear_cart_view(request, id):
     return redirect(redirect_url)
 
 
-# TODO add filters for the products view
 # TODO add tests for products view after that
-
-# TODO fix filters in products template
-
-
-# TODO update products page - add left margin or whatever based on category index and child lvl
