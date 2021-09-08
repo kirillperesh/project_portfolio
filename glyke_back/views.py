@@ -238,8 +238,7 @@ class ProductsView(ListView):
             category_filter = self.request.GET.get('category')
             current_category = Category.objects.get(name = category_filter)
             queryset = base_queryset.filter(category=current_category)
-
-            # TODO comment
+            # if a parent category is chosen - add all of its children (and theirs too, etc.) either
             def add_children_to_queryset(current_parent_category):
                 nonlocal queryset
                 if current_parent_category.child_categories.exists():
