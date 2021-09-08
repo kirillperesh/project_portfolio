@@ -36,24 +36,24 @@
               {% endfor %}
             </select>
           </div>
-          <div class="tag-filter-container">
-            <span>
-              <span class="filter-title filter-title-tag">
-                {% if tag_filters %}
-                  <a href="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:'tag' }}" title='Clear tag filter'>Show tags</a>
-                {% endif %}
+          {% if tag_filters %}
+            <div class="tag-filter-container">
+              <span>
+                <span class="filter-title filter-title-tag">
+                    <a href="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:'tag' }}" title='Clear tag filter'>Show tags</a>
+                </span>
+                <div id="tag_filters_container">
+                  {% for tag in tag_filters %}
+                    <span>
+                      {% with 'tag='|append_url_param_value:tag as tag_param %}
+                      <span class="tag-filter"><a href="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:tag_param }}" title='Remove "{{ tag }}" tag'>{{ tag }}</a></span>{% if not forloop.last %}, {% endif %}
+                      {% endwith %}
+                    </span>
+                  {% endfor %}
+                </div>
               </span>
-              <div id="tag_filters_container">
-                {% for tag in tag_filters %}
-                  <span>
-                    {% with 'tag='|append_url_param_value:tag as tag_param %}
-                    <span class="tag-filter"><a href="{% url 'products'%}?{{ request.GET.urlencode|remove_all_occ_url_param:tag_param }}" title='Remove "{{ tag }}" tag'>{{ tag }}</a></span>{% if not forloop.last %}, {% endif %}
-                    {% endwith %}
-                  </span>
-                {% endfor %}
-              </div>
-            </span>
-          </div>
+            </div>
+          {% endif %}
         </div>
 
         <div class="u-list u-repeater u-list-1">

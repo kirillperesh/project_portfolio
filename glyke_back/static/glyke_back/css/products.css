@@ -324,26 +324,28 @@ a:hover,a:focus{text-decoration:none!important;outline:none!important;-webkit-bo
 }
 
 #select_category, #tag_filters_container {
-    width: 225px;
+    width: 220px;
 }
 #tag_filters_container {
-    margin-left: 115px;
+    margin-left: 100px;
+    width: 235px;
 }
 
 .child-lvl {
     font-size: 14px;
-    background-color: rgb(245, 245, 245);
+    background-color: rgba(114, 146, 172, 0.05);
 }
 .child-lvl-0 {
     font-weight: 1000;
-    background-color: rgb(230, 230, 230);
+    background-color: rgba(114, 146, 172, 0.3);
 }
 .child-lvl-1 {
     font-weight: 800;
 }
 .filters-container {
-    margin-top: 20px;
+    margin: 20px 0 0 12px;
     text-align: left;
+    width: 350px;
 }
 
 .tag-filter:hover {
@@ -354,6 +356,9 @@ a:hover,a:focus{text-decoration:none!important;outline:none!important;-webkit-bo
     float: left;
     width: 115px;
 }
+.filter-title-tag {
+    width: 100px;
+}
 .filter-title a{
     color: white;
 }
@@ -362,10 +367,17 @@ a:hover,a:focus{text-decoration:none!important;outline:none!important;-webkit-bo
 }
 
 .select-category-container, .tag-filter-container {
-    padding: 4px;
+    padding: 10px 5px 10px 10px;
     width: 350px;
 }
 .select-category-container {
-    border-bottom: 2px solid #e27800bb;
+    border-bottom: 4px solid rgba(67, 92, 112);
+    background-color: rgb(114, 146, 172);
+}
+.tag-filter-container {
+    margin: -8px 0 0 15px;
+    width: 350px;
+    border-bottom: 4px solid rgb(114, 146, 172);
+    background-color: rgba(67, 92, 112, 0.4);
 }
 

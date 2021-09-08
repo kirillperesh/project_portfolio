@@ -1,7 +1,5 @@
 from django import template
-# from django.utils.http import urlencode
-from urllib.parse import quote_plus, urlparse
-# TODO this might help
+from urllib.parse import quote_plus
 
 register = template.Library()
 
@@ -33,11 +31,6 @@ def remove_all_occ_url_param(current_params, param_to_remove):
     for param in param_list:
         if param_to_remove in param: continue
         new_params += param + '&'
-    # new_params = current_params.replace(param, '', 1)
-    # if '&' not in current_params:
-    #     return ''
-    # while '&&' in new_params: new_params = new_params.replace('&&', '&')
-    # new_params = new_params[1:] if new_params.startswith('&') else new_params
     new_params = new_params[:-1] if new_params.endswith('&') else new_params
     return new_params
 
