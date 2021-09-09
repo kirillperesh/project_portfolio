@@ -79,6 +79,33 @@ class ModelsTest(TestCase):
         self.assertIsNone(self.child_cat.parent)
         self.assertIsNone(self.product_sub_parent.category)
 
+    def test_category_child_level(self):
+        """Aseert categories' child_level update as expected on CRUD"""
+        test_cat = Category.objects.create(name='Parent cat 2')
+        test_cat_2 = Category.objects.create(name='Sub-parent cat 2', parent = self.parent_cat)
+        self.assertEqual(self.parent_cat.child_level, 0)
+        self.assertEqual(test_cat.child_level, 0)
+        self.assertEqual(self.sub_parent_cat.child_level, 1)
+        self.assertEqual(test_cat_2.child_level, 1)
+        self.assertEqual(self.child_cat.child_level, 2)
+        test_cat.parent = self.child_cat
+        test_cat.save()
+        test_cat_2.parent = None
+        test_cat_2.save()
+        self.assertEqual(self.parent_cat.child_level, 0)
+        self.assertEqual(test_cat.child_level, 3)
+        self.assertEqual(self.sub_parent_cat.child_level, 1)
+        self.assertEqual(test_cat_2.child_level, 0)
+        self.assertEqual(self.child_cat.child_level, 2)
+        self.parent_cat.delete()
+        self.assertEqual(test_cat.child_level, 2)
+        self.assertEqual(self.sub_parent_cat.child_level, 0)
+        self.assertEqual(self.child_cat.child_level, 1)
+
+
+
+    # TODO add category tests here
+
     def test_get_deleted_instance_on_delete(self):
         """Assert a deleted instance is created on_delete"""
         self.product_child.delete()
