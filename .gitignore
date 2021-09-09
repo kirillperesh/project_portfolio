@@ -120,3 +120,6 @@ media/
 folio_back/
 # old_portfolio app's tests
 tests/folio_tests/
+
+# pip
+get-pip.py
