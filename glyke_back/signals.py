@@ -16,6 +16,8 @@ def category_pre_delete_handler(sender, instance, **kwargs):
     sender.objects.filter(parent_id=instance.id).update(parent=new_parent)
     Product.objects.filter(category_id=instance.id).update(category=new_parent)
 
+# TODO add a post delete category signal to update its children child_level
+
 @receiver(post_save,
           sender=OrderLine,
           dispatch_uid='save_order_line')
