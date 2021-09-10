@@ -247,15 +247,10 @@ class ProductsView(ListView):
                         queryset = queryset | new_items
                         add_children_to_queryset(child_category)
             add_children_to_queryset(current_category)
-
-
         # tag_filters block
         tag_filters = set(self.request.GET.getlist('tag'))
         if tag_filters: # check if there are any tag parameters
-            # this was expensive
-            # tag_q = Q()
-            # for tag in tag_filters: tag_q = tag_q | Q(tags__name=tag)
-            # queryset = queryset.filter(tag_q)
+            # FOR NOW, tag filters add up as OR statements, so if a product has ANY tag from tag_filters, it will be added to the queryset
             queryset = queryset.filter(tags__name__in=tag_filters).distinct()
         return queryset
 
