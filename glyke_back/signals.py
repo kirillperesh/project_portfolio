@@ -25,9 +25,10 @@ def category_pre_delete_handler(sender, instance, **kwargs):
     recur_update_child_categories_child_level(instance, update_by=-1)
 
     # TODO comment
-    for category in sender.objects.filter(ordering_index__gt=instance.ordering_index):
-        category.ordering_index -= 1
-        category.save()
+    if instance.ordering_index:
+        for category in sender.objects.filter(ordering_index__gt=instance.ordering_index):
+            category.ordering_index -= 1
+            category.save()
 
     new_parent = instance.parent if instance.parent else None
     sender.objects.filter(parent_id=instance.id).update(parent=new_parent)
