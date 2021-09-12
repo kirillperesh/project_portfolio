@@ -9,7 +9,7 @@ from .models import Category, Product, Order, OrderLine
 
 
 def recur_update_child_categories_child_level(current_parrent, *, update_by):
-    """Recursively updates all children' child_level by update_by value"""
+    """Recursively updates all children's child_level by update_by value"""
     if current_parrent.child_categories.exists():
         new_child_level = current_parrent.child_categories.first().child_level + update_by
         current_parrent.child_categories.update(child_level=new_child_level)
@@ -20,15 +20,18 @@ def recur_update_child_categories_child_level(current_parrent, *, update_by):
           sender=Category,
           dispatch_uid='pre_delete_category')
 def category_pre_delete_handler(sender, instance, **kwargs):
-    """When a category is deleted, switchs its children's parent attr to its own parent (or None)"""
-    # decrement all children' child_level by 1
-    recur_update_child_categories_child_level(instance, update_by=-1)
+    """When a category is deleted, switchs its children's parent attr to its own parent (or None).
+    Also decrement all the following (by ordering_index after this instance) categories' ordering indices by 1.
+    Also decrement all instance's children's child_level by 1.
+    """
+    instance.refresh_from_db() # because sometimes instance.ordering_index doesn't get updated
+    for category in sender.objects.filter(ordering_index__gt=instance.ordering_index):
+        category.ordering_index -= 1
+        category.save()
 
-    # TODO comment
-    if instance.ordering_index:
-        for category in sender.objects.filter(ordering_index__gt=instance.ordering_index):
-            category.ordering_index -= 1
-            category.save()
+    # decrement all children's child_level by 1
+    # needs to be run after all Category.save() methods
+    recur_update_child_categories_child_level(instance, update_by=-1)
 
     new_parent = instance.parent if instance.parent else None
     sender.objects.filter(parent_id=instance.id).update(parent=new_parent)
