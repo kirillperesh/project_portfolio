@@ -81,6 +81,7 @@ class ModelsTest(TestCase):
 
     def test_category_child_level(self):
         """Aseert categories' child_level update as expected on CRUD"""
+        # TODO optimize refreshing
         test_cat = Category.objects.create(name='Parent cat 2')
         test_cat_2 = Category.objects.create(name='Sub-parent cat 2', parent = self.parent_cat)
         self.assertEqual(self.parent_cat.child_level, 0)
