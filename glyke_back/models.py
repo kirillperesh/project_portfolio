@@ -89,6 +89,7 @@ class Category(TimeStampedModel):
         """Updates child_level based on how many ancestor "levels" does the current instance have.
         Ordering_index is used for sorting in templates (basically categories are numerated top down as if they were in a fully unrolled list 1 -> 1.1 -> 1.2 -> 1.2.1 -> 1.3 -> 2)
         Update instance's ordering_index aftercalling super().save()"""
+        just_created = False if self.pk else True
         # child_level block
         self.child_level = 0 # top-lvl-categories are 0
         current_parent = self.parent
@@ -102,7 +103,7 @@ class Category(TimeStampedModel):
         super().save(*args, **kwargs)
 
         # ordering_index block
-        if not self.pk or self.name != self.__original_name: # update all ordering_indices if a new category was created or any category got renamed
+        if just_created or self.name != self.__original_name: # update all ordering_indices if a new category was created or any category got renamed
             indiced_order_by = 'name' # basic ordering for ordering_indices
             self.next_index = 1 # starting from 1
             def numerate_category_recur(current_parrent_cat):
