@@ -854,3 +854,7 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(current_order.order_lines.count(), 0)
 
+
+
+
+# TODO check and if needed update all refresh_from_db() calls
