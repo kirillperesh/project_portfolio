@@ -94,12 +94,9 @@ class Category(TimeStampedModel):
         self.child_level = 0 # top-lvl-categories are 0
         current_parent = self.parent
         while True:
-            if current_parent:
-                self.child_level += 1
-                if current_parent.parent:
-                    current_parent = current_parent.parent
-                    continue
-            break
+            if not current_parent: break
+            self.child_level += 1
+            current_parent = current_parent.parent
         super().save(*args, **kwargs)
 
         # ordering_index block
