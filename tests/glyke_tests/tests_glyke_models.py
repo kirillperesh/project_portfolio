@@ -64,48 +64,42 @@ class ModelsTest(TestCase):
 
     def test_switch_parent_category_on_delete(self):
         """Assert categories of child categories and products switch to its 'grandparents'"""
+        expected_new_parent = self.sub_parent_cat.parent
         self.sub_parent_cat.delete()
-        self.child_cat.refresh_from_db() # child category of sub_parent
-        self.product_sub_parent.refresh_from_db() # child product of sub_parent
-        self.assertEqual(self.child_cat.parent, self.sub_parent_cat.parent)
-        self.assertEqual(self.product_sub_parent.category, self.sub_parent_cat.parent)
+        self.assertEqual(Category.objects.get(id=self.child_cat.id).parent, expected_new_parent)
+        self.assertEqual(Product.objects.get(id=self.product_sub_parent.id).category, expected_new_parent)
 
     def test_set_parent_category_none_on_delete(self):
         """Assert categories of child categories and products set to None if no parents available"""
         self.parent_cat.delete()
-        Category.objects.get(name='Sub-parent cat').delete()
-        self.child_cat.refresh_from_db() # child category of sub_parent
-        self.product_sub_parent.refresh_from_db() # child product of sub_parent
-        self.assertIsNone(self.child_cat.parent)
-        self.assertIsNone(self.product_sub_parent.category)
+        self.sub_parent_cat.delete()
+        # get refreshed instances for assertion
+        self.assertIsNone(Category.objects.get(id=self.child_cat.id).parent)
+        self.assertIsNone(Product.objects.get(id=self.product_sub_parent.id).category)
 
-    def test_category_child_level(self):
-        """Aseert categories' child_level update as expected on CRUD"""
-        # TODO optimize refreshing
+    def test_category_child_level_update(self):
+        """Assert categories' child_level update as expected on CRUD"""
         test_cat = Category.objects.create(name='Parent cat 2')
         test_cat_2 = Category.objects.create(name='Sub-parent cat 2', parent = self.parent_cat)
-        self.assertEqual(self.parent_cat.child_level, 0)
+        self.assertEqual(Category.objects.get(id=self.parent_cat.id).child_level, 0)
+        self.assertEqual(Category.objects.get(id=self.sub_parent_cat.id).child_level, 1)
+        self.assertEqual(Category.objects.get(id=self.child_cat.id).child_level, 2)
         self.assertEqual(test_cat.child_level, 0)
-        self.assertEqual(self.sub_parent_cat.child_level, 1)
         self.assertEqual(test_cat_2.child_level, 1)
-        self.assertEqual(self.child_cat.child_level, 2)
         test_cat.parent = self.child_cat
         test_cat.save()
         test_cat_2.parent = None
         test_cat_2.save()
-        self.assertEqual(self.parent_cat.child_level, 0)
+        self.assertEqual(Category.objects.get(id=self.parent_cat.id).child_level, 0)
+        self.assertEqual(Category.objects.get(id=self.sub_parent_cat.id).child_level, 1)
+        self.assertEqual(Category.objects.get(id=self.child_cat.id).child_level, 2)
         self.assertEqual(test_cat.child_level, 3)
-        self.assertEqual(self.sub_parent_cat.child_level, 1)
         self.assertEqual(test_cat_2.child_level, 0)
-        self.assertEqual(self.child_cat.child_level, 2)
         self.parent_cat.delete()
-        self.sub_parent_cat.refresh_from_db()
-        self.child_cat.refresh_from_db()
-        test_cat.refresh_from_db()
-        self.assertEqual(self.sub_parent_cat.child_level, 0)
-        self.assertEqual(self.child_cat.child_level, 1)
-        self.assertEqual(test_cat.child_level, 2)
-        self.assertEqual(test_cat_2.child_level, 0)
+        self.assertEqual(Category.objects.get(id=self.sub_parent_cat.id).child_level, 0)
+        self.assertEqual(Category.objects.get(id=self.child_cat.id).child_level, 1)
+        self.assertEqual(Category.objects.get(id=test_cat.id).child_level, 2)
+        self.assertEqual(Category.objects.get(id=test_cat_2.id).child_level, 0)
 
     def test_category_ordering_indices_update(self):
         """Assert categories' ordering_indices update properly"""
@@ -153,12 +147,12 @@ class ModelsTest(TestCase):
 
     # TODO add category tests here
 
-    def test_get_deleted_instance_on_delete(self):
+    def test_get_deleted_product_instance_on_delete(self):
         """Assert a deleted instance is created on_delete"""
+        self.assertFalse(Product.objects.filter(name='_deleted_').exists())
         self.product_child.delete()
-        self.order_line.refresh_from_db()
         deleted_product_auto = Product.objects.get(name='_deleted_')
-        self.assertEqual(self.order_line.product, deleted_product_auto)
+        self.assertEqual(OrderLine.objects.get(id=self.order_line.id).product, deleted_product_auto)
 
     def test_is_active_switch(self):
         """Assert is_active attribute switches correctly"""
@@ -421,5 +415,4 @@ class ModelsTest(TestCase):
         order_canceled_latest = Order.objects.create(status='CAN')
         self.assertNotEqual(Order.objects.get_latest_current(), order_current_oldest)
         self.assertEqual(Order.objects.get_latest_current(), order_current_latest)
-
 
