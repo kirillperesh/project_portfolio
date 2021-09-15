@@ -313,8 +313,7 @@ class EditProductViewTest(TestPermissionsGETMixin, TestCase):
         context_data.update(expected_data)
         context_data_encoded = urlencode(context_data)
         self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
-        self.product.refresh_from_db()
-        self.assertEqual(self.product.profit, 0)
+        self.assertEqual(Product.objects.get(id=self.product.id).profit, 0)
         # case: random profit, w/ discount (other cases are tested in tests_glyke_models.py)
         rnd_cost_price = decimal.Decimal(random.randrange(1, 9999))/100
         rnd_selling_price = decimal.Decimal(random.randrange((rnd_cost_price*100), 9999))/100
@@ -339,8 +338,7 @@ class EditProductViewTest(TestPermissionsGETMixin, TestCase):
         context_data.update(expected_data)
         context_data_encoded = urlencode(context_data)
         self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
-        self.product.refresh_from_db()
-        self.assertEqual(self.product.end_user_price, 0)
+        self.assertEqual(Product.objects.get(id=self.product.id).end_user_price, 0)
         # case: all > 0 (other cases are tested in tests_glyke_models.py)
         rnd_selling_price = decimal.Decimal(random.randrange(100, 9999))/100
         rnd_discount = random.randint(1, 80)
@@ -351,9 +349,8 @@ class EditProductViewTest(TestPermissionsGETMixin, TestCase):
         context_data.update(expected_data)
         context_data_encoded = urlencode(context_data)
         self.client.post(self.basic_url, context_data_encoded, content_type="application/x-www-form-urlencoded")
-        self.product.refresh_from_db()
         test_end_user_price = Decimal(rnd_selling_price*Decimal(1-rnd_discount/100)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-        self.assertEqual(self.product.end_user_price, test_end_user_price)
+        self.assertEqual(Product.objects.get(id=self.product.id).end_user_price, test_end_user_price)
 
 class DeleteProductViewTest(TestPermissionsGETMixin, TestCase):
     @classmethod
@@ -854,7 +851,3 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(current_order.order_lines.count(), 0)
 
-
-
-
-# TODO check and if needed update all refresh_from_db() calls
