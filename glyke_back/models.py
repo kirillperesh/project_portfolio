@@ -117,7 +117,6 @@ class Category(TimeStampedModel):
             for parent_category in Category.objects.filter(parent__isnull=True).order_by(indiced_order_by):
                 numerate_category_recur(parent_category)
 
-
 class Price(models.Model):
     cost_price = models.DecimalField(_('cost price'),
                                      max_digits=7,
