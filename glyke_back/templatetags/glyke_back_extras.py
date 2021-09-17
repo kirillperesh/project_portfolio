@@ -21,12 +21,13 @@ def append_url_param_value(param_name, param_value):
 
 @register.filter
 def remove_all_occ_url_param(current_params, param_to_remove):
-    """Remove the first occurence of param from path"""
+    """Remove all occurences of param from path"""
     current_params = str(current_params)
     param_to_remove = str(param_to_remove)
     if param_to_remove not in current_params:
         return current_params
     param_list = current_params.split('&')
+    param_list = ' '.join(param_list). split() # removes all empty strings from the list
     new_params = str()
     for param in param_list:
         if param_to_remove in param: continue
