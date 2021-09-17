@@ -42,7 +42,21 @@ class TestExtraTemplateTags(TestCase):
         expected_result = test_url_param_name + quote_plus(self.every_symbol_string, encoding='utf-8')
         self.assertEqual(expected_result, actual_result)
 
-    
+    def test_remove_all_occ_url_param(self):
+        """
+        TODO"""
+        test_urls_params = '&test_param_1=test_value_1&test_param_2=test_value_2&test_param_1=test_value_3&test_param_2=test_value_4&'
+        assert_results_map = {'no_such_test_param':test_urls_params,
+                              'test_param_1':'test_param_2=test_value_2&test_param_2=test_value_4',
+                              'test_param_2':'test_param_1=test_value_1&test_param_1=test_value_3',
+                              'test_param_':'',}
+        for test_param, expected_result in assert_results_map.items():
+            actual_result = extras.remove_all_occ_url_param(test_urls_params, test_param)
+            self.assertEqual(expected_result, actual_result)
+
+
+
+
 
 
 
