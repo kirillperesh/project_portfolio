@@ -1,6 +1,3 @@
-from logging import raiseExceptions
-from os import name
-from types import prepare_class
 from django.test import TestCase, override_settings
 from django.db.models.signals import pre_delete
 from unittest.mock import MagicMock
@@ -143,9 +140,6 @@ class ModelsTest(TestCase):
         self.assertEqual(Category.objects.get(name='b').ordering_index, 2)
         self.assertEqual(Category.objects.get(name='ba').ordering_index, 3)
         self.assertEqual(Category.objects.get(name='c').ordering_index, 4)
-
-
-    # TODO add category tests here
 
     def test_get_deleted_product_instance_on_delete(self):
         """Assert a deleted instance is created on_delete"""
