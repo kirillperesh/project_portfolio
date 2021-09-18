@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
-from urllib.parse import urlencode, urlparse
+from urllib.parse import urlencode
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 import decimal
@@ -9,7 +9,6 @@ from django.utils.crypto import get_random_string
 
 from glyke_back.models import *
 from glyke_back.forms import *
-from .tests_glyke_models import get_random_temp_file
 
 class TestPermissionsGETMixin:
     """
@@ -44,6 +43,8 @@ class TestPermissionsGETMixin:
 
 
 class AddProductViewTest(TestPermissionsGETMixin, TestCase):
+    """Tests AddProductView
+    To test permissions 'cls.setUpTestPermissionsUsers()' must be set in setUpTestData, e.g. cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200])"""
     @classmethod
     def setUpTestData(cls):
         cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200]) # from TestPermissionsGETMixin
@@ -159,6 +160,8 @@ class AddProductViewTest(TestPermissionsGETMixin, TestCase):
         self.assertEqual(Product.objects.get(name=rnd_name).end_user_price, test_end_user_price)
 
 class EditProductViewTest(TestPermissionsGETMixin, TestCase):
+    """Tests EditProductView
+    To test permissions 'cls.setUpTestPermissionsUsers()' must be set in setUpTestData, e.g. cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200])"""
     @classmethod
     def setUpTestData(cls):
         cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200]) # from TestPermissionsGETMixin
@@ -353,6 +356,8 @@ class EditProductViewTest(TestPermissionsGETMixin, TestCase):
         self.assertEqual(Product.objects.get(id=self.product.id).end_user_price, test_end_user_price)
 
 class DeleteProductViewTest(TestPermissionsGETMixin, TestCase):
+    """Tests DeleteProductView
+    To test permissions 'cls.setUpTestPermissionsUsers()' must be set in setUpTestData, e.g. cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200])"""
     @classmethod
     def setUpTestData(cls):
         cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,302,302]) # from TestPermissionsGETMixin
@@ -406,6 +411,8 @@ class DeleteProductViewTest(TestPermissionsGETMixin, TestCase):
         self.assertRedirects(response=response, expected_url=self.expected_error_url, target_status_code=200, status_code=302)
 
 class ProductsStaffViewTest(TestPermissionsGETMixin, TestCase):
+    """Tests ProductsStaffView
+    To test permissions 'cls.setUpTestPermissionsUsers()' must be set in setUpTestData, e.g. cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200])"""
     @classmethod
     def setUpTestData(cls):
         cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200]) # from TestPermissionsGETMixin
@@ -425,6 +432,8 @@ class ProductsStaffViewTest(TestPermissionsGETMixin, TestCase):
         self.assertQuerysetEqual(view_products_queryset, Product.objects.all())
 
 class AddToCartViewTest(TestPermissionsGETMixin, TestCase):
+    """Tests AddToCartView
+    To test permissions 'cls.setUpTestPermissionsUsers()' must be set in setUpTestData, e.g. cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200])"""
     @classmethod
     def setUpTestData(cls):
         cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[302,405,405,405]) # from TestPermissionsGETMixin
@@ -490,6 +499,8 @@ class AddToCartViewTest(TestPermissionsGETMixin, TestCase):
         self.assertRedirects(response=response, expected_url=expected_url, target_status_code=200, status_code=302)
 
 class ClearCartViewTest(TestPermissionsGETMixin, TestCase):
+    """Tests ClearCartView
+    To test permissions 'cls.setUpTestPermissionsUsers()' must be set in setUpTestData, e.g. cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200])"""
     @classmethod
     def setUpTestData(cls):
         cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[302,302,302,302]) # from TestPermissionsGETMixin
@@ -582,6 +593,8 @@ class ClearCartViewTest(TestPermissionsGETMixin, TestCase):
         self.assertRedirects(response=response, expected_url=expected_url, target_status_code=200, status_code=302)
 
 class CartViewTest(TestPermissionsGETMixin, TestCase):
+    """Tests CartView
+    To test permissions 'cls.setUpTestPermissionsUsers()' must be set in setUpTestData, e.g. cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200])"""
     @classmethod
     def setUpTestData(cls):
         cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[302,200,200,200]) # from TestPermissionsGETMixin

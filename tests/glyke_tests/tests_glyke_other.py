@@ -7,9 +7,7 @@ from glyke_back.templatetags import glyke_back_extras as extras
 
 
 class TestExtraTemplateTags(TestCase):
-    """
-    TODO"""
-
+    """Testcase for all the custom template tags"""
     @classmethod
     def setUpTestData(cls):
         cls.every_symbol_string = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
@@ -20,31 +18,28 @@ class TestExtraTemplateTags(TestCase):
         self.rnd_int_1 = random.randint(101, 199)
 
     def test_addstr(self):
-        """
-        TODO"""
+        """Checks if 'addstr' tag works as expected"""
         actual_result = extras.addstr(self.rnd_string_1, self.rnd_int_1)
         expected_result = self.rnd_string_1 + str(self.rnd_int_1)
         self.assertEqual(expected_result, actual_result)
 
     def test_remove_first_occ_substr(self):
-        """
-        TODO"""
+        """Checks if 'remove_first_occ_substr' tag works as expected"""
+
         test_concat_str = self.rnd_string_1 + self.rnd_string_2 + self.rnd_string_2
         actual_result = extras.remove_first_occ_substr(test_concat_str, self.rnd_string_2)
         expected_result = self.rnd_string_1 + self.rnd_string_2
         self.assertEqual(expected_result, actual_result)
 
     def test_append_url_param_value(self):
-        """
-        TODO"""
+        """Checks if 'append_url_param_value' tag works as expected"""
         test_url_param_name = 'test_param='
         actual_result = extras.append_url_param_value(test_url_param_name, self.every_symbol_string)
         expected_result = test_url_param_name + quote_plus(self.every_symbol_string, encoding='utf-8')
         self.assertEqual(expected_result, actual_result)
 
     def test_remove_all_occ_url_param(self):
-        """
-        TODO"""
+        """Checks if 'remove_all_occ_url_param' tag works as expected"""
         test_urls_params = '&test_param_1=test_value_1&test_param_2=test_value_2&test_param_1=test_value_3&test_param_2=test_value_4&'
         assert_results_map = {'no_such_test_param':test_urls_params,
                               'test_param_1':'test_param_2=test_value_2&test_param_2=test_value_4',
