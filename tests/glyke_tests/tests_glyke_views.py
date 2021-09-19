@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
-from urllib.parse import urlencode
+from urllib.parse import urlencode, quote_plus
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 import decimal
@@ -863,4 +863,52 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
         response = self.client.post(self.basic_url, context_data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(current_order.order_lines.count(), 0)
+
+class ProductsViewTest(TestPermissionsGETMixin, TestCase):
+    """Tests ProductsView
+    To test permissions 'cls.setUpTestPermissionsUsers()' must be set in setUpTestData, e.g. cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200])"""
+    @classmethod
+    def setUpTestData(cls):
+        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[200,200,200,200]) # from TestPermissionsGETMixin
+        cls.parent_cat = Category.objects.create(name='Parent cat')
+        cls.sub_parent_cat = Category.objects.create(name='Sub-parent cat', parent = cls.parent_cat)
+        cls.child_cat = Category.objects.create(name='Child cat', parent = cls.sub_parent_cat)
+        cls.empty_cat = Category.objects.create(name='Empty cat')
+        cls.product_parent = Product.objects.create(name='Product of parent cat', category = cls.parent_cat, selling_price = 1)
+        cls.product_sub_parent = Product.objects.create(name='Product of sub-parent cat', category = cls.sub_parent_cat, selling_price = 2)
+        cls.product_child = Product.objects.create(name='Product of child cat', category = cls.child_cat, selling_price = 3)
+
+    def setUp(self):
+        self.client.force_login(self.test_user) # force_login before making requests because this is a staff-only view
+        self.basic_url = reverse('products')
+
+    def test_category_param(self):
+        """Checks if the category filter works properly"""
+        # case: no category filter
+        response = self.client.get(self.basic_url)
+        self.assertQuerysetEqual(response.context['categories'], Category.objects.filter(is_active=True).order_by('ordering_index'))
+        self.assertQuerysetEqual(response.context['products'], Product.objects.all().order_by('-discount_percent', '-stock'))
+        # case: parent category filter
+        response = self.client.get(self.basic_url + f'?category={quote_plus(self.parent_cat.name)}')
+        self.assertQuerysetEqual(response.context['categories'], Category.objects.filter(is_active=True).order_by('ordering_index'))
+        self.assertQuerysetEqual(response.context['products'], Product.objects.all().order_by('-discount_percent', '-stock'))
+        # case: sub-parent category filter
+        response = self.client.get(self.basic_url + f'?category={quote_plus(self.sub_parent_cat.name)}')
+        self.assertQuerysetEqual(response.context['categories'], Category.objects.filter(is_active=True).order_by('ordering_index'))
+        self.assertQuerysetEqual(response.context['products'], Product.objects.exclude(category=self.parent_cat).order_by('-discount_percent', '-stock'))
+        (response.context['products'], Product.objects.exclude(category=self.parent_cat).order_by('-discount_percent', '-stock'))
+        # case: child category filter
+        response = self.client.get(self.basic_url + f'?category={quote_plus(self.child_cat.name)}')
+        self.assertQuerysetEqual(response.context['categories'], Category.objects.filter(is_active=True).order_by('ordering_index'))
+        self.assertQuerysetEqual(response.context['products'], Product.objects.filter(category=self.child_cat.id).order_by('-discount_percent', '-stock'))
+        # case: empty category filter
+        response = self.client.get(self.basic_url + f'?category={quote_plus(self.empty_cat.name)}')
+        self.assertQuerysetEqual(response.context['categories'], Category.objects.filter(is_active=True).order_by('ordering_index'))
+        self.assertFalse(response.context['products'].exists())
+
+    # TODO add tags param tests
+
+
+
+
 
