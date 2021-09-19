@@ -299,7 +299,7 @@ class ProductsView(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['categories'] = [category for category in Category.objects.all().order_by('ordering_index')]
+        context['categories'] = [category for category in Category.objects.filter(is_active=True).order_by('ordering_index')]
         context['category'] = self.request.GET.get('category')
         context['tag_filters'] = set(self.request.GET.getlist('tag'))
         return context
