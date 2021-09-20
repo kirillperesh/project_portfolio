@@ -1,5 +1,5 @@
 from logging import raiseExceptions
-from django.db.models import Q
+from django.db.models import Q, query
 from django.shortcuts import render, redirect, get_object_or_404, resolve_url
 from django.template import context
 from django.urls import reverse, reverse_lazy
@@ -132,7 +132,7 @@ def edit_product_dynamic_view(request, id):
     current_category = Category.objects.get(id=request.POST['category']) if request.method == 'POST' else product_instance.category
     product_instance_data = {'name': product_instance.name,
                              'description': product_instance.description,
-                             'tags': ', '.join(list(product_instance.tags.names())),
+                             'tags': product_instance.tags.all().values_list()[0][1],
                              'stock': product_instance.stock,
                              'cost_price': product_instance.cost_price,
                              'selling_price': product_instance.selling_price,
