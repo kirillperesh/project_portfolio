@@ -182,7 +182,7 @@ class EditProductViewTest(TestPermissionsGETMixin, TestCase):
                                               discount_percent=30,
                                               photos = photo_models.Gallery.objects.create(title='product_gallery')
                                              )
-        self.product.tags.add('tag1, tag2')
+        self.product.tags.add('tag1', 'tag2')
         self.basic_url = reverse('edit_product', kwargs={'id': self.product.id})
         self.initial_products_count = Product.objects.all().count()
         self.basic_context_data = {'category': self.product.category.id,
@@ -375,7 +375,7 @@ class DeleteProductViewTest(TestPermissionsGETMixin, TestCase):
                                               discount_percent=30,
                                               photos = photo_models.Gallery.objects.create(title='product_gallery')
                                              )
-        self.product.tags.add('tag1, tag2')
+        self.product.tags.add('tag1', 'tag2')
         self.basic_url = reverse('delete_product', kwargs={'id': self.product.id})
 
     def test_delete_product(self):
@@ -874,9 +874,18 @@ class ProductsViewTest(TestPermissionsGETMixin, TestCase):
         cls.sub_parent_cat = Category.objects.create(name='Sub-parent cat', parent = cls.parent_cat)
         cls.child_cat = Category.objects.create(name='Child cat', parent = cls.sub_parent_cat)
         cls.empty_cat = Category.objects.create(name='Empty cat')
-        cls.product_parent = Product.objects.create(name='Product of parent cat', category = cls.parent_cat, selling_price = 1)
-        cls.product_sub_parent = Product.objects.create(name='Product of sub-parent cat', category = cls.sub_parent_cat, selling_price = 2)
-        cls.product_child = Product.objects.create(name='Product of child cat', category = cls.child_cat, selling_price = 3)
+        cls.product_parent = Product.objects.create(name='Product of parent cat',
+                                                    category = cls.parent_cat,
+                                                    selling_price = 1)
+        cls.product_parent.tags.add('tag1', 'tag2', 'tag3', 'tag4')
+        cls.product_sub_parent = Product.objects.create(name='Product of sub-parent cat',
+                                                        category = cls.sub_parent_cat,
+                                                        selling_price = 2)
+        cls.product_sub_parent.tags.add('tag2', 'tag3', 'tag4', 'tag5')
+        cls.product_child = Product.objects.create(name='Product of child cat',
+                                                   category = cls.child_cat,
+                                                   selling_price = 3)
+        cls.product_child.tags.add('tag3', 'tag4', 'tag5', 'tag6')
 
     def setUp(self):
         self.client.force_login(self.test_user) # force_login before making requests because this is a staff-only view
@@ -906,8 +915,37 @@ class ProductsViewTest(TestPermissionsGETMixin, TestCase):
         self.assertQuerysetEqual(response.context['categories'], Category.objects.filter(is_active=True).order_by('ordering_index'))
         self.assertFalse(response.context['products'].exists())
 
-    # TODO add tags param tests
+    def test_tags_params(self):
+        """Checks if tags filter works properly"""
+        # TODO comment this test
+        params = '?'
+        expected_queryset = Product.objects.filter(is_active=True).order_by('-discount_percent', '-stock')
+        test_tags = ('tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6')
+        expected_tags = []
 
+        # case: no tags
+        response = self.client.get(self.basic_url+params)
+        self.assertQuerysetEqual(response.context['products'], expected_queryset)
+
+        # case: add tags one by one
+        for tag in test_tags:
+            params += f'tag={tag}&'
+            expected_tags.append(tag)
+            response = self.client.get(self.basic_url+params)
+            self.assertQuerysetEqual(response.context['products'],
+                                     expected_queryset.filter(tags__name__in=expected_tags).distinct())
+
+        # case: remove tags one by one
+        for tag in test_tags:
+            params = params.replace(f'tag={tag}&', '')
+            expected_tags.remove(tag)
+            response = self.client.get(self.basic_url+params)
+            if expected_tags:
+                self.assertQuerysetEqual(response.context['products'],
+                                         expected_queryset.filter(tags__name__in=expected_tags).distinct())
+
+
+# TODO fix test_initial_forms_data
 
 
 
