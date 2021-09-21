@@ -23,7 +23,6 @@ def get_random_temp_file(extension):
     return (SimpleUploadedFile(rnd_file_name, b"these are the file contents"), rnd_file_name)
 
 
-
 MEDIA_ROOT = tempfile.mkdtemp() # temp dir to test filefields (test_auto_upload_dir_method)
 @override_settings(MEDIA_ROOT=MEDIA_ROOT) # temp dir to test filefields (test_auto_upload_dir_method)
 class ModelsTest(TestCase):

@@ -1,7 +1,4 @@
-from logging import raiseExceptions
-from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404, resolve_url
-from django.template import context
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, Http404
 from django import forms
@@ -144,15 +141,14 @@ def edit_product_dynamic_view(request, id):
     product_form = AddProductForm(initial=product_instance_data)
     CategoryFiltersForm = type('CategoryFiltersForm', (forms.Form,), category_fields) # creates a class (inherits from forms.Form class) with category_fields as attributes (form fields)
     filters_form = CategoryFiltersForm(initial=product_instance.attributes)
-    context = {
-        'category_form': SelectCategoryProductForm(initial={'category': current_category}),
-        'photos_form': photos_form,
-        'product_form': product_form,
-        'filter_form': filters_form,
-        'product': product_instance,
-        'photos_display_urls': photos_display_urls,
-        'category': current_category.id,
-        }
+    context = {'category_form': SelectCategoryProductForm(initial={'category': current_category}),
+               'photos_form': photos_form,
+               'product_form': product_form,
+               'filter_form': filters_form,
+               'product': product_instance,
+               'photos_display_urls': photos_display_urls,
+               'category': current_category.id,
+               }
 
     if request.method == 'POST':
         # if category is not the only POST arameter
@@ -223,6 +219,49 @@ def delete_product_view(request, id):
     redirect_url = f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'product deletion (status has not change)'})}" if initial_status == product_to_delete.is_active else reverse('products')
     return redirect(redirect_url)
 
+@login_required()
+@require_http_methods(["GET",])
+def clear_cart_view(request, id):
+    """Clears an order (deletes all its order_line)
+    Also checks if the user has the permission (order instance belongs to the user or is_staff)"""
+    order_to_clear = get_object_or_404(Order, id=id)
+    # check user permissions to clear this cart
+    if not (request.user.is_staff or order_to_clear.customer == request.user): raise Http404
+    for order_line in order_to_clear.order_lines.all():
+        order_line.delete()
+    redirect_url = f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'cart (tried to clear it, but it did not become empty)'})}" if order_to_clear.order_lines.exists() else reverse('products')
+    return redirect(redirect_url)
+
+@login_required()
+@require_http_methods(["GET", "POST"])
+def cart_view(request):
+    """Returns 500 if there is no CUR (current) order
+    Update order_lines' quantity properies via save() or deletes an order_line instance if there is no corresponding product's id in POST parameters"""
+    current_order = get_order(request, status='CUR') # select the latest current order
+    # return 500 if there is no current order, because get_order function returns an Order instance or redirects to oops/
+    if isinstance(current_order, HttpResponseRedirect): return current_order
+    if request.method=='POST':
+        products_id_set = set(request.POST.getlist('products_id'))
+        # for each order_live checks if its quantity has changed. if so, updates that instance
+        # if there is no order_line's product's id in POST parameters, deletes that order_line
+        for order_line in current_order.order_lines.all(): # ordered by line_number by default
+            if str(order_line.product.id) in products_id_set:
+                quantity_list = request.POST.getlist(f'quantity_{order_line.line_number}')
+                if quantity_list: # to deal with unmatching 'product_id' or 'quantity_' parameters
+                    if len(quantity_list) != 1: continue # to avoid duplicating
+                    # making sure the quality has changed before accessing DB
+                    # also order_line's quantity has to be less than its product's stock
+                    new_quantity = int(quantity_list[0])
+                    if order_line.quantity != new_quantity and new_quantity <= order_line.product.stock:
+                        order_line.quantity = new_quantity
+                        order_line.save()
+            else:
+                order_line.delete()
+    context = {}
+    context['order'] = current_order
+    context['order_lines'] = current_order.order_lines.all()
+    return render(request, "cart.html", context)
+
 class ProductsView(ListView):
     http_method_names = ['get', ]
     model = Product
@@ -256,11 +295,10 @@ class ProductsView(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['categories'] = [category for category in Category.objects.all().order_by('ordering_index')]
+        context['categories'] = [category for category in Category.objects.filter(is_active=True).order_by('ordering_index')]
         context['category'] = self.request.GET.get('category')
         context['tag_filters'] = set(self.request.GET.getlist('tag'))
         return context
-
 
 class ProductsStaffView(UserIsStaff_Or404_Mixin, ListView):
     # Paginating, ordering and filtering are done by JS DataTables
@@ -294,36 +332,6 @@ class SignInView(LoginView):
     authentication_form = SignInForm
     template_name = 'sign_in.html'
 
-@login_required()
-@require_http_methods(["GET", "POST"])
-def cart_view(request):
-    """Returns 500 if there is no CUR (current) order
-    Update order_lines' quantity properies via save() or deletes an order_line instance if there is no corresponding product's id in POST parameters"""
-    current_order = get_order(request, status='CUR') # select the latest current order
-    # return 500 if there is no current order, because get_order function returns an Order instance or redirects to oops/
-    if isinstance(current_order, HttpResponseRedirect): return current_order
-    if request.method=='POST':
-        products_id_set = set(request.POST.getlist('products_id'))
-        # for each order_live checks if its quantity has changed. if so, updates that instance
-        # if there is no order_line's product's id in POST parameters, deletes that order_line
-        for order_line in current_order.order_lines.all(): # ordered by line_number by default
-            if str(order_line.product.id) in products_id_set:
-                quantity_list = request.POST.getlist(f'quantity_{order_line.line_number}')
-                if quantity_list: # to deal with unmatching 'product_id' or 'quantity_' parameters
-                    if len(quantity_list) != 1: continue # to avoid duplicating
-                    # making sure the quality has changed before accessing DB
-                    # also order_line's quantity has to be less than its product's stock
-                    new_quantity = int(quantity_list[0])
-                    if order_line.quantity != new_quantity and new_quantity <= order_line.product.stock:
-                        order_line.quantity = new_quantity
-                        order_line.save()
-            else:
-                order_line.delete()
-    context = {}
-    context['order'] = current_order
-    context['order_lines'] = current_order.order_lines.all()
-    return render(request, "cart.html", context)
-
 class AddToCartView(LoginRequiredMixin, RedirectView):
     """Creates a new OrderLine of product given or increments an existing one
     If there's none, a current_order is created via user_logs_in signal"""
@@ -343,19 +351,3 @@ class AddToCartView(LoginRequiredMixin, RedirectView):
                                  product=Product.objects.get(id=product_id),
                                  )
         return RedirectView.dispatch(self, request, *args, **kwargs)
-
-@login_required()
-@require_http_methods(["GET",])
-def clear_cart_view(request, id):
-    """Clears an order (deletes all its order_line)
-    Also checks if the user has the permission (order instance belongs to the user or is_staff)"""
-    order_to_clear = get_object_or_404(Order, id=id)
-    # check user permissions to clear this cart
-    if not (request.user.is_staff or order_to_clear.customer == request.user): raise Http404
-    for order_line in order_to_clear.order_lines.all():
-        order_line.delete()
-    redirect_url = f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'cart (tried to clear it, but it did not become empty)'})}" if order_to_clear.order_lines.exists() else reverse('products')
-    return redirect(redirect_url)
-
-
-# TODO add tests for products view after that

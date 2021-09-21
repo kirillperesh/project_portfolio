@@ -1,15 +1,15 @@
 from django.test import TestCase
 from django.urls import reverse
-from urllib.parse import urlencode, urlparse
+from urllib.parse import urlencode, quote_plus
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 import decimal
 import random
 from django.utils.crypto import get_random_string
 
+from taggit.models import Tag
 from glyke_back.models import *
 from glyke_back.forms import *
-from .tests_glyke_models import get_random_temp_file
 
 class TestPermissionsGETMixin:
     """
@@ -42,8 +42,9 @@ class TestPermissionsGETMixin:
             response = self.client.get(self.basic_url)
             self.assertEqual(response.status_code, expected_status_code)
 
-
 class AddProductViewTest(TestPermissionsGETMixin, TestCase):
+    """Tests AddProductView
+    To test permissions 'cls.setUpTestPermissionsUsers()' must be set in setUpTestData, e.g. cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200])"""
     @classmethod
     def setUpTestData(cls):
         cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200]) # from TestPermissionsGETMixin
@@ -159,6 +160,8 @@ class AddProductViewTest(TestPermissionsGETMixin, TestCase):
         self.assertEqual(Product.objects.get(name=rnd_name).end_user_price, test_end_user_price)
 
 class EditProductViewTest(TestPermissionsGETMixin, TestCase):
+    """Tests EditProductView
+    To test permissions 'cls.setUpTestPermissionsUsers()' must be set in setUpTestData, e.g. cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200])"""
     @classmethod
     def setUpTestData(cls):
         cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200]) # from TestPermissionsGETMixin
@@ -179,7 +182,7 @@ class EditProductViewTest(TestPermissionsGETMixin, TestCase):
                                               discount_percent=30,
                                               photos = photo_models.Gallery.objects.create(title='product_gallery')
                                              )
-        self.product.tags.add('tag1, tag2')
+        self.product.tags.add('tag1', 'tag2')
         self.basic_url = reverse('edit_product', kwargs={'id': self.product.id})
         self.initial_products_count = Product.objects.all().count()
         self.basic_context_data = {'category': self.product.category.id,
@@ -353,6 +356,8 @@ class EditProductViewTest(TestPermissionsGETMixin, TestCase):
         self.assertEqual(Product.objects.get(id=self.product.id).end_user_price, test_end_user_price)
 
 class DeleteProductViewTest(TestPermissionsGETMixin, TestCase):
+    """Tests DeleteProductView
+    To test permissions 'cls.setUpTestPermissionsUsers()' must be set in setUpTestData, e.g. cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200])"""
     @classmethod
     def setUpTestData(cls):
         cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,302,302]) # from TestPermissionsGETMixin
@@ -370,7 +375,7 @@ class DeleteProductViewTest(TestPermissionsGETMixin, TestCase):
                                               discount_percent=30,
                                               photos = photo_models.Gallery.objects.create(title='product_gallery')
                                              )
-        self.product.tags.add('tag1, tag2')
+        self.product.tags.add('tag1', 'tag2')
         self.basic_url = reverse('delete_product', kwargs={'id': self.product.id})
 
     def test_delete_product(self):
@@ -406,6 +411,8 @@ class DeleteProductViewTest(TestPermissionsGETMixin, TestCase):
         self.assertRedirects(response=response, expected_url=self.expected_error_url, target_status_code=200, status_code=302)
 
 class ProductsStaffViewTest(TestPermissionsGETMixin, TestCase):
+    """Tests ProductsStaffView
+    To test permissions 'cls.setUpTestPermissionsUsers()' must be set in setUpTestData, e.g. cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200])"""
     @classmethod
     def setUpTestData(cls):
         cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200]) # from TestPermissionsGETMixin
@@ -425,6 +432,8 @@ class ProductsStaffViewTest(TestPermissionsGETMixin, TestCase):
         self.assertQuerysetEqual(view_products_queryset, Product.objects.all())
 
 class AddToCartViewTest(TestPermissionsGETMixin, TestCase):
+    """Tests AddToCartView
+    To test permissions 'cls.setUpTestPermissionsUsers()' must be set in setUpTestData, e.g. cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200])"""
     @classmethod
     def setUpTestData(cls):
         cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[302,405,405,405]) # from TestPermissionsGETMixin
@@ -490,6 +499,8 @@ class AddToCartViewTest(TestPermissionsGETMixin, TestCase):
         self.assertRedirects(response=response, expected_url=expected_url, target_status_code=200, status_code=302)
 
 class ClearCartViewTest(TestPermissionsGETMixin, TestCase):
+    """Tests ClearCartView
+    To test permissions 'cls.setUpTestPermissionsUsers()' must be set in setUpTestData, e.g. cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200])"""
     @classmethod
     def setUpTestData(cls):
         cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[302,302,302,302]) # from TestPermissionsGETMixin
@@ -582,6 +593,8 @@ class ClearCartViewTest(TestPermissionsGETMixin, TestCase):
         self.assertRedirects(response=response, expected_url=expected_url, target_status_code=200, status_code=302)
 
 class CartViewTest(TestPermissionsGETMixin, TestCase):
+    """Tests CartView
+    To test permissions 'cls.setUpTestPermissionsUsers()' must be set in setUpTestData, e.g. cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200])"""
     @classmethod
     def setUpTestData(cls):
         cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[302,200,200,200]) # from TestPermissionsGETMixin
@@ -851,3 +864,80 @@ class CartViewTest(TestPermissionsGETMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(current_order.order_lines.count(), 0)
 
+class ProductsViewTest(TestPermissionsGETMixin, TestCase):
+    """Tests ProductsView
+    To test permissions 'cls.setUpTestPermissionsUsers()' must be set in setUpTestData, e.g. cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200])"""
+    @classmethod
+    def setUpTestData(cls):
+        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[200,200,200,200]) # from TestPermissionsGETMixin
+        cls.parent_cat = Category.objects.create(name='Parent cat')
+        cls.sub_parent_cat = Category.objects.create(name='Sub-parent cat', parent = cls.parent_cat)
+        cls.child_cat = Category.objects.create(name='Child cat', parent = cls.sub_parent_cat)
+        cls.empty_cat = Category.objects.create(name='Empty cat')
+        cls.product_parent = Product.objects.create(name='Product of parent cat',
+                                                    category = cls.parent_cat,
+                                                    selling_price = 1)
+        cls.product_parent.tags.add('tag1', 'tag2', 'tag3', 'tag4')
+        cls.product_sub_parent = Product.objects.create(name='Product of sub-parent cat',
+                                                        category = cls.sub_parent_cat,
+                                                        selling_price = 2)
+        cls.product_sub_parent.tags.add('tag2', 'tag3', 'tag4', 'tag5')
+        cls.product_child = Product.objects.create(name='Product of child cat',
+                                                   category = cls.child_cat,
+                                                   selling_price = 3)
+        cls.product_child.tags.add('tag3', 'tag4', 'tag5', 'tag6')
+
+    def setUp(self):
+        self.client.force_login(self.test_user) # force_login before making requests because this is a staff-only view
+        self.basic_url = reverse('products')
+
+    def test_category_param(self):
+        """Checks if the category filter works properly"""
+        # case: no category filter
+        response = self.client.get(self.basic_url)
+        self.assertQuerysetEqual(response.context['categories'], Category.objects.filter(is_active=True).order_by('ordering_index'))
+        self.assertQuerysetEqual(response.context['products'], Product.objects.all().order_by('-discount_percent', '-stock'))
+        # case: parent category filter
+        response = self.client.get(self.basic_url + f'?category={quote_plus(self.parent_cat.name)}')
+        self.assertQuerysetEqual(response.context['categories'], Category.objects.filter(is_active=True).order_by('ordering_index'))
+        self.assertQuerysetEqual(response.context['products'], Product.objects.all().order_by('-discount_percent', '-stock'))
+        # case: sub-parent category filter
+        response = self.client.get(self.basic_url + f'?category={quote_plus(self.sub_parent_cat.name)}')
+        self.assertQuerysetEqual(response.context['categories'], Category.objects.filter(is_active=True).order_by('ordering_index'))
+        self.assertQuerysetEqual(response.context['products'], Product.objects.exclude(category=self.parent_cat).order_by('-discount_percent', '-stock'))
+        (response.context['products'], Product.objects.exclude(category=self.parent_cat).order_by('-discount_percent', '-stock'))
+        # case: child category filter
+        response = self.client.get(self.basic_url + f'?category={quote_plus(self.child_cat.name)}')
+        self.assertQuerysetEqual(response.context['categories'], Category.objects.filter(is_active=True).order_by('ordering_index'))
+        self.assertQuerysetEqual(response.context['products'], Product.objects.filter(category=self.child_cat.id).order_by('-discount_percent', '-stock'))
+        # case: empty category filter
+        response = self.client.get(self.basic_url + f'?category={quote_plus(self.empty_cat.name)}')
+        self.assertQuerysetEqual(response.context['categories'], Category.objects.filter(is_active=True).order_by('ordering_index'))
+        self.assertFalse(response.context['products'].exists())
+
+    def test_tags_get_params(self):
+        """Checks if tags filter works properly"""
+        get_params = '?'
+        expected_queryset = Product.objects.filter(is_active=True).order_by('-discount_percent', '-stock')
+        test_tags = [tag.name for tag in list(Tag.objects.all())] # names of all tags
+        expected_tags = []
+        # case: no tags
+        response = self.client.get(self.basic_url+get_params)
+        self.assertQuerysetEqual(response.context['products'], expected_queryset)
+        # case: add tags one by one and assert each time
+        for tag in test_tags:
+            get_params += f'tag={tag}&'
+            expected_tags.append(tag)
+            response = self.client.get(self.basic_url+get_params)
+            self.assertQuerysetEqual(response.context['products'],
+                                     expected_queryset.filter(tags__name__in=expected_tags).distinct())
+        # case: remove tags one by one and assert each time
+        for tag in test_tags:
+            get_params = get_params.replace(f'tag={tag}&', '')
+            expected_tags.remove(tag)
+            response = self.client.get(self.basic_url+get_params)
+            if not expected_tags: # re-assert when there is no tags again
+                self.assertQuerysetEqual(response.context['products'], expected_queryset)
+                continue
+            self.assertQuerysetEqual(response.context['products'],
+                                        expected_queryset.filter(tags__name__in=expected_tags).distinct())

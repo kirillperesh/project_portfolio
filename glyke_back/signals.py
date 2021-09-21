@@ -1,6 +1,3 @@
-from glyke_back.views import cart_view
-from logging import raiseExceptions
-from os import name
 from django.dispatch.dispatcher import receiver
 from django.db.models.signals import pre_delete, post_delete, post_save
 from django.contrib.auth.signals import user_logged_in
@@ -22,8 +19,7 @@ def recur_update_child_categories_child_level(current_parrent, *, update_by):
 def category_pre_delete_handler(sender, instance, **kwargs):
     """When a category is deleted, switchs its children's parent attr to its own parent (or None).
     Also decrement all the following (by ordering_index after this instance) categories' ordering indices by 1.
-    Also decrement all instance's children's child_level by 1.
-    """
+    Also decrement all instance's children's child_level by 1."""
     instance.refresh_from_db() # because sometimes instance.ordering_index doesn't get updated
     for category in sender.objects.filter(ordering_index__gt=instance.ordering_index):
         category.ordering_index -= 1

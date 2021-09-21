@@ -1,11 +1,10 @@
 from django.contrib.auth.models import User
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-# from django.urls.base import is_valid_path
 from django.utils.translation import gettext_lazy as _
 
-# from photologue import models as photo_models
-from .models import Category, Product, OrderLine
+from .models import Category, Product
+
 
 class AddProductForm(forms.ModelForm):
     class Meta:
@@ -42,14 +41,11 @@ class AddProductForm(forms.ModelForm):
                 self.errors.pop('name')
         return form_is_valid
 
-
 class SelectCategoryProductForm(forms.Form):
     category = forms.ModelChoiceField(required=True,
                                       queryset=Category.objects.filter(is_active=True),
                                       empty_label='..',
                                       widget=forms.Select(attrs={'class': 'custom-select',}))
-
-
 
 class PhotosForm(forms.Form):
     photos = forms.ImageField(required=False,
