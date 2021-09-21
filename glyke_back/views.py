@@ -1,7 +1,4 @@
-from logging import raiseExceptions
-from django.db.models import Q, query
 from django.shortcuts import render, redirect, get_object_or_404, resolve_url
-from django.template import context
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, Http404
 from django import forms
@@ -132,7 +129,7 @@ def edit_product_dynamic_view(request, id):
     current_category = Category.objects.get(id=request.POST['category']) if request.method == 'POST' else product_instance.category
     product_instance_data = {'name': product_instance.name,
                              'description': product_instance.description,
-                             'tags': product_instance.tags.all().values_list()[0][1],
+                             'tags': ', '.join(list(product_instance.tags.names())),
                              'stock': product_instance.stock,
                              'cost_price': product_instance.cost_price,
                              'selling_price': product_instance.selling_price,
@@ -144,15 +141,14 @@ def edit_product_dynamic_view(request, id):
     product_form = AddProductForm(initial=product_instance_data)
     CategoryFiltersForm = type('CategoryFiltersForm', (forms.Form,), category_fields) # creates a class (inherits from forms.Form class) with category_fields as attributes (form fields)
     filters_form = CategoryFiltersForm(initial=product_instance.attributes)
-    context = {
-        'category_form': SelectCategoryProductForm(initial={'category': current_category}),
-        'photos_form': photos_form,
-        'product_form': product_form,
-        'filter_form': filters_form,
-        'product': product_instance,
-        'photos_display_urls': photos_display_urls,
-        'category': current_category.id,
-        }
+    context = {'category_form': SelectCategoryProductForm(initial={'category': current_category}),
+               'photos_form': photos_form,
+               'product_form': product_form,
+               'filter_form': filters_form,
+               'product': product_instance,
+               'photos_display_urls': photos_display_urls,
+               'category': current_category.id,
+               }
 
     if request.method == 'POST':
         # if category is not the only POST arameter
