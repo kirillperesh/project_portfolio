@@ -7,6 +7,7 @@ import decimal
 import random
 from django.utils.crypto import get_random_string
 
+from taggit.models import Tag
 from glyke_back.models import *
 from glyke_back.forms import *
 
@@ -40,7 +41,6 @@ class TestPermissionsGETMixin:
                 self.client.force_login(user)
             response = self.client.get(self.basic_url)
             self.assertEqual(response.status_code, expected_status_code)
-
 
 class AddProductViewTest(TestPermissionsGETMixin, TestCase):
     """Tests AddProductView
@@ -915,38 +915,29 @@ class ProductsViewTest(TestPermissionsGETMixin, TestCase):
         self.assertQuerysetEqual(response.context['categories'], Category.objects.filter(is_active=True).order_by('ordering_index'))
         self.assertFalse(response.context['products'].exists())
 
-    def test_tags_params(self):
+    def test_tags_get_params(self):
         """Checks if tags filter works properly"""
-        # TODO comment this test
-        params = '?'
+        get_params = '?'
         expected_queryset = Product.objects.filter(is_active=True).order_by('-discount_percent', '-stock')
-        test_tags = ('tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6')
+        test_tags = [tag.name for tag in list(Tag.objects.all())] # names of all tags
         expected_tags = []
-
         # case: no tags
-        response = self.client.get(self.basic_url+params)
+        response = self.client.get(self.basic_url+get_params)
         self.assertQuerysetEqual(response.context['products'], expected_queryset)
-
-        # case: add tags one by one
+        # case: add tags one by one and assert each time
         for tag in test_tags:
-            params += f'tag={tag}&'
+            get_params += f'tag={tag}&'
             expected_tags.append(tag)
-            response = self.client.get(self.basic_url+params)
+            response = self.client.get(self.basic_url+get_params)
             self.assertQuerysetEqual(response.context['products'],
                                      expected_queryset.filter(tags__name__in=expected_tags).distinct())
-
-        # case: remove tags one by one
+        # case: remove tags one by one and assert each time
         for tag in test_tags:
-            params = params.replace(f'tag={tag}&', '')
+            get_params = get_params.replace(f'tag={tag}&', '')
             expected_tags.remove(tag)
-            response = self.client.get(self.basic_url+params)
-            if expected_tags:
-                self.assertQuerysetEqual(response.context['products'],
-                                         expected_queryset.filter(tags__name__in=expected_tags).distinct())
-
-
-# TODO fix test_initial_forms_data
-
-
-
-
+            response = self.client.get(self.basic_url+get_params)
+            if not expected_tags: # re-assert when there is no tags again
+                self.assertQuerysetEqual(response.context['products'], expected_queryset)
+                continue
+            self.assertQuerysetEqual(response.context['products'],
+                                        expected_queryset.filter(tags__name__in=expected_tags).distinct())
