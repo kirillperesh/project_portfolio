@@ -2,11 +2,11 @@
     {% if user.is_authenticated %}
         <div id="profile_pannel_dropdown">
             <a href="">{% if user.first_name %}{{user.first_name}} {% if user.last_name %}{{user.last_name}}{% endif %}{% else %}{{user.username}}{% endif %}
-                <button type="button" class="btn btn-primary btn-profile">
-                    <i class="fas fa-{% if not user.is_staff %}user-circle{% elif user.is_superuser %}robot{% else %}id-card{% endif %}"></i>
-                    <span class="sr-only">Open profile page or log in</span>
-                </button>
             </a>
+            <div class="btn-profile">
+                <i class="fas fa-{% if not user.is_staff %}user-circle{% elif user.is_superuser %}robot{% else %}id-card{% endif %}"></i>
+                <span class="sr-only">Open profile page or log in</span>
+            </div>
 
             {% block cart_panel %}
                 {% include "cart_panel.html" %}
@@ -40,6 +40,8 @@
         </nav>
 
     {% else %}
+    <!-- TODO
+    update this part -->
         <div id="profile_pannel_dropdown">
             <a href="{% url 'sign_in'%}">Log In</a>
 
