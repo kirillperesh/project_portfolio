@@ -1,7 +1,12 @@
 <header>
     {% if user.is_authenticated %}
         <div id="profile_pannel_dropdown">
-            <a href="">{% if user.first_name %}{{user.first_name}} {% if user.last_name %}{{user.last_name}}{% endif %}{% else %}{{user.username}}{% endif %}</a>
+            <a href="">{% if user.first_name %}{{user.first_name}} {% if user.last_name %}{{user.last_name}}{% endif %}{% else %}{{user.username}}{% endif %}
+                <button type="button" class="btn btn-primary btn-profile">
+                    <i class="fas fa-{% if not user.is_staff %}user-circle{% elif user.is_superuser %}robot{% else %}id-card{% endif %}"></i>
+                    <span class="sr-only">Open profile page or log in</span>
+                </button>
+            </a>
 
             {% block cart_panel %}
                 {% include "cart_panel.html" %}
@@ -13,10 +18,10 @@
         </div>
         <nav id="profile_pannel" >
             <div class="profile-menu">
-            <button type="button" id="profile_pannel_collapse" class="btn btn-primary">
-                <i class="fas fa-{% if not user.is_staff %}user-circle{% elif user.is_superuser %}robot{% else %}id-card{% endif %}"></i>
-                <span class="sr-only">Toggle profile menu</span>
-            </button>
+                <button type="button" id="profile_pannel_collapse" class="btn btn-primary">
+                    <i class="fas fa-bars"></i>
+                    <span class="sr-only">Toggle site menu</span>
+                </button>
             </div>
             <ul class="list-unstyled components mb-5">
             <li>
