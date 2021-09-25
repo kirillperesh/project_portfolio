@@ -1,60 +1,52 @@
 <header>
-    {% if user.is_authenticated %}
-        <div id="profile_pannel_dropdown">
+    <div id="profile_pannel_dropdown">
+        {% if user.is_authenticated %}
             <a href="">{% if user.first_name %}{{user.first_name}} {% if user.last_name %}{{user.last_name}}{% endif %}{% else %}{{user.username}}{% endif %}
+                <div class="btn-profile">
+                    <i class="fas fa-{% if not user.is_staff %}user-circle{% elif user.is_superuser %}robot{% else %}id-card{% endif %}"></i>
+                    <span class="sr-only">Open profile page or log in</span>
+                </div>
             </a>
-            <div class="btn-profile">
-                <i class="fas fa-{% if not user.is_staff %}user-circle{% elif user.is_superuser %}robot{% else %}id-card{% endif %}"></i>
-                <span class="sr-only">Open profile page or log in</span>
-            </div>
 
             {% block cart_panel %}
                 {% include "cart_panel.html" %}
             {% endblock %}
 
-            {% block resume_panel %}
-                {% include "resume_panel.html" %}
-            {% endblock %}
+        {% else %}
+            <a href="{% url 'sign_in'%}">Log In
+                <div class="btn-profile">
+                    <i class="fas fa-user-secret"></i>
+                    <span class="sr-only">Open profile page or log in</span>
+                </div>
+            </a>
+        {% endif %}
+
+        {% block resume_panel %}
+            {% include "resume_panel.html" %}
+        {% endblock %}
+    </div>
+    <nav id="profile_pannel" >
+        <div class="profile-menu">
+            <button type="button" id="profile_pannel_collapse" class="btn btn-primary">
+                <i class="fas fa-bars"></i>
+                <span class="sr-only">Toggle site menu</span>
+            </button>
         </div>
-        <nav id="profile_pannel" >
-            <div class="profile-menu">
-                <button type="button" id="profile_pannel_collapse" class="btn btn-primary">
-                    <i class="fas fa-bars"></i>
-                    <span class="sr-only">Toggle site menu</span>
-                </button>
-            </div>
-            <ul class="list-unstyled components mb-5">
+        <ul class="list-unstyled components">
             <li>
                 <a href="{% url 'products' %}"><span class="fas fa-grip-horizontal mr-3"></span>Catalogue</a>
             </li>
-            <li>
-                <a href="{% url 'products_staff' %}"><span class="fas fa-th-list mr-3"></span>Products DB (staff)</a>
-            </li>
-            <li>
-                <a href="{% url 'add_product' %}"><span class="fas fa-plus mr-3"></span>Add product (staff)</a>
-            </li>
-            <li>
-                <a href="{% url 'logout'%}"><span class="fas fa-times mr-3"></span>Log out</a>
-            </li>
-            </ul>
-        </nav>
-
-    {% else %}
-    <!-- TODO
-    update this part -->
-        <div id="profile_pannel_dropdown">
-            <a href="{% url 'sign_in'%}">Log In</a>
-
-            {% block resume_panel_right %}
-                {% include "resume_panel.html" %}
-            {% endblock %}
-        </div>
-        <nav id="profile_pannel" >
-            <div class="profile-menu">
-            <button type="button" class="btn btn-primary" disabled>
-                <i class="fas fa-user-secret"></i>
-            </button>
-            </div>
-        </nav>
-    {% endif %}
+            {% if user.is_authenticated %}
+                <li>
+                    <a href="{% url 'products_staff' %}"><span class="fas fa-th-list mr-3"></span>Products DB (staff)</a>
+                </li>
+                <li>
+                    <a href="{% url 'add_product' %}"><span class="fas fa-plus mr-3"></span>Add product (staff)</a>
+                </li>
+                <li>
+                    <a href="{% url 'logout'%}"><span class="fas fa-times mr-3"></span>Log out</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
 </header>
