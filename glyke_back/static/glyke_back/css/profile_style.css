@@ -21,6 +21,10 @@
     overflow: hidden;
     text-overflow: ellipsis; }
 
+  #cart_panel a {
+    width: 250px;
+  }
+
 #profile_pannel{
   position: fixed;
   z-index: 2;
