@@ -8,6 +8,8 @@ from django.contrib.auth.views import LogoutView
 
 urlpatterns = [
     path("", views.Home.as_view(), name="home"),
+
+    path("profile", views.ProfileView.as_view(), name="profile"),
     path("sign_up", views.SignUpView.as_view(), name="sign_up"),
     path("sign_in", views.SignInView.as_view(), name="sign_in"),
     path("logout", LogoutView.as_view(), name="logout"),
@@ -18,7 +20,7 @@ urlpatterns = [
     path("delete_product/<int:id>", views.delete_product_view, name="delete_product"),
     path("products", views.ProductsView.as_view(), name="products"),
     path("products_staff", views.ProductsStaffView.as_view(), name="products_staff"),
-    
+
     path("cart", views.cart_view, name="cart"),
     path("add_to_cart", views.AddToCartView.as_view(), name="add_to_cart"),
     path("clear_cart/<int:id>", views.clear_cart_view, name="clear_cart"),
