@@ -1,6 +1,7 @@
+from django.db.models import query
 from django.shortcuts import render, redirect, get_object_or_404, resolve_url
 from django.urls import reverse, reverse_lazy
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, request
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_http_methods
@@ -262,6 +263,21 @@ def cart_view(request):
     context['order_lines'] = current_order.order_lines.all()
     return render(request, "cart.html", context)
 
+class ProfileView(ListView):
+    http_method_names = ['get', ]
+    model = Order
+    # paginate_by = 9
+    template_name = 'profile.html'
+    context_object_name = 'orders'
+
+    def get_queryset(self):
+        """
+        TODO"""
+        queryset = None
+        if self.request.user.is_authenticated:
+            queryset = self.model.objects.filter(customer=self.request.user)
+        return queryset
+
 class ProductsView(ListView):
     http_method_names = ['get', ]
     model = Product
@@ -307,6 +323,7 @@ class ProductsStaffView(UserIsStaff_Or404_Mixin, ListView):
     queryset = model.objects.all()
     template_name = 'products_staff.html'
     context_object_name = 'products'
+
 
 class ProductDetailView(DetailView):
     http_method_names = ['get', ]
