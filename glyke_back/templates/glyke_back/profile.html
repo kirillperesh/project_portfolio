@@ -28,21 +28,53 @@
                     <div class="accordion">
                         {% for order in orders %}
                             <div class="accordion-item">
-                            <h2 class="accordion-header" id="heading_{{order.id}}">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{order.id}}" aria-expanded="false" aria-controls="collapse_{{order.id}}">
-                                {{order}}
-                                </button>
-                            </h2>
-                            <div id="collapse_{{order.id}}" class="accordion-collapse collapse" aria-labelledby="heading_{{order.id}}">
-                                <div class="accordion-body">
-                                    {% for order_line in order.order_lines.all %}
-                                        {{order_line}}
-                                        <br>
-                                    {% endfor %}
-
+                                <h2 class="accordion-header" id="heading_{{order.id}}">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{order.id}}" aria-expanded="false" aria-controls="collapse_{{order.id}}">
+                                    {{order}}
+                                    </button>
+                                </h2>
+                                <div id="collapse_{{order.id}}" class="accordion-collapse collapse" aria-labelledby="heading_{{order.id}}">
+                                    <div class="accordion-body">
+                                        {% if not order.order_lines.all %}
+                                            <span>This order is empty</span>
+                                        {% else %}
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Product</th>
+                                                        <th>Initial price</th>
+                                                        <th>Discount</th>
+                                                        <th>Price</th>
+                                                        <th>Quantity</th>
+                                                        <th>Total per position</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for order_line in order.order_lines.all %}
+                                                        <tr>
+                                                            <td>{{order_line.line_number}}</td>
+                                                            <td>
+                                                                <a href="{% url 'product_details' id=order_line.product.id %}">{{order_line.product.name}}</a>
+                                                            </td>
+                                                            <td>{{order_line.product.selling_price}}</td>
+                                                            <td>{{order_line.product.discount_percent}}</td>
+                                                            <td>{{order_line.product.end_user_price}}</td>
+                                                            <td>{{order_line.quantity}}</td>
+                                                            <td>{{order_line.end_user_price}}</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                            <div>
+                                                <span>Total: </span>
+                                                <span>{{ order.end_user_price }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
-                            </div>
+                            <span>{{ order.get_status_display }}</span>
                         {% endfor %}
                     </div>
 
