@@ -278,6 +278,11 @@ class ProfileView(ListView):
             queryset = self.model.objects.filter(customer=self.request.user)
         return queryset
 
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['order_status_choices'] = Order.ORDER_STATUS_CHOICES
+        return context
+
 class ProductsView(ListView):
     http_method_names = ['get', ]
     model = Product
