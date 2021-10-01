@@ -3,11 +3,11 @@
 
 {% block title %} Profile page {% endblock %}
 
-<!-- {% block additional_head %}
+{% block additional_head %}
 {% load static %}
 
-<link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/cart.css' %}"/>
-{% endblock %} -->
+<link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/profile.css' %}"/>
+{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -32,10 +32,11 @@
                             <div class="accordion-item">
                                 <h2 class="accordion-header" id="heading_{{order.id}}">
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{order.id}}" aria-expanded="false" aria-controls="collapse_{{order.id}}">
-                                        <p>
-                                            <div>Items: {{order.items_total}}</div></p>
-                                    <div>Last modified: {{order.modified}}</div>
-                                    <div>Status {{order.get_status_display}}</div>
+                                        <div>
+                                            <span>Items: {{order.items_total}}</span><br>
+                                            <span>Last modified: {{order.modified}}</span><br>
+                                            <span>Status {{order.get_status_display}}</span><br>
+                                        </div>
                                     </button>
                                 </h2>
                                 <div id="collapse_{{order.id}}" class="accordion-collapse collapse" aria-labelledby="heading_{{order.id}}">
