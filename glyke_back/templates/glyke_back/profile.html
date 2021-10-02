@@ -6,6 +6,7 @@
 {% block additional_head %}
 {% load static %}
 
+<link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/cart.css' %}"/>
 <link rel="stylesheet" type="text/css" href="{% static 'glyke_back/css/profile.css' %}"/>
 {% endblock %}
 
@@ -26,66 +27,80 @@
                         </div>
                     </header>
                     <div class="accordion">
-                        <!-- TODO add iteration over choices -->
+                        {% for order_status, grouped_orders in order_grouped_by_status.items %}
+                            {% if grouped_orders %}
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="heading_{{order_status}}">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{order_status}}" aria-expanded="false" aria-controls="collapse_{{order_status}}">
+                                            <span> {{grouped_orders.first.get_status_display}}</span>
+                                        </button>
+                                    </h2>
+                                    <div id="collapse_{{order_status}}" class="accordion-collapse collapse" aria-labelledby="heading_{{order_status}}">
+                                        <div class="accordion-body">
 
-                        {% for order in orders %}
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="heading_{{order.id}}">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{order.id}}" aria-expanded="false" aria-controls="collapse_{{order.id}}">
-                                        <div>
-                                            <span>Items: {{order.items_total}}</span><br>
-                                            <span>Last modified: {{order.modified}}</span><br>
-                                            <span>Status {{order.get_status_display}}</span><br>
-                                        </div>
-                                    </button>
-                                </h2>
-                                <div id="collapse_{{order.id}}" class="accordion-collapse collapse" aria-labelledby="heading_{{order.id}}">
-                                    <div class="accordion-body">
-                                        {% if not order.order_lines.all %}
-                                            <span>This order is empty</span>
-                                        {% else %}
-                                            <table>
-                                                <thead>
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th>Product</th>
-                                                        <th>Initial price</th>
-                                                        <th>Discount</th>
-                                                        <th>Price</th>
-                                                        <th>Quantity</th>
-                                                        <th>Total per position</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {% for order_line in order.order_lines.all %}
-                                                        <tr>
-                                                            <td>{{order_line.line_number}}</td>
-                                                            <td>
-                                                                <a href="{% url 'product_details' id=order_line.product.id %}">{{order_line.product.name}}</a>
-                                                            </td>
-                                                            <td>{{order_line.product.selling_price}}</td>
-                                                            <td>{{order_line.product.discount_percent}}</td>
-                                                            <td>{{order_line.product.end_user_price}}</td>
-                                                            <td>{{order_line.quantity}}</td>
-                                                            <td>{{order_line.end_user_price}}</td>
-                                                        </tr>
-                                                    {% endfor %}
-                                                </tbody>
-                                            </table>
-                                            <div>
-                                                <span>Total: </span>
-                                                <span>{{ order.end_user_price }}</span>
+
+                                            <div class="accordion">
+                                                {% for order in grouped_orders %}
+                                                    <div class="accordion-item">
+                                                        <h2 class="accordion-header" id="heading_{{order.id}}">
+                                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{order.id}}" aria-expanded="false" aria-controls="collapse_{{order.id}}">
+                                                                <div>
+                                                                    <span>Items: {{order.items_total}}</span><br>
+                                                                    <span>Last modified: {{order.modified}}</span><br>
+                                                                    <span>Status {{order.get_status_display}}</span><br>
+                                                                </div>
+                                                            </button>
+                                                        </h2>
+                                                        <div id="collapse_{{order.id}}" class="accordion-collapse collapse" aria-labelledby="heading_{{order.id}}">
+                                                            <div class="accordion-body">
+                                                                {% if not order.order_lines.all %}
+                                                                    <span>This order is empty</span>
+                                                                {% else %}
+                                                                    <table>
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>#</th>
+                                                                                <th>Product</th>
+                                                                                <th>Initial price</th>
+                                                                                <th>Discount</th>
+                                                                                <th>Price</th>
+                                                                                <th>Quantity</th>
+                                                                                <th>Total per position</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            {% for order_line in order.order_lines.all %}
+                                                                                <tr>
+                                                                                    <td>{{order_line.line_number}}</td>
+                                                                                    <td>
+                                                                                        <a href="{% url 'product_details' id=order_line.product.id %}">{{order_line.product.name}}</a>
+                                                                                    </td>
+                                                                                    <td>{{order_line.product.selling_price}}</td>
+                                                                                    <td>{{order_line.product.discount_percent}}</td>
+                                                                                    <td>{{order_line.product.end_user_price}}</td>
+                                                                                    <td>{{order_line.quantity}}</td>
+                                                                                    <td>{{order_line.end_user_price}}</td>
+                                                                                </tr>
+                                                                            {% endfor %}
+                                                                        </tbody>
+                                                                    </table>
+                                                                    <div>
+                                                                        <span>Total: </span>
+                                                                        <span>{{ order.end_user_price }}</span>
+                                                                    </div>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
                                             </div>
-                                        {% endif %}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            {% endif %}
                         {% endfor %}
                     </div>
-
-
                 </div>
-
                 <div class="col-xl-6">
                     <span>Placeholder</span>
                 </div>
