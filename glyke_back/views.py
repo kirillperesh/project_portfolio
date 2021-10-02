@@ -280,7 +280,12 @@ class ProfileView(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['order_status_choices'] = Order.ORDER_STATUS_CHOICES
+        order_status_groups = dict()
+        if self.queryset:
+            for status, verbose_status in self.model.ORDER_STATUS_CHOICES:
+                order_status_groups[str(status)] = self.queryset.filter(status=status)
+        context['order_grouped_by_status'] = order_status_groups
+        # context['order_status_choices'] = Order.ORDER_STATUS_CHOICES
         return context
 
 class ProductsView(ListView):
