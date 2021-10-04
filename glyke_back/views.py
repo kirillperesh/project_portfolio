@@ -271,11 +271,12 @@ class ProfileView(ListView):
     context_object_name = 'orders'
 
     def get_queryset(self):
-        """
-        TODO"""
-        if not self.request.user.is_authenticated: return None
-        self.queryset = super().get_queryset()
-        self.queryset = self.queryset.filter(customer=self.request.user)
+        """Sets queryset to None if user isn't authenticated
+        Basic queryset is all user's Orders"""
+        self.queryset = None
+        if self.request.user.is_authenticated:
+            self.queryset = super().get_queryset()
+            self.queryset = self.queryset.filter(customer=self.request.user)
         return self.queryset
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -286,8 +287,8 @@ class ProfileView(ListView):
         if self.queryset:
             for status, verbose_status in self.model.ORDER_STATUS_CHOICES:
                 orders_grouped_by_status[str(status)] = self.queryset.filter(status=status)
-        for it in orders_grouped_by_status.items():
-            print(it)
+        # for it in orders_grouped_by_status.items():
+        #     print(it)
         context['orders_grouped_by_status'] = orders_grouped_by_status
         # context['order_status_choices'] = Order.ORDER_STATUS_CHOICES
         return context
