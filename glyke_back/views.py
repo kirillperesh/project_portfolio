@@ -280,15 +280,13 @@ class ProfileView(ListView):
         return self.queryset
 
     def get_context_data(self, *, object_list=None, **kwargs):
-        """
-        TODO"""
+        """Adds a dict() with user's orders sorted by status,
+        e.g. context['orders_grouped_by_status']['DED'] is a queryset of user's delivered orders"""
         context = super().get_context_data(**kwargs)
         orders_grouped_by_status = dict()
         if self.queryset:
-            for status, verbose_status in self.model.ORDER_STATUS_CHOICES:
+            for status in self.model.ORDER_STATUS_CHOICES.keys(): # uses statuses' short form only
                 orders_grouped_by_status[str(status)] = self.queryset.filter(status=status)
-        # for it in orders_grouped_by_status.items():
-        #     print(it)
         context['orders_grouped_by_status'] = orders_grouped_by_status
         # context['order_status_choices'] = Order.ORDER_STATUS_CHOICES
         return context
