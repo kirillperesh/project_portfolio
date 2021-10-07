@@ -271,12 +271,25 @@ class ProfileView(ListView):
     context_object_name = 'orders'
 
     def get_queryset(self):
-        """
-        TODO"""
-        queryset = None
+        """Sets queryset to None if user isn't authenticated
+        Basic queryset is all user's Orders"""
+        self.queryset = None
         if self.request.user.is_authenticated:
-            queryset = self.model.objects.filter(customer=self.request.user)
-        return queryset
+            self.queryset = super().get_queryset()
+            self.queryset = self.queryset.filter(customer=self.request.user)
+        return self.queryset
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        """Adds a dict() with user's orders sorted by status,
+        e.g. context['orders_grouped_by_status']['DED'] is a queryset of user's delivered orders"""
+        context = super().get_context_data(**kwargs)
+        orders_grouped_by_status = dict()
+        if self.queryset:
+            for status in self.model.ORDER_STATUS_CHOICES.keys(): # uses statuses' short form only
+                orders_grouped_by_status[str(status)] = self.queryset.filter(status=status)
+        context['orders_grouped_by_status'] = orders_grouped_by_status
+        # context['order_status_choices'] = Order.ORDER_STATUS_CHOICES
+        return context
 
 class ProductsView(ListView):
     http_method_names = ['get', ]
