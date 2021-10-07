@@ -266,7 +266,6 @@ def cart_view(request):
 class ProfileView(ListView):
     http_method_names = ['get', ]
     model = Order
-    # paginate_by = 9
     template_name = 'profile.html'
     context_object_name = 'orders'
 
@@ -285,7 +284,7 @@ class ProfileView(ListView):
         context = super().get_context_data(**kwargs)
         orders_grouped_by_status = dict()
         if self.queryset:
-            for status in self.model.ORDER_STATUS_CHOICES.keys(): # uses statuses' short form only
+            for status, verbose_status in self.model.ORDER_STATUS_CHOICES: # uses statuses' short form only
                 orders_grouped_by_status[str(status)] = self.queryset.filter(status=status)
         context['orders_grouped_by_status'] = orders_grouped_by_status
         # context['order_status_choices'] = Order.ORDER_STATUS_CHOICES
@@ -381,3 +380,5 @@ class AddToCartView(LoginRequiredMixin, RedirectView):
                                  product=Product.objects.get(id=product_id),
                                  )
         return RedirectView.dispatch(self, request, *args, **kwargs)
+
+# TODO style and test profile page
