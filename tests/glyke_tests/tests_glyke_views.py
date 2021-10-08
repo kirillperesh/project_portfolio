@@ -941,3 +941,18 @@ class ProductsViewTest(TestPermissionsGETMixin, TestCase):
                 continue
             self.assertQuerysetEqual(response.context['products'],
                                         expected_queryset.filter(tags__name__in=expected_tags).distinct())
+
+class ProfileViewTest(TestPermissionsGETMixin, TestCase):
+    """Tests ProfileView
+    To test permissions 'cls.setUpTestPermissionsUsers()' must be set in setUpTestData, e.g. cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200])"""
+    @classmethod
+    def setUpTestData(cls):
+        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[302,200,200,200]) # from TestPermissionsGETMixin
+
+    def setUp(self):
+        self.client.force_login(self.test_user) # force_login before making requests because this is a staff-only view
+        self.basic_url = reverse('profile')
+
+    # def test_test(self):
+    #     response = self.client.get(self.basic_url)
+    #     print(response)
