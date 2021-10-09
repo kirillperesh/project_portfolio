@@ -953,6 +953,22 @@ class ProfileViewTest(TestPermissionsGETMixin, TestCase):
         self.client.force_login(self.test_user) # force_login before making requests because this is a staff-only view
         self.basic_url = reverse('profile')
 
-    # def test_test(self):
-    #     response = self.client.get(self.basic_url)
-    #     print(response)
+    def generate_N_orders(self, customer, number):
+        """
+        TODO"""
+        statuses = Order.ORDER_STATUS_CHOICES
+        if ('CUR', 'Current order') in statuses: statuses.remove(('CUR', 'Current order'))
+        for _ in range(number):
+            rnd_status = random.choice(statuses)[0]
+            Order.objects.create(customer=customer, status=rnd_status)
+
+    def test_test(self):
+        """
+        TODO"""
+        self.generate_N_orders(customer=self.test_user, number=10)
+        self.generate_N_orders(customer=self.test_user_staff, number=10)
+        response = self.client.get(self.basic_url)
+        self.assertEqual(len(response.context['orders_grouped_by_status']), len(Order.ORDER_STATUS_CHOICES))
+        for status, order_queryset in response.context['orders_grouped_by_status'].items():
+            self.assertQuerysetEqual(self.test_user.orders.filter(status=status), order_queryset)
+
