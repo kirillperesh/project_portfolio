@@ -941,3 +941,32 @@ class ProductsViewTest(TestPermissionsGETMixin, TestCase):
                 continue
             self.assertQuerysetEqual(response.context['products'],
                                         expected_queryset.filter(tags__name__in=expected_tags).distinct())
+
+class ProfileViewTest(TestPermissionsGETMixin, TestCase):
+    """Tests ProfileView
+    To test permissions 'cls.setUpTestPermissionsUsers()' must be set in setUpTestData, e.g. cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[404,404,200,200])"""
+    @classmethod
+    def setUpTestData(cls):
+        cls.setUpTestPermissionsUsers(expected_permissions_status_codes=[302,200,200,200]) # from TestPermissionsGETMixin
+
+    def setUp(self):
+        self.client.force_login(self.test_user) # force_login before making requests because this is a staff-only view
+        self.basic_url = reverse('profile')
+
+    def generate_N_orders(self, customer, number):
+        """A local functions to quickly generate N (number) orders of a given customer"""
+        statuses = Order.ORDER_STATUS_CHOICES
+        if ('CUR', 'Current order') in statuses: statuses.remove(('CUR', 'Current order'))
+        for _ in range(number):
+            rnd_status = random.choice(statuses)[0]
+            Order.objects.create(customer=customer, status=rnd_status)
+
+    def test_profile_context_orders(self):
+        """Checks if the view gets the right orders queryset"""
+        self.generate_N_orders(customer=self.test_user, number=10)
+        self.generate_N_orders(customer=self.test_user_staff, number=10)
+        response = self.client.get(self.basic_url)
+        self.assertEqual(len(response.context['orders_grouped_by_status']), len(Order.ORDER_STATUS_CHOICES))
+        for status, order_queryset in response.context['orders_grouped_by_status'].items():
+            self.assertQuerysetEqual(self.test_user.orders.filter(status=status), order_queryset)
+

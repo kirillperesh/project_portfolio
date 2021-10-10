@@ -263,7 +263,7 @@ def cart_view(request):
     context['order_lines'] = current_order.order_lines.all()
     return render(request, "cart.html", context)
 
-class ProfileView(ListView):
+class ProfileView(LoginRequiredMixin, ListView):
     http_method_names = ['get', ]
     model = Order
     template_name = 'profile.html'
