@@ -110,32 +110,6 @@
     color: rgb(255, 255, 255);
   }
 
-.accordion-body{
-  padding: 5px 10px !important;
-}
-.accordion-item{
-  padding: 0px !important;
-  border-style: solid none solid none !important;
-}
-.accordion-item .accordion-item{
-  border-style: solid !important;
-  border-color: rgba(67, 92, 112, 0.7) !important;
-}
-.accordion-button:not(.collapsed){
-  color: #ffffff !important;
-  background-color: rgb(114, 146, 172) !important;
-  border-color: rgba(67, 92, 112, 0.7) !important;
-}
-.accordion-item .accordion-item .accordion-button:not(.collapsed){
-  background-color: rgba(67, 92, 112, 0.7) !important;
-}
-.accordion-button, .accordion-item{
-  border-radius: 0px !important;
-}
-.accordion-button:not(.collapsed)::after{
-  background-image: url(https://cdn-icons-png.flaticon.com/512/318/318275.png) !important;
-  transform: rotate(-180deg) scale(1.15) !important;
-}
 
 
 @media (max-width: 500px) {
