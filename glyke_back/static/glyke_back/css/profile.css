@@ -43,9 +43,16 @@
   transform: rotate(-180deg) scale(1.15) !important;
 }
 
+.order-container{
+  width: 100%;
+  margin-right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 .order-number{
   font-weight: 700;
-  font-size: 14px;
+  font-size: 15px;
   color: rgba(0, 0, 0, 0.5);
 }
 .order-timestams{
