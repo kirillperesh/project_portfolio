@@ -42,13 +42,18 @@
                                                     <div class="accordion-item">
                                                         <h2 class="accordion-header" id="heading_{{order.id}}">
                                                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{order.id}}" aria-expanded="false" aria-controls="collapse_{{order.id}}">
-                                                                <div>
-                                                                    <span>Order of {{ order.order_lines.count}} products ({{order.items_total}} items for {{ order.end_user_price }} $ in total)</span><br>
-                                                                    <span class="order-number"># {{ order.number }}</span><br>
-                                                                    <!-- TODO place timestamps as a block on the right -->
-                                                                    <div class="order-timestams">
-                                                                        <span>Created: {{ order.created }}</span><br>
-                                                                        <span>Edited: {{ order.modified }}</span>
+                                                                <div class="order-container">
+                                                                    <!-- TODO style -->
+                                                                    <div class="order-left">
+                                                                        <span class="order-desc order-top">{{ order.order_lines.count}} products<br>
+                                                                        <span class="order-desc order-bottom">{{order.items_total}} items for {{ order.end_user_price }} $ in total</span><br>
+                                                                    </div>
+                                                                    <div class="order-right order-timestams">
+                                                                        <span class="order-number"># {{ order.number }}</span><br>
+                                                                        <span>{{ order.created }}</span><br>
+                                                                        {% if not order.created == order.modified %}
+                                                                        <span>{{ order.modified }} [edited]</span>
+                                                                        {% endif %}
                                                                     </div>
                                                                 </div>
                                                             </button>
