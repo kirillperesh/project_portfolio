@@ -50,14 +50,30 @@
   align-items: center;
   justify-content: space-between;
 }
+.order-left{
+  text-align: left;
+  font-weight: 500;
+}
+.order-desc{
+  font-size: 24px;
+}
+.order-desc-bottom{
+  font-weight: 700;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.4);
+}
+.order-right{
+  text-align: right;
+  font-weight: 500;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.4);
+}
 .order-number{
   font-weight: 700;
   font-size: 15px;
   color: rgba(0, 0, 0, 0.5);
 }
-.order-timestams{
-  text-align: right;
-  font-weight: 500;
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.4);
+.edited-tag{
+  font-weight: 1000;
+  color: rgba(114, 146, 172, 0.8);
 }
