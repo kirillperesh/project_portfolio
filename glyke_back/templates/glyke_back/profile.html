@@ -45,10 +45,10 @@
                                                                 <div class="order-container">
                                                                     <!-- TODO style -->
                                                                     <div class="order-left">
-                                                                        <span class="order-desc">{{order.items_total}} items | {{ order.end_user_price }} $</span><br>
-                                                                        <span class="order-desc order-desc-bottom">[ {{ order.order_lines.count}} products ]<br>
+                                                                        <span class="order-desc">{{order.items_total}} items <span class="order-separator">|</span> {{ order.end_user_price }} <span class="order-dlr-sign">$</span></span><br>
+                                                                        <span class="order-desc order-desc-bottom fs-13px">[ {{ order.order_lines.count}} products ]<br>
                                                                     </div>
-                                                                    <div class="order-right">
+                                                                    <div class="order-right fs-13px">
                                                                         <span class="order-number"># {{ order.number }}</span><br>
                                                                         <span>{{ order.created }}</span><br>
                                                                         {% if not order.created == order.modified %}
