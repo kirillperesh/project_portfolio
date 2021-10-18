@@ -59,13 +59,11 @@
 }
 .order-desc-bottom{
   font-weight: 700;
-  font-size: 13px;
   color: rgba(0, 0, 0, 0.4);
 }
 .order-right{
   text-align: right;
   font-weight: 500;
-  font-size: 13px;
   color: rgba(0, 0, 0, 0.4);
 }
 .order-number{
@@ -73,7 +71,16 @@
   font-size: 15px;
   color: rgba(0, 0, 0, 0.5);
 }
-.edited-tag{
+.edited-tag, .order-separator, .order-dlr-sign{
   font-weight: 1000;
   color: rgba(114, 146, 172, 0.8);
+}
+.fs-13px{
+  font-size: 13px;
+}
+.accordion-button:not(.collapsed) .edited-tag, .accordion-button:not(.collapsed) .order-separator{
+  color: rgb(200, 230, 255)
+}
+.order-dlr-sign{
+  font-size: 17px;
 }
