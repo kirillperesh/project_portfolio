@@ -54,10 +54,10 @@
   text-align: left;
   font-weight: 500;
 }
-.order-desc{
+.order-left .desc{
   font-size: 24px;
 }
-.order-desc-bottom{
+.order-left .desc-bottom{
   font-weight: 700;
   color: rgba(0, 0, 0, 0.4);
 }
@@ -66,21 +66,21 @@
   font-weight: 500;
   color: rgba(0, 0, 0, 0.4);
 }
-.order-number{
+.order-right .number{
   font-weight: 700;
   font-size: 15px;
   color: rgba(0, 0, 0, 0.5);
 }
-.edited-tag, .order-separator, .order-dlr-sign{
+.order-right .edited-tag, .order-left .separator, .order-left .dlr-sign{
   font-weight: 1000;
   color: rgba(114, 146, 172, 0.8);
 }
 .fs-13px{
-  font-size: 13px;
+  font-size: 13px !important;
 }
-.accordion-button:not(.collapsed) .edited-tag, .accordion-button:not(.collapsed) .order-separator{
+.accordion-button:not(.collapsed) .order-right .edited-tag, .accordion-button:not(.collapsed) .order-left .separator,  .accordion-button:not(.collapsed) .order-left .dlr-sign{
   color: rgb(200, 230, 255)
 }
-.order-dlr-sign{
+.order-left .dlr-sign{
   font-size: 17px;
 }
