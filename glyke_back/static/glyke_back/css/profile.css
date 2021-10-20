@@ -26,6 +26,7 @@
 .accordion-item .accordion-item{
   border-style: solid !important;
   border-color: rgba(114, 146, 172, 0.8) !important;
+  margin: 0px;
 }
 .accordion-button:not(.collapsed){
   color: #ffffff !important;
@@ -41,6 +42,13 @@
 .accordion-button:not(.collapsed)::after{
   background-image: url(https://cdn-icons-png.flaticon.com/512/318/318275.png) !important;
   transform: rotate(-180deg) scale(1.15) !important;
+}
+
+.orders-container{
+  background-color: rgba(114, 146, 172);
+}
+.orders-container h1{
+  color: #fff;
 }
 
 .order-container{
