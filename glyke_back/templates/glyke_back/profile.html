@@ -15,8 +15,9 @@
     <div class="col-xl-9 col-lg-10 col-md-12 col-sm-12 mx-auto">
         <div class="tm-bg-primary-dark tm-block tm-block-h-auto">
             <div class="row">
-                <div class="col-12">
-                    <h2 class="tm-block-title d-inline-block">Placeholder</h2>
+                <div class="col-12 profile-welcome">
+                    <h2 class="welcome-header">Hey, {% if user.first_name %}{{user.first_name}} {% if user.last_name %}{{user.last_name}}{% endif %}{% else %}{{user.username}}{% endif %}!</h2>
+                    <h5 class="welcome-text">On this page you can check your orders history and change your profile settings</h5>
                 </div>
             </div>
             <div class="row">
@@ -43,7 +44,6 @@
                                                         <h2 class="accordion-header" id="heading_{{order.id}}">
                                                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{order.id}}" aria-expanded="false" aria-controls="collapse_{{order.id}}">
                                                                 <div class="order-container">
-                                                                    <!-- TODO style -->
                                                                     <div class="order-left">
                                                                         <span class="desc">{{order.items_total}} items <span class="separator">|</span> {{ order.end_user_price }} <span class="dlr-sign">$</span></span><br>
                                                                         <span class="desc desc-bottom fs-13px">[ {{ order.order_lines.count}} products ]<br>
@@ -120,4 +120,4 @@
 
 {% endblock %}
 
-<!-- TODO customize this page -->
+<!-- TODO add change password form and smth else -->
