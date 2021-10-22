@@ -12,8 +12,9 @@
     padding:20px 0px;
     position:relative;margin:0;
 }
-.orders-container{font-family:'Open Sans', sans-serif;margin:0 auto;width:100%;}
-
+.orders-container{font-family:'Open Sans', sans-serif;
+  margin:0 auto;
+  width:100%;}
 
 .accordion-body{
     padding: 5px 10px !important;
@@ -49,6 +50,8 @@
 }
 .orders-container h1{
   color: #fff;
+  font-size: 22px !important;
+  padding: 15px 0 !important;
 }
 
 .order-container{
@@ -91,4 +94,17 @@
 }
 .order-left .dlr-sign{
   font-size: 17px;
+}
+.profile-welcome{
+  text-align: left;
+  font-family:"Poppins", Arial, sans-serif;
+  margin-bottom: 10px;
+}
+.profile-welcome .welcome-header{
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 20px;
+}
+.profile-welcome .welcome-text{
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 15px;
 }
