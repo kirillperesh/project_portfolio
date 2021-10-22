@@ -110,6 +110,8 @@
     color: rgb(255, 255, 255);
   }
 
+
+
 @media (max-width: 500px) {
   #profile_pannel_dropdown {
     left: 0px;
