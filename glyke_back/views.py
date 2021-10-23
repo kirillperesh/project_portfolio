@@ -12,6 +12,7 @@ from django.views.generic import ListView, DetailView, TemplateView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
 from django.views.generic.base import RedirectView
 from proj_folio.defaults import DEFAULT_NO_IMAGE_URL
 
@@ -282,6 +283,7 @@ class ProfileView(LoginRequiredMixin, ListView):
         """Adds a dict() with user's orders sorted by status,
         e.g. context['orders_grouped_by_status']['DED'] is a queryset of user's delivered orders"""
         context = super().get_context_data(**kwargs)
+        context['password_change_form'] = PasswordChangeForm(user=self.request.user)
         orders_grouped_by_status = dict()
         if self.queryset:
             for status, verbose_status in self.model.ORDER_STATUS_CHOICES: # uses statuses' short form only
