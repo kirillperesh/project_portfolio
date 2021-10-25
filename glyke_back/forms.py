@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm, PasswordChangeForm
 from django.utils.translation import gettext_lazy as _
 
 from .models import Category, Product
@@ -77,3 +77,10 @@ class SignInForm(AuthenticationForm):
         super(SignInForm, self).__init__(*args, **kwargs)
         self.fields['username'].widget = forms.TextInput(attrs={'class':'required', 'placeholder': 'Username'})
         self.fields['password'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Password'})
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super(PasswordChangeForm, self).__init__(*args, **kwargs)
+        self.fields['old_password'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Old password'})
+        self.fields['new_password1'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'New password'})
+        self.fields['new_password2'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Repeat new password..'})
