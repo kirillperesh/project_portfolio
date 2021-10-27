@@ -295,7 +295,6 @@ class ProfileView(LoginRequiredMixin, ListView):
         # TODO add password changing processing here
         return super().get(self, request, *args, **kwargs)
 
-
 class ProductsView(ListView):
     http_method_names = ['get', ]
     model = Product
@@ -341,7 +340,6 @@ class ProductsStaffView(UserIsStaff_Or404_Mixin, ListView):
     queryset = model.objects.all()
     template_name = 'products_staff.html'
     context_object_name = 'products'
-
 
 class ProductDetailView(DetailView):
     http_method_names = ['get', ]
