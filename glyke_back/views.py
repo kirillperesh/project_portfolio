@@ -292,7 +292,25 @@ class ProfileView(LoginRequiredMixin, ListView):
         return context
 
     def post(self, request, *args, **kwargs):
-        # TODO add password changing processing here
+        """
+        TODO"""
+        old_password = request.POST['old_password']
+        new_password1 = request.POST['new_password1']
+        new_password2 = request.POST['new_password2']
+        print(request.POST)
+        print(request.user.check_password(request.POST['old_password']))
+
+        if request.user.check_password(old_password) and new_password1 == new_password2:
+            if not old_password == new_password2:
+                request.user.set_password(new_password2)
+                request.user.save()
+        else:
+            print('wrong smth')
+
+
+
+
+
         return super().get(self, request, *args, **kwargs)
 
 class ProductsView(ListView):
