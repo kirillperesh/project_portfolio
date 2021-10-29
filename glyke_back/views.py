@@ -152,7 +152,7 @@ def edit_product_dynamic_view(request, id):
                }
 
     if request.method == 'POST':
-        # if category is not the only POST arameter
+        # if category is not the only POST parameter
         if len(request.POST) > 2:
             product_form = AddProductForm(request.POST or None)
             filters_form = CategoryFiltersForm(request.POST or None)
@@ -282,7 +282,7 @@ class ProfileView(LoginRequiredMixin, ListView):
         """Adds a dict() with user's orders sorted by status,
         e.g. context['orders_grouped_by_status']['DED'] is a queryset of user's delivered orders"""
         context = super().get_context_data(**kwargs)
-        context['password_change_form'] = CustomPasswordChangeForm(user=self.request.user)
+        context['password_change_form'] = CustomPasswordChangeForm(user=self.request.user, data=self.request.POST or None)
         orders_grouped_by_status = dict()
         if self.queryset:
             for status, verbose_status in self.model.ORDER_STATUS_CHOICES: # uses statuses' short form only
@@ -294,18 +294,22 @@ class ProfileView(LoginRequiredMixin, ListView):
     def post(self, request, *args, **kwargs):
         """
         TODO"""
-        old_password = request.POST['old_password']
-        new_password1 = request.POST['new_password1']
-        new_password2 = request.POST['new_password2']
-        print(request.POST)
-        print(request.user.check_password(request.POST['old_password']))
-
-        if request.user.check_password(old_password) and new_password1 == new_password2:
-            if not old_password == new_password2:
-                request.user.set_password(new_password2)
-                request.user.save()
+        password_change_form = CustomPasswordChangeForm(user=self.request.user, data=request.POST)
+        if password_change_form.is_valid():
+            print('valid')
+            # password_change_form.save()
         else:
-            print('wrong smth')
+            print('invalid')
+        # old_password = request.POST['old_password']
+        # new_password1 = request.POST['new_password1']
+        # new_password2 = request.POST['new_password2']
+
+        # if request.user.check_password(old_password) and new_password1 == new_password2:
+        #     if not old_password == new_password2:
+        #         request.user.set_password(new_password2)
+        #         request.user.save()
+        # else:
+        #     print('wrong smth')
 
 
 
