@@ -83,4 +83,4 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         super(PasswordChangeForm, self).__init__(*args, **kwargs)
         self.fields['old_password'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Old password'})
         self.fields['new_password1'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'New password'})
-        self.fields['new_password2'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Repeat new password..'})
+        self.fields['new_password2'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Repeat new password'})
