@@ -122,12 +122,22 @@
                                         </div>
                                     </button>
                                 </h2>
+                                <span>
+                                    {% if password_change_form.errors %}
+                                        {% for field in password_change_form %}
+                                        <span>
+                                            {{ field.errors }}
+                                        </span>
+                                        {% endfor %}
+                                    {% endif %}
+                                </span>
                                 <div id="collapse_password_change" class="accordion-collapse collapse" aria-labelledby="heading_password_change">
                                     <div class="accordion-body">
                                         <form class="change-password-form" role="form" action="" method="post">
                                             {% csrf_token %}
                                             {% for field in password_change_form %}
                                                 <p>{{ field }}</p>
+                                                <!-- <p>{{ field.errors }}</p> -->
                                             {% endfor %}
                                             <input type="submit" value="Change password">
                                         </form>
