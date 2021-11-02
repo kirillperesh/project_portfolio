@@ -108,3 +108,23 @@
   color: rgba(255, 255, 255, 0.8);
   font-size: 15px;
 }
+
+.errorlist{
+  color: white;
+  list-style-type: none;
+  text-align: center;
+  padding: 0;
+  background-color: lightcoral;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: rgb(238, 238, 238);
+  margin-bottom: -2px;
+}
+.errorlist > li {
+    border-bottom-style: solid;
+    border-bottom-width: 2px;
+    border-bottom-color: rgb(238, 238, 238);
+}
+/* .field-errors ul{
+  margin-bottom: -1px;
+} */

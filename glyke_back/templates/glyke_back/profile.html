@@ -110,13 +110,41 @@
                 </div>
 
 
-
-
-
                 <div class="col-xl-6">
-                    <span>Placeholder</span>
                     <div>
-                        {{ password_change_form.as_p }}
+                        Edit your profile
+                        <div class="accordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading_password_change">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_password_change" aria-expanded="false" aria-controls="collapse_password_change">
+                                        <div class="">
+                                            Change password
+                                        </div>
+                                    </button>
+                                </h2>
+                                <span>
+                                    {% if password_change_form.errors %}
+                                        {% for field in password_change_form %}
+                                            <span>
+                                                {{ field.errors }}
+                                            </span>
+                                        {% endfor %}
+                                    {% endif %}
+                                </span>
+                                <div id="collapse_password_change" class="accordion-collapse collapse" aria-labelledby="heading_password_change">
+                                    <div class="accordion-body">
+                                        <form class="change-password-form" role="form" action="" method="post">
+                                            {% csrf_token %}
+                                            {% for field in password_change_form %}
+                                                <p>{{ field }}</p>
+                                                <!-- <p>{{ field.errors }}</p> -->
+                                            {% endfor %}
+                                            <input type="submit" value="Change password">
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -131,3 +159,4 @@
 {% endblock %}
 
 <!-- TODO add change password form and smth else -->
+<!-- TODO customize password change form -->

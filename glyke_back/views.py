@@ -152,7 +152,7 @@ def edit_product_dynamic_view(request, id):
                }
 
     if request.method == 'POST':
-        # if category is not the only POST arameter
+        # if category is not the only POST parameter
         if len(request.POST) > 2:
             product_form = AddProductForm(request.POST or None)
             filters_form = CategoryFiltersForm(request.POST or None)
@@ -282,7 +282,7 @@ class ProfileView(LoginRequiredMixin, ListView):
         """Adds a dict() with user's orders sorted by status,
         e.g. context['orders_grouped_by_status']['DED'] is a queryset of user's delivered orders"""
         context = super().get_context_data(**kwargs)
-        context['password_change_form'] = CustomPasswordChangeForm(user=self.request.user)
+        context['password_change_form'] = CustomPasswordChangeForm(user=self.request.user, data=self.request.POST or None)
         orders_grouped_by_status = dict()
         if self.queryset:
             for status, verbose_status in self.model.ORDER_STATUS_CHOICES: # uses statuses' short form only
@@ -292,9 +292,17 @@ class ProfileView(LoginRequiredMixin, ListView):
         return context
 
     def post(self, request, *args, **kwargs):
-        # TODO add password changing processing here
-        return super().get(self, request, *args, **kwargs)
+        """
+        TODO"""
+        password_change_form = CustomPasswordChangeForm(user=self.request.user, data=request.POST)
+        if password_change_form.is_valid():
+            password_change_form.save()
+        else:
+            print('invalid')
+        # request.user.set_password('admin')
+        # request.user.save()
 
+        return super().get(self, request, *args, **kwargs)
 
 class ProductsView(ListView):
     http_method_names = ['get', ]
@@ -341,7 +349,6 @@ class ProductsStaffView(UserIsStaff_Or404_Mixin, ListView):
     queryset = model.objects.all()
     template_name = 'products_staff.html'
     context_object_name = 'products'
-
 
 class ProductDetailView(DetailView):
     http_method_names = ['get', ]
