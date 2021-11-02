@@ -296,24 +296,11 @@ class ProfileView(LoginRequiredMixin, ListView):
         TODO"""
         password_change_form = CustomPasswordChangeForm(user=self.request.user, data=request.POST)
         if password_change_form.is_valid():
-            print('valid')
-            # password_change_form.save()
+            password_change_form.save()
         else:
             print('invalid')
-        # old_password = request.POST['old_password']
-        # new_password1 = request.POST['new_password1']
-        # new_password2 = request.POST['new_password2']
-
-        # if request.user.check_password(old_password) and new_password1 == new_password2:
-        #     if not old_password == new_password2:
-        #         request.user.set_password(new_password2)
-        #         request.user.save()
-        # else:
-        #     print('wrong smth')
-
-
-
-
+        # request.user.set_password('admin')
+        # request.user.save()
 
         return super().get(self, request, *args, **kwargs)
 
