@@ -20,7 +20,7 @@
                     <h5 class="welcome-text">On this page you can check your orders history and change your profile settings</h5>
                 </div>
             </div>
-            <div class="row">
+            <div class="row" id="profile-main-row">
                 <div class="col-xl-6 orders-col">
                     <header id="orders-header">
                         <div class="orders-container">
@@ -110,34 +110,34 @@
                 </div>
 
 
-                <div class="col-xl-6">
-                    <div>
-                        Edit your profile
+                <div class="col-xl-6 change-password-col">
+                    <div id="change-password-header" class="right-side-header">
                         <div class="accordion">
                             <div class="accordion-item">
                                 <h2 class="accordion-header" id="heading_password_change">
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_password_change" aria-expanded="false" aria-controls="collapse_password_change">
-                                        <div class="">
-                                            Change password
+                                        <div>
+                                            Change your password
                                         </div>
                                     </button>
                                 </h2>
-                                <span>
+                                <div>
                                     {% if password_change_form.errors %}
-                                        {% for field in password_change_form %}
-                                            <span>
-                                                {{ field.errors }}
-                                            </span>
-                                        {% endfor %}
+                                        <div class="password-change-errors">
+                                            {% for field in password_change_form %}
+                                                <span>
+                                                    {{ field.errors }}
+                                                </span>
+                                            {% endfor %}
+                                        </div>
                                     {% endif %}
-                                </span>
+                                </div>
                                 <div id="collapse_password_change" class="accordion-collapse collapse" aria-labelledby="heading_password_change">
                                     <div class="accordion-body">
                                         <form class="change-password-form" role="form" action="" method="post">
                                             {% csrf_token %}
                                             {% for field in password_change_form %}
                                                 <p>{{ field }}</p>
-                                                <!-- <p>{{ field.errors }}</p> -->
                                             {% endfor %}
                                             <input type="submit" value="Change password">
                                         </form>
@@ -146,7 +146,55 @@
                             </div>
                         </div>
                     </div>
+
+
+
+
+                    <div id="placeholder1-header" class="right-side-header">
+                        <div class="accordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading_placeholder1">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_placeholder1" aria-expanded="false" aria-controls="collapse_placeholder1">
+                                        <div>
+                                            Another feature placeholder
+                                        </div>
+                                    </button>
+                                </h2>
+                                <div id="collapse_placeholder1" class="accordion-collapse collapse" aria-labelledby="heading_pplaceholder1">
+                                    <div class="accordion-body">
+                                        <div>
+                                            some stuff
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="placeholder2-header" class="right-side-header">
+                        <div class="accordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading_placeholder2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_placeholder2" aria-expanded="false" aria-controls="collapse_placeholder2">
+                                        <div>
+                                        And another feature placeholder
+                                        </div>
+                                    </button>
+                                </h2>
+                                <div id="collapse_placeholder2" class="accordion-collapse collapse" aria-labelledby="heading_pplaceholder2">
+                                    <div class="accordion-body">
+                                        <div>
+                                            some other stuff
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
                 </div>
+            </div>
 
 
 
