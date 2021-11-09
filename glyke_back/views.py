@@ -292,13 +292,9 @@ class ProfileView(LoginRequiredMixin, ListView):
         return context
 
     def post(self, request, *args, **kwargs):
-        """
-        TODO"""
+        """Processes PasswordChangeForm and UserChangeForm"""
         password_change_form = CustomPasswordChangeForm(user=self.request.user, data=request.POST)
         if password_change_form.is_valid(): password_change_form.save()
-        # left this for testing for a while
-        # request.user.set_password('admin')
-        # request.user.save()
         return super().get(self, request, *args, **kwargs)
 
 class ProductsView(ListView):
@@ -392,4 +388,4 @@ class AddToCartView(LoginRequiredMixin, RedirectView):
         return RedirectView.dispatch(self, request, *args, **kwargs)
 
 # TODO style and test profile page
-# TODO add some more features on profile page
+# TODO add some more features to profile page
