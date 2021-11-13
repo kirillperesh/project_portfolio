@@ -160,11 +160,26 @@
                                         </div>
                                     </button>
                                 </h2>
+                                <div>
+                                    {% if user_change_form.errors %}
+                                        <div class="password-change-errors">
+                                            {% for field in user_change_form %}
+                                                <span>
+                                                    {{ field.errors }}
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
                                 <div id="collapse_placeholder1" class="accordion-collapse collapse" aria-labelledby="heading_pplaceholder1">
                                     <div class="accordion-body">
-                                        <div>
-                                            add a form here
-                                        </div>
+                                        <form class="change-password-form" role="form" action="" method="post">
+                                            {% csrf_token %}
+                                            {% for field in user_change_form %}
+                                                <p>{{ field }}</p>
+                                            {% endfor %}
+                                            <input type="submit" value="Change plepel">
+                                        </form>
                                     </div>
                                 </div>
                             </div>
