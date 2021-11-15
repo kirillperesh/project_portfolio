@@ -93,10 +93,13 @@ class CustomUserChangeForm(UserChangeForm):
         fields = ('username', 'email')
         field_classes = {'username': UsernameField}
 
-    def __init__(self, *args, **kwargs):
-        super(UserChangeForm, self).__init__(*args, **kwargs)
-        # self.fields['old_password'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Old password'})
-        # self.fields['new_password1'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'New password'})
-        # self.fields['new_password2'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Repeat new password'})
+    def clean(self):
+        cleaned_data = super().clean()
+        email = self.cleaned_data['email']
+        initial_email = self.initial['email']
+        if User.objects.filter(email=email).exclude(email=initial_email).exists():
+            self.add_error('email', 'That email is already being used by another user')
+        return cleaned_data
+
 
 
