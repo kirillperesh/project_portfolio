@@ -2,7 +2,7 @@
 justify-content: space-between;
 }
 
-.orders-col, .change-password-col{
+.orders-col, .right-side-col{
   background:#eee;
   margin:0 -5px;
   padding:0;
@@ -21,9 +21,12 @@ justify-content: space-between;
   padding:20px 0px;
   position:relative;margin:0;
 }
-.orders-container{font-family:'Open Sans', sans-serif;
+.orders-container{
+  font-family:'Open Sans', sans-serif;
   margin:0 auto;
-  width:100%;}
+  width:100%;
+  height: 60px;
+}
 
 .accordion-body{
     padding: 5px 10px !important;
@@ -144,5 +147,9 @@ justify-content: space-between;
   margin: 5px 0;
 }
 .right-side-header .accordion-button{
-  height: 56px;
+  height: 60px;
+}
+.right-side-header .header-text{
+  font-family:'Open Sans', sans-serif;
+  font-weight: 700;
 }

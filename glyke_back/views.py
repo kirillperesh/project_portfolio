@@ -16,7 +16,7 @@ from django.views.generic.base import RedirectView
 from proj_folio.defaults import DEFAULT_NO_IMAGE_URL
 
 from photologue import models as photo_models
-from .forms import AddProductForm, PhotosForm, SelectCategoryProductForm, RegisterForm, SignInForm, CustomPasswordChangeForm
+from .forms import AddProductForm, PhotosForm, SelectCategoryProductForm, RegisterForm, SignInForm, CustomPasswordChangeForm, CustomUserChangeForm
 from .models import Category, Order, OrderLine, Product
 from .decorators_mixins import user_is_staff_or_404, UserIsStaff_Or404_Mixin
 
@@ -282,23 +282,32 @@ class ProfileView(LoginRequiredMixin, ListView):
         """Adds a dict() with user's orders sorted by status,
         e.g. context['orders_grouped_by_status']['DED'] is a queryset of user's delivered orders"""
         context = super().get_context_data(**kwargs)
-        context['password_change_form'] = CustomPasswordChangeForm(user=self.request.user, data=self.request.POST or None)
+
+        password_change_form_data, user_change_form_data = None, None
+        if 'form_name' in self.request.POST.keys():
+            # this is done to separete forms
+            form_name = self.request.POST['form_name']
+            if form_name == 'password_change_form':
+                password_change_form_data = self.request.POST
+            elif form_name == 'user_change_form':
+                user_change_form_data = self.request.POST
+        context['password_change_form'] = CustomPasswordChangeForm(user=self.request.user, data=password_change_form_data)
+        context['user_change_form'] = CustomUserChangeForm(instance=self.request.user, data=user_change_form_data)
+
         orders_grouped_by_status = dict()
         if self.queryset:
             for status, verbose_status in self.model.ORDER_STATUS_CHOICES: # uses statuses' short form only
                 orders_grouped_by_status[str(status)] = self.queryset.filter(status=status)
         context['orders_grouped_by_status'] = orders_grouped_by_status
-        # context['order_status_choices'] = Order.ORDER_STATUS_CHOICES
         return context
 
     def post(self, request, *args, **kwargs):
-        """
-        TODO"""
+        """Processes PasswordChangeForm and UserChangeForm"""
         password_change_form = CustomPasswordChangeForm(user=self.request.user, data=request.POST)
         if password_change_form.is_valid(): password_change_form.save()
-        # left this for testing for a while
-        # request.user.set_password('admin')
-        # request.user.save()
+        user_change_form = CustomUserChangeForm(instance=self.request.user, data=request.POST)
+        if user_change_form.is_valid(): user_change_form.save()
+
         return super().get(self, request, *args, **kwargs)
 
 class ProductsView(ListView):
@@ -392,4 +401,4 @@ class AddToCartView(LoginRequiredMixin, RedirectView):
         return RedirectView.dispatch(self, request, *args, **kwargs)
 
 # TODO style and test profile page
-# TODO add some more features on profile page
+# TODO add some more features to profile page
