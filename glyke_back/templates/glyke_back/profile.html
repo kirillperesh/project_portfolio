@@ -123,7 +123,7 @@
                                 </h2>
                                 <div>
                                     {% if password_change_form.errors %}
-                                        <div class="password-change-errors">
+                                        <div class="right-side-form-errors">
                                             {% for field in password_change_form %}
                                                 <span>
                                                     {{ field.errors }}
@@ -134,11 +134,12 @@
                                 </div>
                                 <div id="collapse_password_change" class="accordion-collapse collapse" aria-labelledby="heading_password_change">
                                     <div class="accordion-body">
-                                        <form class="change-password-form" role="form" action="" method="post">
+                                        <form role="form" action="" method="post">
                                             {% csrf_token %}
                                             {% for field in password_change_form %}
                                                 <p>{{ field }}</p>
                                             {% endfor %}
+                                            <input type="hidden" name="form_name" value="password_change_form">
                                             <input type="submit" value="Change password">
                                         </form>
                                     </div>
@@ -156,13 +157,13 @@
                                 <h2 class="accordion-header" id="heading_placeholder1">
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_placeholder1" aria-expanded="false" aria-controls="collapse_placeholder1">
                                         <div class="header-text">
-                                            Change your username
+                                            Change your username or email
                                         </div>
                                     </button>
                                 </h2>
                                 <div>
                                     {% if user_change_form.errors %}
-                                        <div class="password-change-errors">
+                                        <div class="right-side-form-errors">
                                             {% for field in user_change_form %}
                                                 <span>
                                                     {{ field.errors }}
@@ -173,12 +174,13 @@
                                 </div>
                                 <div id="collapse_placeholder1" class="accordion-collapse collapse" aria-labelledby="heading_pplaceholder1">
                                     <div class="accordion-body">
-                                        <form class="change-password-form" role="form" action="" method="post">
+                                        <form role="form" action="" method="post">
                                             {% csrf_token %}
                                             {% for field in user_change_form %}
                                                 <p>{{ field }}</p>
                                             {% endfor %}
-                                            <input type="submit" value="Change plepel">
+                                            <input type="hidden" name="form_name" value="user_change_form">
+                                            <input type="submit" value="Change username/email">
                                         </form>
                                     </div>
                                 </div>
