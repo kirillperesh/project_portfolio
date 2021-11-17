@@ -68,19 +68,19 @@ class RegisterForm(UserCreationForm):
             'email': forms.EmailInput(attrs={'placeholder': _('Email..'),}),
         }
     def __init__(self, *args, **kwargs):
-        super(RegisterForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['password1'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Password..'})
         self.fields['password2'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Repeat password..'})
 
 class SignInForm(AuthenticationForm):
     def __init__(self, *args, **kwargs):
-        super(SignInForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['username'].widget = forms.TextInput(attrs={'class':'required', 'placeholder': 'Username'})
         self.fields['password'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Password'})
 
 class CustomPasswordChangeForm(PasswordChangeForm):
     def __init__(self, *args, **kwargs):
-        super(PasswordChangeForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['old_password'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Old password'})
         self.fields['new_password1'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'New password'})
         self.fields['new_password2'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Repeat new password'})
@@ -92,6 +92,11 @@ class CustomUserChangeForm(UserChangeForm):
         model = User
         fields = ('username', 'email')
         field_classes = {'username': UsernameField}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].widget = forms.TextInput(attrs={'class':'required', 'placeholder': 'New username'})
+        self.fields['email'].widget = forms.EmailInput(attrs={'class':'required', 'placeholder': 'New email'})
 
     def clean(self):
         cleaned_data = super().clean()
