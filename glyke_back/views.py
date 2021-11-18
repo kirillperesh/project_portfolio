@@ -285,14 +285,14 @@ class ProfileView(LoginRequiredMixin, ListView):
 
         password_change_form_data, user_change_form_data = None, None
         if 'form_name' in self.request.POST.keys():
-            # this is done to separete forms
+            # this is done to separate forms
             form_name = self.request.POST['form_name']
             if form_name == 'password_change_form':
                 password_change_form_data = self.request.POST
             elif form_name == 'user_change_form':
                 user_change_form_data = self.request.POST
         context['password_change_form'] = CustomPasswordChangeForm(user=self.request.user, data=password_change_form_data)
-        context['user_change_form'] = CustomUserChangeForm(instance=self.request.user, data=user_change_form_data)
+        context['user_change_form'] = CustomUserChangeForm()
 
         orders_grouped_by_status = dict()
         if self.queryset:
