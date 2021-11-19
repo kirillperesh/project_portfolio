@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm, UsernameField, PasswordChangeForm
+from django.forms import fields
 from django.utils.translation import gettext_lazy as _
 
 from .models import Category, Product
@@ -85,17 +86,27 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         self.fields['new_password1'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'New password'})
         self.fields['new_password2'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Repeat new password'})
 
-class CustomUserChangeForm(UserChangeForm):
+class UsernameChangeForm(UserChangeForm):
     password = None
 
     class Meta:
         model = User
-        fields = ('username', 'email')
+        fields = ('username',)
         field_classes = {'username': UsernameField}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['username'].widget = forms.TextInput(attrs={'class':'required', 'placeholder': 'New username'})
+
+class EmailChangeForm(UserChangeForm):
+    password = None
+
+    class Meta:
+        model = User
+        fields = ('email',)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.fields['email'].widget = forms.EmailInput(attrs={'class':'required', 'placeholder': 'New email'})
 
     def clean(self):
