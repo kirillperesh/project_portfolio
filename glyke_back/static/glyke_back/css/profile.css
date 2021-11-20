@@ -121,7 +121,7 @@ justify-content: space-between;
   font-size: 15px;
 }
 
-.password-change-errors{
+.right-side-form-errors{
   border-style: solid none;
   border-width: 20px 0 5px 0;
   border-color: rgb(238, 238, 238);
@@ -152,4 +152,8 @@ justify-content: space-between;
 .right-side-header .header-text{
   font-family:'Open Sans', sans-serif;
   font-weight: 700;
+}
+
+.change-user-btn{
+  width: 170px;
 }
