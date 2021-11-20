@@ -162,9 +162,20 @@
                                     </button>
                                 </h2>
                                 <div>
-                                    {% if user_change_form.errors %}
+                                    {% if username_change_form.errors %}
                                         <div class="right-side-form-errors">
-                                            {% for field in user_change_form %}
+                                            {% for field in username_change_form %}
+                                                <span>
+                                                    {{ field.errors }}
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    {% if email_change_form.errors %}
+                                        <div class="right-side-form-errors">
+                                            {% for field in email_change_form %}
                                                 <span>
                                                     {{ field.errors }}
                                                 </span>
@@ -176,11 +187,21 @@
                                     <div class="accordion-body">
                                         <form role="form" action="" method="post">
                                             {% csrf_token %}
-                                            {% for field in user_change_form %}
-                                                <p>{{ field }}</p>
+                                            <span class="user-name-email-current">{{ user.username }}</span>
+                                            {% for field in username_change_form %}
+                                                <span class="user-change-field">{{ field }}</span>
                                             {% endfor %}
-                                            <input type="hidden" name="form_name" value="user_change_form">
-                                            <input type="submit" value="Change username/email">
+                                            <input type="hidden" name="form_name" value="username_change_form">
+                                            <input type="submit" value="Change username" class="change-user-btn">
+                                        </form>
+                                        <form role="form" action="" method="post">
+                                            {% csrf_token %}
+                                            <span class="user-name-email-current">{{ user.email }}</span>
+                                            {% for field in email_change_form %}
+                                                <span class="user-change-field">{{ field }}</span>
+                                            {% endfor %}
+                                            <input type="hidden" name="form_name" value="email_change_form">
+                                            <input type="submit" value="Change Email" class="change-user-btn">
                                         </form>
                                     </div>
                                 </div>
