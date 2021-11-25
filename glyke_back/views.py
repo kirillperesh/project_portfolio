@@ -285,11 +285,9 @@ class ProfileView(LoginRequiredMixin, ListView):
 
 
 
-
         context['password_change_form'] = CustomPasswordChangeForm(user=self.request.user)
         context['username_change_form'] = UsernameChangeForm()
         context['email_change_form'] = EmailChangeForm()
-
 
         # password_change_form_data, username_change_form_data, email_change_form_data = None, None, None
         if 'form_name' in self.request.POST.keys():
@@ -301,7 +299,6 @@ class ProfileView(LoginRequiredMixin, ListView):
                 context['username_change_form'] = UsernameChangeForm(instance=self.request.user, data=self.request.POST)
             elif form_name == 'email_change_form':
                  context['email_change_form'] = EmailChangeForm(instance=self.request.user, data=self.request.POST)
-
             # context['password_change_form'] = CustomPasswordChangeForm(user=self.request.user, data=self.request.POST)
             # context['username_change_form'] = UsernameChangeForm(instance=self.request.user, data=self.request.POST)
             # context['email_change_form'] = EmailChangeForm(instance=self.request.user, data=self.request.POST)
@@ -320,14 +317,17 @@ class ProfileView(LoginRequiredMixin, ListView):
         password_change_form = CustomPasswordChangeForm(user=self.request.user, data=request.POST)
         if password_change_form.is_valid():password_change_form.save()
 
+        # initial_username = self.request.user.username
         username_change_form = UsernameChangeForm(instance=self.request.user, data=request.POST)
         if username_change_form.is_valid(): username_change_form.save()
+        # else:
+        #     self.request.GET = {'username': initial_username}
 
         email_change_form = EmailChangeForm(instance=self.request.user, data=request.POST)
-        if email_change_form.is_valid(): email_change_form.save()
+        if email_change_form.is_valid():
+            email_change_form.save()
 
-
-
+        self.request.user.refresh_from_db()
         return super().get(self, request, *args, **kwargs)
 
 class ProductsView(ListView):
