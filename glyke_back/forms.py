@@ -87,6 +87,7 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         self.fields['new_password2'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Repeat new password'})
 
 class UsernameChangeForm(UserChangeForm):
+    # TODO add unchanged name validation
     password = None
 
     class Meta:
