@@ -283,26 +283,19 @@ class ProfileView(LoginRequiredMixin, ListView):
         e.g. context['orders_grouped_by_status']['DED'] is a queryset of user's delivered orders"""
         context = super().get_context_data(**kwargs)
 
-
-
         context['password_change_form'] = CustomPasswordChangeForm(user=self.request.user)
         context['username_change_form'] = UsernameChangeForm()
         context['email_change_form'] = EmailChangeForm()
 
-        # password_change_form_data, username_change_form_data, email_change_form_data = None, None, None
         if 'form_name' in self.request.POST.keys():
-            # this is done to separate forms
+            # this is done to separate forms one from another
             form_name = self.request.POST['form_name']
             if form_name == 'password_change_form':
-                 context['password_change_form'] = CustomPasswordChangeForm(user=self.request.user, data=self.request.POST)
+                context['password_change_form'] = CustomPasswordChangeForm(user=self.request.user, data=self.request.POST)
             elif form_name == 'username_change_form':
                 context['username_change_form'] = UsernameChangeForm(instance=self.request.user, data=self.request.POST)
             elif form_name == 'email_change_form':
-                 context['email_change_form'] = EmailChangeForm(instance=self.request.user, data=self.request.POST)
-            # context['password_change_form'] = CustomPasswordChangeForm(user=self.request.user, data=self.request.POST)
-            # context['username_change_form'] = UsernameChangeForm(instance=self.request.user, data=self.request.POST)
-            # context['email_change_form'] = EmailChangeForm(instance=self.request.user, data=self.request.POST)
-        # TODO add form fields placeholders
+                context['email_change_form'] = EmailChangeForm(instance=self.request.user, data=self.request.POST)
         orders_grouped_by_status = dict()
         if self.queryset:
             for status, verbose_status in self.model.ORDER_STATUS_CHOICES: # uses statuses' short form only
@@ -313,19 +306,12 @@ class ProfileView(LoginRequiredMixin, ListView):
     def post(self, request, *args, **kwargs):
         """
         TODO"""
-        # add get_context_data call here
-        password_change_form = CustomPasswordChangeForm(user=self.request.user, data=request.POST)
+        password_change_form = CustomPasswordChangeForm(user=request.user, data=request.POST)
         if password_change_form.is_valid():password_change_form.save()
-
-        # initial_username = self.request.user.username
-        username_change_form = UsernameChangeForm(instance=self.request.user, data=request.POST)
+        username_change_form = UsernameChangeForm(instance=request.user, data=request.POST)
         if username_change_form.is_valid(): username_change_form.save()
-        # else:
-        #     self.request.GET = {'username': initial_username}
-
-        email_change_form = EmailChangeForm(instance=self.request.user, data=request.POST)
-        if email_change_form.is_valid():
-            email_change_form.save()
+        email_change_form = EmailChangeForm(instance=request.user, data=request.POST)
+        if email_change_form.is_valid(): email_change_form.save()
 
         self.request.user.refresh_from_db()
         return super().get(self, request, *args, **kwargs)
