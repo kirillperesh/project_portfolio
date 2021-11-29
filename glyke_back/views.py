@@ -306,12 +306,19 @@ class ProfileView(LoginRequiredMixin, ListView):
     def post(self, request, *args, **kwargs):
         """
         TODO"""
-        password_change_form = CustomPasswordChangeForm(user=request.user, data=request.POST)
-        if password_change_form.is_valid():password_change_form.save()
-        username_change_form = UsernameChangeForm(instance=request.user, data=request.POST)
-        if username_change_form.is_valid(): username_change_form.save()
-        email_change_form = EmailChangeForm(instance=request.user, data=request.POST)
-        if email_change_form.is_valid(): email_change_form.save()
+        if 'form_name' in self.request.POST.keys():
+            # this is done to separate forms one from another
+            form_name = self.request.POST['form_name']
+            if form_name == 'password_change_form':
+                password_change_form = CustomPasswordChangeForm(user=request.user, data=request.POST)
+                if password_change_form.is_valid(): password_change_form.save()
+            elif form_name == 'username_change_form':
+                username_change_form = UsernameChangeForm(instance=request.user, data=request.POST)
+                if username_change_form.is_valid(): username_change_form.save()
+            elif form_name == 'email_change_form':
+                email_change_form = EmailChangeForm(instance=request.user, data=request.POST)
+                if email_change_form.is_valid(): email_change_form.save()        
+        
 
         self.request.user.refresh_from_db()
         return super().get(self, request, *args, **kwargs)
