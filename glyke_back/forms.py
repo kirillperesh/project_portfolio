@@ -114,8 +114,11 @@ class EmailChangeForm(UserChangeForm):
         cleaned_data = super().clean()
         email = self.cleaned_data['email']
         initial_email = self.initial['email']
-        if User.objects.filter(email=email).exclude(email=initial_email).exists():
-            self.add_error('email', 'That email is already being used by another user')
+        
+        if not email: self.add_error('email', 'Email can not be empty')
+        elif email == initial_email: self.add_error('email', "That's the same email you already use")
+        elif User.objects.filter(email=email).exclude(email=initial_email).exists():
+            self.add_error('email', 'That email is already being used by another user')                
         return cleaned_data
 
 
