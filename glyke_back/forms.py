@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm, UsernameField, PasswordChangeForm
+from django.db.models.fields import EmailField
 from django.forms import fields
 from django.utils.translation import gettext_lazy as _
 
@@ -87,6 +88,7 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         self.fields['new_password2'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Repeat new password'})
 
 class UsernameChangeForm(UserChangeForm):
+    # TODO add unchanged name validation
     password = None
 
     class Meta:
@@ -96,7 +98,14 @@ class UsernameChangeForm(UserChangeForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['username'].widget = forms.TextInput(attrs={'class':'required', 'placeholder': 'New username'})
+        self.fields['username'].widget = forms.TextInput(attrs={'required':True, 'placeholder': 'New username'})
+        
+    def clean(self):
+        cleaned_data = super().clean()
+        username = self.cleaned_data['username']
+        initial_username = self.initial['username']
+        if username == initial_username: self.add_error('username', "That's the same username you already use")
+        return cleaned_data
 
 class EmailChangeForm(UserChangeForm):
     password = None
@@ -107,14 +116,16 @@ class EmailChangeForm(UserChangeForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['email'].widget = forms.EmailInput(attrs={'class':'required', 'placeholder': 'New email'})
+        self.fields['email'].widget = forms.EmailInput(attrs={'required':True, 'placeholder': 'New email'})
 
     def clean(self):
         cleaned_data = super().clean()
         email = self.cleaned_data['email']
         initial_email = self.initial['email']
-        if User.objects.filter(email=email).exclude(email=initial_email).exists():
-            self.add_error('email', 'That email is already being used by another user')
+                
+        if email == initial_email: self.add_error('email', "That's the same email you already use")
+        elif User.objects.filter(email=email).exclude(email=initial_email).exists():
+            self.add_error('email', 'That email is already being used by another user')                
         return cleaned_data
 
 

@@ -187,7 +187,7 @@
                                     <div class="accordion-body">
                                         <form role="form" action="" method="post">
                                             {% csrf_token %}
-                                            <span class="user-name-email-current">{{ user.username }}</span>
+                                            {% comment %} <div class="user-name-email-current">Current name: {{ user.username }}</div> {% endcomment %}
                                             {% for field in username_change_form %}
                                                 <span class="user-change-field">{{ field }}</span>
                                             {% endfor %}
@@ -196,12 +196,13 @@
                                         </form>
                                         <form role="form" action="" method="post">
                                             {% csrf_token %}
-                                            <span class="user-name-email-current">{{ user.email }}</span>
+                                           
                                             {% for field in email_change_form %}
                                                 <span class="user-change-field">{{ field }}</span>
                                             {% endfor %}
                                             <input type="hidden" name="form_name" value="email_change_form">
                                             <input type="submit" value="Change Email" class="change-user-btn">
+                                            <div class="user-name-email-current">Current email: {{ user.email }}</div>
                                         </form>
                                     </div>
                                 </div>
