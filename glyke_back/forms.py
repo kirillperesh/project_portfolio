@@ -88,7 +88,6 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         self.fields['new_password2'].widget = forms.PasswordInput(attrs={'class':'required', 'placeholder': 'Repeat new password'})
 
 class UsernameChangeForm(UserChangeForm):
-    # TODO add unchanged name validation
     password = None
 
     class Meta:
@@ -102,9 +101,10 @@ class UsernameChangeForm(UserChangeForm):
         
     def clean(self):
         cleaned_data = super().clean()
-        username = self.cleaned_data['username']
-        initial_username = self.initial['username']
-        if username == initial_username: self.add_error('username', "That's the same username you already use")
+        if self.has_changed():
+            username = self.cleaned_data['username']
+            initial_username = self.initial['username']
+            if username == initial_username: self.add_error('username', "That's the same username you've been already using")
         return cleaned_data
 
 class EmailChangeForm(UserChangeForm):
@@ -120,13 +120,12 @@ class EmailChangeForm(UserChangeForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        email = self.cleaned_data['email']
-        initial_email = self.initial['email']
-                
-        if email == initial_email: self.add_error('email', "That's the same email you already use")
-        elif User.objects.filter(email=email).exclude(email=initial_email).exists():
-            self.add_error('email', 'That email is already being used by another user')                
+        if self.has_changed():
+            email = self.cleaned_data['email']
+            initial_email = self.initial['email']
+                    
+            if email == initial_email:
+                self.add_error('email', "That's the same email you've been already using")
+            elif User.objects.filter(email=email).exclude(email=initial_email).exists():
+                self.add_error('email', 'That email is already being used by another user')                
         return cleaned_data
-
-
-
