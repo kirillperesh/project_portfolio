@@ -263,6 +263,7 @@ def cart_view(request):
     context['order_lines'] = current_order.order_lines.all()
     return render(request, "cart.html", context)
 
+# TODO rewrite profile view as non-CBV
 class ProfileView(LoginRequiredMixin, ListView):
     http_method_names = ['get', 'post']
     model = Order
@@ -283,19 +284,21 @@ class ProfileView(LoginRequiredMixin, ListView):
         e.g. context['orders_grouped_by_status']['DED'] is a queryset of user's delivered orders"""
         context = super().get_context_data(**kwargs)
 
+        # forms (user_change) block
         context['password_change_form'] = CustomPasswordChangeForm(user=self.request.user)
         context['username_change_form'] = UsernameChangeForm()
         context['email_change_form'] = EmailChangeForm()
-
         if 'form_name' in self.request.POST.keys():
             # this is done to separate forms one from another
             form_name = self.request.POST['form_name']
             if form_name == 'password_change_form':
                 context['password_change_form'] = CustomPasswordChangeForm(user=self.request.user, data=self.request.POST)
             elif form_name == 'username_change_form':
-                context['username_change_form'] = UsernameChangeForm(instance=self.request.user, data=self.request.POST)
+                context['username_change_form'] = UsernameChangeForm(instance=self.request.user, data=self.request.POST)                    
             elif form_name == 'email_change_form':
                 context['email_change_form'] = EmailChangeForm(instance=self.request.user, data=self.request.POST)
+        
+        # orders block
         orders_grouped_by_status = dict()
         if self.queryset:
             for status, verbose_status in self.model.ORDER_STATUS_CHOICES: # uses statuses' short form only
@@ -314,10 +317,10 @@ class ProfileView(LoginRequiredMixin, ListView):
                 if password_change_form.is_valid(): password_change_form.save()
             elif form_name == 'username_change_form':
                 username_change_form = UsernameChangeForm(instance=request.user, data=request.POST)
-                if username_change_form.is_valid(): username_change_form.save()
+                if username_change_form.is_valid(): username_change_form.save()                    
             elif form_name == 'email_change_form':
                 email_change_form = EmailChangeForm(instance=request.user, data=request.POST)
-                if email_change_form.is_valid(): email_change_form.save()        
+                if email_change_form.is_valid():email_change_form.save()        
         
 
         self.request.user.refresh_from_db()
