@@ -326,6 +326,57 @@ class ProfileView(LoginRequiredMixin, ListView):
         self.request.user.refresh_from_db()
         return super().get(self, request, *args, **kwargs)
 
+@login_required()
+@require_http_methods(["GET", "POST"])
+def profile_view(request):
+    """
+    TODO"""
+    context = {}
+    
+    # basic queryset block    
+    queryset = Order.objects.filter(customer=request.user) if request.user.is_authenticated else None
+    context['orders'] = queryset
+    
+    # orders block
+    orders_grouped_by_status = dict()
+    if queryset:
+        for status, verbose_status in Order.ORDER_STATUS_CHOICES: # uses statuses' short form only
+            orders_grouped_by_status[str(status)] = queryset.filter(status=status)
+    context['orders_grouped_by_status'] = orders_grouped_by_status
+    
+    # forms (user_change) block
+    context['password_change_form'] = CustomPasswordChangeForm(user=request.user)
+    context['username_change_form'] = UsernameChangeForm()
+    context['email_change_form'] = EmailChangeForm()
+    
+    
+    
+    if request.method == 'POST':
+        if 'form_name' in request.POST.keys():
+            # this is done to separate forms one from another
+            form_name = request.POST['form_name']
+            if form_name == 'password_change_form':
+                # TODO
+                context['password_change_form'] = CustomPasswordChangeForm(user=request.user, data=request.POST)
+            elif form_name == 'username_change_form':
+                context['username_change_form'] = UsernameChangeForm(instance=request.user, data=request.POST)
+                if context['username_change_form'].is_valid():
+                    context['username_change_form'].save()
+                    context['username_change_form'] = UsernameChangeForm()
+
+            elif form_name == 'email_change_form':
+                # TODO
+                context['email_change_form'] = EmailChangeForm(instance=request.user, data=request.POST)
+    
+    
+    request.user.refresh_from_db()
+    return render(request, "profile.html", context)
+
+
+
+
+
+
 class ProductsView(ListView):
     http_method_names = ['get', ]
     model = Product

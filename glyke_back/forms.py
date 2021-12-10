@@ -99,13 +99,13 @@ class UsernameChangeForm(UserChangeForm):
         super().__init__(*args, **kwargs)
         self.fields['username'].widget = forms.TextInput(attrs={'required':True, 'placeholder': 'New username'})
         
-    # def clean(self):
-    #     cleaned_data = super().clean()
-    #     username = self.cleaned_data['username']
-    #     initial_username = self.initial['username']
-    #     if username == initial_username: self.add_error('username', "That's the same username you've been already using")
+    def clean(self):
+        cleaned_data = super().clean()
+        username = self.cleaned_data['username']
+        initial_username = self.initial['username']
+        if username == initial_username: self.add_error('username', "That's the same username you've been already using")
         
-    #     return cleaned_data
+        return cleaned_data
 
 class EmailChangeForm(UserChangeForm):
     password = None
