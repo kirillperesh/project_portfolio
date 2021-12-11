@@ -263,69 +263,6 @@ def cart_view(request):
     context['order_lines'] = current_order.order_lines.all()
     return render(request, "cart.html", context)
 
-
-# class ProfileView(LoginRequiredMixin, ListView):
-#     http_method_names = ['get', 'post']
-#     model = Order
-#     template_name = 'profile.html'
-#     context_object_name = 'orders'
-
-#     def get_queryset(self):
-#         """Sets queryset to None if user isn't authenticated
-#         Basic queryset is all user's Orders"""
-#         self.queryset = None
-#         if self.request.user.is_authenticated:
-#             self.queryset = super().get_queryset()
-#             self.queryset = self.queryset.filter(customer=self.request.user)
-#         return self.queryset
-
-#     def get_context_data(self, *, object_list=None, **kwargs):
-#         """Adds a dict() with user's orders sorted by status,
-#         e.g. context['orders_grouped_by_status']['DED'] is a queryset of user's delivered orders"""
-#         context = super().get_context_data(**kwargs)
-
-#         # forms (user_change) block
-#         context['password_change_form'] = CustomPasswordChangeForm(user=self.request.user)
-#         context['username_change_form'] = UsernameChangeForm()
-#         context['email_change_form'] = EmailChangeForm()
-#         if 'form_name' in self.request.POST.keys():
-#             # this is done to separate forms one from another
-#             form_name = self.request.POST['form_name']
-#             if form_name == 'password_change_form':
-#                 context['password_change_form'] = CustomPasswordChangeForm(user=self.request.user, data=self.request.POST)
-#             elif form_name == 'username_change_form':
-#                 context['username_change_form'] = UsernameChangeForm(instance=self.request.user, data=self.request.POST)                    
-#             elif form_name == 'email_change_form':
-#                 context['email_change_form'] = EmailChangeForm(instance=self.request.user, data=self.request.POST)
-        
-#         # orders block
-#         orders_grouped_by_status = dict()
-#         if self.queryset:
-#             for status, verbose_status in self.model.ORDER_STATUS_CHOICES: # uses statuses' short form only
-#                 orders_grouped_by_status[str(status)] = self.queryset.filter(status=status)
-#         context['orders_grouped_by_status'] = orders_grouped_by_status
-#         return context
-
-#     def post(self, request, *args, **kwargs):
-#         """
-#         TODO"""
-#         if 'form_name' in self.request.POST.keys():
-#             # this is done to separate forms one from another
-#             form_name = self.request.POST['form_name']
-#             if form_name == 'password_change_form':
-#                 password_change_form = CustomPasswordChangeForm(user=request.user, data=request.POST)
-#                 if password_change_form.is_valid(): password_change_form.save()
-#             elif form_name == 'username_change_form':
-#                 username_change_form = UsernameChangeForm(instance=request.user, data=request.POST)
-#                 if username_change_form.is_valid(): username_change_form.save()                    
-#             elif form_name == 'email_change_form':
-#                 email_change_form = EmailChangeForm(instance=request.user, data=request.POST)
-#                 if email_change_form.is_valid():email_change_form.save()        
-        
-
-#         self.request.user.refresh_from_db()
-#         return super().get(self, request, *args, **kwargs)
-
 @login_required()
 @require_http_methods(["GET", "POST"])
 def profile_view(request):
@@ -347,13 +284,12 @@ def profile_view(request):
     # forms (user_change) block
     context['password_change_form'] = password_change_form_EMPTY = CustomPasswordChangeForm(user=request.user)
     context['username_change_form'] = username_change_form_EMPTY = UsernameChangeForm()
-    context['email_change_form'] = email_change_form_EMPTY = EmailChangeForm()    
-    
-        
+    context['email_change_form'] = email_change_form_EMPTY = EmailChangeForm()
     if 'form_name' in request.POST.keys(): # basically if method is POST
         # this is done to process one form at a time
         form_name = request.POST['form_name']
         filled_form, empty_form = None, None
+        # if python 3.10.0 or later is used, structural pattern matching block below may be used instead of this one
         if form_name == 'password_change_form':
             filled_form = CustomPasswordChangeForm(user=request.user, data=request.POST)
             empty_form = password_change_form_EMPTY
@@ -362,21 +298,24 @@ def profile_view(request):
             empty_form = username_change_form_EMPTY
         elif form_name == 'email_change_form':
             filled_form = EmailChangeForm(instance=request.user, data=request.POST)
-            empty_form = email_change_form_EMPTY
-        
+            empty_form = email_change_form_EMPTY                  
+        # match form_name:
+        #     case 'password_change_form':
+        #         filled_form = CustomPasswordChangeForm(user=request.user, data=request.POST)
+        #         empty_form = password_change_form_EMPTY            
+        #     case 'username_change_form':
+        #         filled_form = UsernameChangeForm(instance=request.user, data=request.POST)
+        #         empty_form = username_change_form_EMPTY            
+        #     case 'email_change_form':
+        #         filled_form = EmailChangeForm(instance=request.user, data=request.POST)
+        #         empty_form = email_change_form_EMPTY             
         context[form_name] = filled_form     
         if filled_form.is_valid():
             filled_form.save()
-            context[form_name] = empty_form
-        
+            context[form_name] = empty_form        
     
     request.user.refresh_from_db()
     return render(request, "profile.html", context)
-
-
-
-
-
 
 class ProductsView(ListView):
     http_method_names = ['get', ]
