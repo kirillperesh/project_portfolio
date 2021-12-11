@@ -310,7 +310,7 @@ def profile_view(request):
         #         filled_form = EmailChangeForm(instance=request.user, data=request.POST)
         #         empty_form = email_change_form_EMPTY             
         context[form_name] = filled_form     
-        if filled_form.is_valid():
+        if filled_form and filled_form.is_valid():
             filled_form.save()
             context[form_name] = empty_form        
     
