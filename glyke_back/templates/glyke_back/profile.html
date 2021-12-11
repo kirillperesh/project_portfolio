@@ -150,12 +150,11 @@
 
 
 
-
-                    <div id="placeholder1-header" class="right-side-header">
+                    <div id="username_email_change-header" class="right-side-header">
                         <div class="accordion">
                             <div class="accordion-item">
-                                <h2 class="accordion-header" id="heading_placeholder1">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_placeholder1" aria-expanded="false" aria-controls="collapse_placeholder1">
+                                <h2 class="accordion-header" id="heading_username_email_change">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_username_email_change" aria-expanded="false" aria-controls="collapse_username_email_change">
                                         <div class="header-text">
                                             Change your username or email
                                         </div>
@@ -183,7 +182,7 @@
                                         </div>
                                     {% endif %}
                                 </div>
-                                <div id="collapse_placeholder1" class="accordion-collapse collapse" aria-labelledby="heading_pplaceholder1">
+                                <div id="collapse_username_email_change" class="accordion-collapse collapse" aria-labelledby="heading_pusername_email_change">
                                     <div class="accordion-body">
                                         <form role="form" action="" method="post">
                                             {% csrf_token %}
@@ -196,7 +195,6 @@
                                         </form>
                                         <form role="form" action="" method="post">
                                             {% csrf_token %}
-                                           
                                             {% for field in email_change_form %}
                                                 <span class="user-change-field">{{ field }}</span>
                                             {% endfor %}

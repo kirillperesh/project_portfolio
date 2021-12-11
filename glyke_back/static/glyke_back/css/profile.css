@@ -157,3 +157,7 @@ justify-content: space-between;
 .change-user-btn{
   width: 170px;
 }
+
+.right-side-col form{
+  margin: 10px;
+}

@@ -5,14 +5,13 @@ from glyke_back import views
 from django.contrib.auth.views import LogoutView
 
 
-
 urlpatterns = [
     path("", views.Home.as_view(), name="home"),
 
-    path("profile", views.ProfileView.as_view(), name="profile"),
     path("sign_up", views.SignUpView.as_view(), name="sign_up"),
     path("sign_in", views.SignInView.as_view(), name="sign_in"),
     path("logout", LogoutView.as_view(), name="logout"),
+    path("profile", views.profile_view, name="profile"),
 
     path("add_product", views.add_product_dynamic_view, name="add_product"),
     path("edit_product/<int:id>", views.edit_product_dynamic_view, name="edit_product"),
@@ -25,4 +24,3 @@ urlpatterns = [
     path("add_to_cart", views.AddToCartView.as_view(), name="add_to_cart"),
     path("clear_cart/<int:id>", views.clear_cart_view, name="clear_cart"),
 ]
-
