@@ -1,3 +1,4 @@
+from logging import raiseExceptions
 from django.test import TestCase
 from django.urls import reverse
 from urllib.parse import urlencode, quote_plus
@@ -970,3 +971,25 @@ class ProfileViewTest(TestPermissionsGETMixin, TestCase):
         for status, order_queryset in response.context['orders_grouped_by_status'].items():
             self.assertQuerysetEqual(self.test_user.orders.filter(status=status), order_queryset)
 
+    def test_password_change(self):
+        """
+        TODO"""
+        self.client.logout()
+        initial_password = User.objects.make_random_password()
+        rnd_password = User.objects.make_random_password()
+        # rnd_email = f'{get_random_string(length=10)}@mail.rnd'
+        password_change_test_user = User.objects.create_user(username='initial_name',
+                                                             password=initial_password)
+        self.client.force_login(password_change_test_user)
+        self.assertTrue(password_change_test_user.check_password(initial_password))
+        context_data = urlencode({'form_name': 'password_change_form',
+                                  'old_password': initial_password,
+                                  'new_password1': rnd_password,
+                                  'new_password2': rnd_password})
+        self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
+        password_change_test_user.refresh_from_db()
+        self.assertTrue(password_change_test_user.check_password(rnd_password))
+        
+        
+        
+        
