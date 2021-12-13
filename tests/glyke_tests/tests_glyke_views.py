@@ -972,24 +972,81 @@ class ProfileViewTest(TestPermissionsGETMixin, TestCase):
             self.assertQuerysetEqual(self.test_user.orders.filter(status=status), order_queryset)
 
     def test_password_change(self):
-        """
-        TODO"""
+        """Checks if the view's password changing form works properly"""
         self.client.logout()
-        initial_password = User.objects.make_random_password()
+        initial_password = 'initial_password'
         rnd_password = User.objects.make_random_password()
-        # rnd_email = f'{get_random_string(length=10)}@mail.rnd'
         password_change_test_user = User.objects.create_user(username='initial_name',
                                                              password=initial_password)
         self.client.force_login(password_change_test_user)
         self.assertTrue(password_change_test_user.check_password(initial_password))
+        # case: correct
         context_data = urlencode({'form_name': 'password_change_form',
                                   'old_password': initial_password,
                                   'new_password1': rnd_password,
                                   'new_password2': rnd_password})
-        self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
+        response = self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
         password_change_test_user.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(password_change_test_user.check_password(rnd_password))
+        # case: incorrect old password
+        self.client.force_login(password_change_test_user)
+        context_data = urlencode({'form_name': 'password_change_form',
+                                  'old_password': rnd_password+'wrong_password',
+                                  'new_password1': rnd_password+'new_password',
+                                  'new_password2': rnd_password+'new_password'})
+        response = self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
+        password_change_test_user.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(password_change_test_user.check_password(rnd_password))
+        # case: unmatching new passwords
+        self.client.force_login(password_change_test_user)
+        context_data = urlencode({'form_name': 'password_change_form',
+                                  'old_password': rnd_password,
+                                  'new_password1': rnd_password+'new_password_1',
+                                  'new_password2': rnd_password+'new_password_2'})
+        response = self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
+        password_change_test_user.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(password_change_test_user.check_password(rnd_password))
+        # case: new password is too short
+        self.client.force_login(password_change_test_user)
+        context_data = urlencode({'form_name': 'password_change_form',
+                                  'old_password': rnd_password,
+                                  'new_password1': '1',
+                                  'new_password2': '1'})
+        response = self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
+        password_change_test_user.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
         self.assertTrue(password_change_test_user.check_password(rnd_password))
         
+    def test_email_change(self):
+        """Checks if the view's email changing form works properly"""
+        self.client.logout()
+        initial_email = 'initial_email@initial.email'
+        rnd_email = f'{get_random_string(length=10)}@mail.rnd'
+        email_change_test_user = User.objects.create_user(username='initial_name',
+                                                          email=initial_email)
+        self.client.force_login(email_change_test_user)
+        self.assertEqual(email_change_test_user.email, initial_email)
+        # case: correct
+        context_data = urlencode({'form_name': 'email_change_form',
+                                  'email': rnd_email})
+        response = self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
+        email_change_test_user.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(email_change_test_user.email, rnd_email)
+        # case: email is already being used
+        self.client.force_login(email_change_test_user)
+        used_email = 'used_'+rnd_email
+        User.objects.create_user(username='used_email_user', email=used_email)
+        context_data = urlencode({'form_name': 'email_change_form',
+                                  'email': used_email})
+        response = self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
+        email_change_test_user.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(email_change_test_user.email, rnd_email)        
         
         
         
+      # TODO add tests to check forms separation  
