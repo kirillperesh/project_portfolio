@@ -1020,6 +1020,31 @@ class ProfileViewTest(TestPermissionsGETMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(password_change_test_user.check_password(rnd_password))
         
+    def test_username_change(self):
+        """Checks if the view's email changing form works properly"""
+        self.client.logout()
+        initial_name = 'initial_name'
+        username_change_test_user = User.objects.create_user(username=initial_name)
+        self.client.force_login(username_change_test_user)
+        self.assertEqual(username_change_test_user.username, initial_name)
+        # case: correct
+        # context_data = urlencode({'form_name': 'email_change_form',
+        #                           'email': rnd_email})
+        # response = self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
+        # email_change_test_user.refresh_from_db()
+        # self.assertEqual(response.status_code, 200)
+        # self.assertEqual(email_change_test_user.email, rnd_email)
+        # # case: email is already being used
+        # self.client.force_login(email_change_test_user)
+        # used_email = 'used_'+rnd_email
+        # User.objects.create_user(username='used_email_user', email=used_email)
+        # context_data = urlencode({'form_name': 'email_change_form',
+        #                           'email': used_email})
+        # response = self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
+        # email_change_test_user.refresh_from_db()
+        # self.assertEqual(response.status_code, 200)
+        # self.assertEqual(email_change_test_user.email, rnd_email)
+        
     def test_email_change(self):
         """Checks if the view's email changing form works properly"""
         self.client.logout()
@@ -1045,7 +1070,7 @@ class ProfileViewTest(TestPermissionsGETMixin, TestCase):
         response = self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
         email_change_test_user.refresh_from_db()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(email_change_test_user.email, rnd_email)        
+        self.assertEqual(email_change_test_user.email, rnd_email)
         
         
         
