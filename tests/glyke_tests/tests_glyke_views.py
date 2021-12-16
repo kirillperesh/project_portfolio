@@ -1000,6 +1000,7 @@ class ProfileViewTest(TestPermissionsGETMixin, TestCase):
         password_change_test_user.refresh_from_db()
         self.assertEqual(response.status_code, 200)
         self.assertTrue(password_change_test_user.check_password(rnd_password))
+        self.assertIn('Your old password was entered incorrectly. Please enter it again.', response.context['password_change_form'].errors['old_password'])
         # case: unmatching new passwords
         self.client.force_login(password_change_test_user)
         context_data = urlencode({'form_name': 'password_change_form',
@@ -1010,6 +1011,7 @@ class ProfileViewTest(TestPermissionsGETMixin, TestCase):
         password_change_test_user.refresh_from_db()
         self.assertEqual(response.status_code, 200)
         self.assertTrue(password_change_test_user.check_password(rnd_password))
+        self.assertIn('The two password fields didn’t match.', response.context['password_change_form'].errors['new_password2'])
         # case: new password is too short
         self.client.force_login(password_change_test_user)
         context_data = urlencode({'form_name': 'password_change_form',
@@ -1020,6 +1022,29 @@ class ProfileViewTest(TestPermissionsGETMixin, TestCase):
         password_change_test_user.refresh_from_db()
         self.assertEqual(response.status_code, 200)
         self.assertTrue(password_change_test_user.check_password(rnd_password))
+        self.assertIn('This password is too short. It must contain at least 8 characters.', response.context['password_change_form'].errors['new_password2'])
+        # case: new password is too common
+        self.client.force_login(password_change_test_user)
+        context_data = urlencode({'form_name': 'password_change_form',
+                                  'old_password': rnd_password,
+                                  'new_password1': '12345678',
+                                  'new_password2': '12345678'})
+        response = self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
+        password_change_test_user.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(password_change_test_user.check_password(rnd_password))
+        self.assertIn('This password is too common.', response.context['password_change_form'].errors['new_password2'])
+        # case: new password is entirely numeric
+        self.client.force_login(password_change_test_user)
+        context_data = urlencode({'form_name': 'password_change_form',
+                                  'old_password': rnd_password,
+                                  'new_password1': '5198453179465165',
+                                  'new_password2': '5198453179465165'})
+        response = self.client.post(self.basic_url, context_data, content_type="application/x-www-form-urlencoded")
+        password_change_test_user.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(password_change_test_user.check_password(rnd_password))
+        self.assertIn('This password is entirely numeric.', response.context['password_change_form'].errors['new_password2'])
         
     def test_username_change(self):
         """Checks if the view's username changing form works properly"""
