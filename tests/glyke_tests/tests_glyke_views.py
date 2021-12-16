@@ -989,6 +989,7 @@ class ProfileViewTest(TestPermissionsGETMixin, TestCase):
         password_change_test_user.refresh_from_db()
         self.assertEqual(response.status_code, 200)
         self.assertTrue(password_change_test_user.check_password(rnd_password))
+        self.assertEqual(dict(), response.context['password_change_form'].errors) # making sure there was no mistakes
         # case: incorrect old password
         self.client.force_login(password_change_test_user)
         context_data = urlencode({'form_name': 'password_change_form',
@@ -1021,7 +1022,7 @@ class ProfileViewTest(TestPermissionsGETMixin, TestCase):
         self.assertTrue(password_change_test_user.check_password(rnd_password))
         
     def test_username_change(self):
-        """Checks if the view's email changing form works properly"""
+        """Checks if the view's username changing form works properly"""
         self.client.logout()
         initial_name = 'initial_name'
         rnd_username = f'{get_random_string(length=5)}_new_name'
@@ -1035,6 +1036,7 @@ class ProfileViewTest(TestPermissionsGETMixin, TestCase):
         username_change_test_user.refresh_from_db()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(username_change_test_user.username, rnd_username)
+        self.assertEqual(dict(), response.context['username_change_form'].errors) # making sure there was no mistakes
         # case: username is already being used
         self.client.force_login(username_change_test_user)
         used_username = 'used_' + rnd_username
@@ -1045,6 +1047,7 @@ class ProfileViewTest(TestPermissionsGETMixin, TestCase):
         username_change_test_user.refresh_from_db()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(username_change_test_user.username, rnd_username)
+        self.assertIn('A user with that username already exists.', response.context['username_change_form'].errors['username'])
         
     def test_email_change(self):
         """Checks if the view's email changing form works properly"""
@@ -1062,6 +1065,7 @@ class ProfileViewTest(TestPermissionsGETMixin, TestCase):
         email_change_test_user.refresh_from_db()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(email_change_test_user.email, rnd_email)
+        self.assertEqual(dict(), response.context['email_change_form'].errors) # making sure there was no mistakes
         # case: email is already being used
         self.client.force_login(email_change_test_user)
         used_email = 'used_' + rnd_email
@@ -1072,6 +1076,7 @@ class ProfileViewTest(TestPermissionsGETMixin, TestCase):
         email_change_test_user.refresh_from_db()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(email_change_test_user.email, rnd_email)
+        self.assertIn('That email is already being used by another user', response.context['email_change_form'].errors['email'])
         
         
         
