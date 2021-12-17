@@ -268,24 +268,21 @@ def cart_view(request):
 def profile_view(request):
     """
     TODO"""
-    context = {}
-    
+    context = {}    
     # basic queryset block    
     queryset = Order.objects.filter(customer=request.user) if request.user.is_authenticated else None
-    context['orders'] = queryset
-    
+    context['orders'] = queryset    
     # orders block
     orders_grouped_by_status = dict()
     if queryset:
         for status, verbose_status in Order.ORDER_STATUS_CHOICES: # uses statuses' short form only
             orders_grouped_by_status[str(status)] = queryset.filter(status=status)
-    context['orders_grouped_by_status'] = orders_grouped_by_status
-    
+    context['orders_grouped_by_status'] = orders_grouped_by_status    
     # forms (user_change) block
     context['password_change_form'] = password_change_form_EMPTY = CustomPasswordChangeForm(user=request.user)
     context['username_change_form'] = username_change_form_EMPTY = UsernameChangeForm()
     context['email_change_form'] = email_change_form_EMPTY = EmailChangeForm()
-    if 'form_name' in request.POST.keys(): # basically if method is POST
+    if 'form_name' in request.POST.keys(): # if method is POST
         # this is done to process one form at a time
         form_name = request.POST['form_name']
         filled_form, empty_form = None, None
@@ -312,8 +309,7 @@ def profile_view(request):
         context[form_name] = filled_form     
         if filled_form and filled_form.is_valid():
             filled_form.save()
-            context[form_name] = empty_form        
-    
+            context[form_name] = empty_form  
     request.user.refresh_from_db()
     return render(request, "profile.html", context)
 
@@ -407,5 +403,4 @@ class AddToCartView(LoginRequiredMixin, RedirectView):
                                  )
         return RedirectView.dispatch(self, request, *args, **kwargs)
 
-# TODO style and test profile page
 # TODO add some more features to profile page
