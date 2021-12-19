@@ -7,7 +7,7 @@ justify-content: space-between;
   margin:0 -5px;
   padding:0;
 }
-#orders-header {
+#orders-header, #manage-acc-header {
   background:#fff;
   height: 60px;
   margin:5px 0 20px 0;
@@ -21,11 +21,20 @@ justify-content: space-between;
   padding:20px 0px;
   position:relative;margin:0;
 }
-.orders-container{
+.orders-container, .manage-acc-container{
   font-family:'Open Sans', sans-serif;
   margin:0 auto;
   width:100%;
   height: 60px;
+  background-color: rgba(114, 146, 172);
+}
+.manage-acc-container {
+  background-color: rgb(245, 165, 35);
+}
+.orders-container h1, .manage-acc-container h1{
+  color: #fff;
+  font-size: 22px !important;
+  padding: 15px 0 !important;
 }
 
 .accordion-body{
@@ -33,7 +42,7 @@ justify-content: space-between;
   }
 .accordion-item{
   padding: 0px !important;
-  border-style: solid none solid none !important;
+  border-style: none none solid none !important;
   margin: 0 0 5px 0;
 }
 .accordion-item .accordion-item{
@@ -41,10 +50,14 @@ justify-content: space-between;
   border-color: rgba(114, 146, 172, 0.8) !important;
   margin: 0px;
 }
+.accordion-button{
+  background-color: rgba(114, 146, 172, 0.04) !important;
+  border-color: rgba(114, 146, 172, 0.8) !important;
+}
 .accordion-button:not(.collapsed){
   color: #ffffff !important;
   background-color: rgb(114, 146, 172) !important;
-  border-color: rgba(114, 146, 172, 0.8) !important;
+  /* border-color: rgba(114, 146, 172, 0.8) !important; */
 }
 .accordion-item .accordion-item .accordion-button:not(.collapsed){
   background-color: rgba(114, 146, 172, 0.8) !important;
@@ -55,15 +68,6 @@ justify-content: space-between;
 .accordion-button:not(.collapsed)::after{
   background-image: url(https://cdn-icons-png.flaticon.com/512/318/318275.png) !important;
   transform: rotate(-180deg) scale(1.15) !important;
-}
-
-.orders-container{
-  background-color: rgba(114, 146, 172);
-}
-.orders-container h1{
-  color: #fff;
-  font-size: 22px !important;
-  padding: 15px 0 !important;
 }
 
 .order-container{
@@ -146,9 +150,9 @@ justify-content: space-between;
 .right-side-header{
   margin: 5px 0;
 }
-.right-side-header .accordion-button{
+/* .right-side-header .accordion-button{
   height: 60px;
-}
+} */
 .right-side-header .header-text{
   font-family:'Open Sans', sans-serif;
   font-weight: 700;
@@ -160,4 +164,12 @@ justify-content: space-between;
 
 .right-side-col form{
   margin: 10px;
+}
+
+.right-side-col .accordion-button{
+  background-color: rgba(245, 165, 35, 0.04) !important;
+  border-color: rgba(245, 165, 35, 0.8) !important;
+}
+.right-side-col .accordion-button:not(.collapsed){
+  background-color: rgb(245, 165, 35) !important;
 }

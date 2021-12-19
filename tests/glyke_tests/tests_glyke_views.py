@@ -1101,8 +1101,4 @@ class ProfileViewTest(TestPermissionsGETMixin, TestCase):
         email_change_test_user.refresh_from_db()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(email_change_test_user.email, rnd_email)
-        self.assertIn('That email is already being used by another user', response.context['email_change_form'].errors['email'])
-        
-        
-        
-      # TODO add tests to check forms separation  
+        self.assertIn('That email is already being used by another user', response.context['email_change_form'].errors['email'])        
