@@ -266,8 +266,9 @@ def cart_view(request):
 @login_required()
 @require_http_methods(["GET", "POST"])
 def profile_view(request):
-    """
-    TODO"""
+    """For python 3.10.0 or newer, there is a structural pattern matching option for form selection (instead fo 'elif's).
+    Queries all of user's orders and sorts it by status.
+    Profile management forms are separated from each other by hidden input 'form_name'"""
     context = {}    
     # basic queryset block    
     queryset = Order.objects.filter(customer=request.user) if request.user.is_authenticated else None
@@ -286,7 +287,7 @@ def profile_view(request):
         # this is done to process one form at a time
         form_name = request.POST['form_name']
         filled_form, empty_form = None, None
-        # if python 3.10.0 or later is used, structural pattern matching block below may be used instead of this one
+        # if python 3.10.0 or newer is used, structural pattern matching block below may be used instead of this one
         if form_name == 'password_change_form':
             filled_form = CustomPasswordChangeForm(user=request.user, data=request.POST)
             empty_form = password_change_form_EMPTY
@@ -367,11 +368,12 @@ class ProductDetailView(DetailView):
     template_name = 'product.html'
     context_object_name = 'product'
     extra_context={'no_image_url': DEFAULT_NO_IMAGE_URL}
-
-class Home(RedirectView):
+    
+class Home(TemplateView):
     http_method_names = ['get', ]
-    url = reverse_lazy('products') # 'trying to reverse something at import time before the URLs are ready to be reversed'
-
+    template_name = 'home.html'
+    
+    
 class SignUpView(CreateView):
     http_method_names = ['get', 'post']
     model = User
@@ -403,4 +405,4 @@ class AddToCartView(LoginRequiredMixin, RedirectView):
                                  )
         return RedirectView.dispatch(self, request, *args, **kwargs)
 
-# TODO add some more features to profile page
+# TODO make parallax home page
