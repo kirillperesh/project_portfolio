@@ -370,9 +370,8 @@ class ProductDetailView(DetailView):
     extra_context={'no_image_url': DEFAULT_NO_IMAGE_URL}
     
 class Home(TemplateView):
-    http_method_names = ['get', ]
-    template_name = 'home.html'
-    
+    http_method_names = ['get',]
+    template_name = 'home.html'    
     
 class SignUpView(CreateView):
     http_method_names = ['get', 'post']
