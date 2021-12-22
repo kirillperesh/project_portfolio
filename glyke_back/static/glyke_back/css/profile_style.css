@@ -38,11 +38,11 @@
   -o-transition: all 0.4s;
   transition: all 0.4s;
   left: 180px;
-  top: -250px; }
+  top: -300px; }
   #profile_pannel .h6 {
     color: #fff; }
   #profile_pannel.active {
-    margin-top: 300px; }
+    margin-top: 350px; }
     #profile_pannel.active .profile-menu {
       top: -100px;
       /* right: 150px; */
@@ -76,7 +76,7 @@
   #profile_pannel .profile-menu {
     display: inline-block;
     position: absolute;
-    top: 256px;
+    top: 306px;
     left: -3px;
     -webkit-transition: 0.9s;
     -o-transition: 0.9s;
