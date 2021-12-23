@@ -148,7 +148,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 LOGIN_URL = 'sign_in'
 LOGOUT_URL = 'logout'
-LOGIN_REDIRECT_URL = 'products'
+LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'sign_in'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
