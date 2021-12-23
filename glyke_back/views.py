@@ -374,6 +374,7 @@ class Home(TemplateView):
     template_name = 'home.html'
     
     # TODO finish home page
+    # TODO add quickly-genarate-stuff-view
     
 class SignUpView(CreateView):
     http_method_names = ['get', 'post']
