@@ -15,6 +15,9 @@
 
 #cart_panel a {
     background-color: darkorange;
+    width: auto;
+    min-width: 150px;
+    max-width: 250px;
 }
 
 #cart_title {
