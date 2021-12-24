@@ -6,14 +6,16 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login
 from django.utils.text import slugify
 from urllib.parse import urlencode
 from django.views.generic import ListView, DetailView, TemplateView, CreateView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView
-from django.contrib.auth.models import User
 from django.views.generic.base import RedirectView
 from proj_folio.defaults import DEFAULT_NO_IMAGE_URL
+from proj_folio.settings import DEBUG as DEBUG_MODE
 
 from photologue import models as photo_models
 from .forms import AddProductForm, PhotosForm, SelectCategoryProductForm, RegisterForm, SignInForm, CustomPasswordChangeForm, UsernameChangeForm, EmailChangeForm
@@ -314,6 +316,22 @@ def profile_view(request):
     request.user.refresh_from_db()
     return render(request, "profile.html", context)
 
+@require_http_methods(["GET",])
+def generate_stuff_view(request):
+    """
+    TODO""" 
+    if not DEBUG_MODE: return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'DEBUG mode is OFF'})}") 
+    if request.user.is_authenticated: LogoutView.as_view()(request)
+    
+    staff_user_username = 'General_Kenobi'
+    staff_user_password = 'staff_user_password'
+    User.objects.get(username=staff_user_username).delete()
+    staff_user = User.objects.create_user(username=staff_user_username, password=staff_user_password)
+    user = authenticate(username=staff_user_username, password=staff_user_password)
+    if user is not None: login(request, user)
+     
+    return redirect(reverse('products'))
+
 class ProductsView(ListView):
     http_method_names = ['get', ]
     model = Product
@@ -406,5 +424,3 @@ class AddToCartView(LoginRequiredMixin, RedirectView):
                                  product=Product.objects.get(id=product_id),
                                  )
         return RedirectView.dispatch(self, request, *args, **kwargs)
-
-# TODO make parallax home page
