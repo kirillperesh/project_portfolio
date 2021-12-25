@@ -271,16 +271,16 @@ def profile_view(request):
     """For python 3.10.0 or newer, there is a structural pattern matching option for form selection (instead fo 'elif's).
     Queries all of user's orders and sorts it by status.
     Profile management forms are separated from each other by hidden input 'form_name'"""
-    context = {}    
-    # basic queryset block    
+    context = {}
+    # basic queryset block
     queryset = Order.objects.filter(customer=request.user) if request.user.is_authenticated else None
-    context['orders'] = queryset    
+    context['orders'] = queryset
     # orders block
     orders_grouped_by_status = dict()
     if queryset:
         for status, verbose_status in Order.ORDER_STATUS_CHOICES: # uses statuses' short form only
             orders_grouped_by_status[str(status)] = queryset.filter(status=status)
-    context['orders_grouped_by_status'] = orders_grouped_by_status    
+    context['orders_grouped_by_status'] = orders_grouped_by_status
     # forms (user_change) block
     context['password_change_form'] = password_change_form_EMPTY = CustomPasswordChangeForm(user=request.user)
     context['username_change_form'] = username_change_form_EMPTY = UsernameChangeForm()
@@ -298,38 +298,38 @@ def profile_view(request):
             empty_form = username_change_form_EMPTY
         elif form_name == 'email_change_form':
             filled_form = EmailChangeForm(instance=request.user, data=request.POST)
-            empty_form = email_change_form_EMPTY                  
+            empty_form = email_change_form_EMPTY
         # match form_name:
         #     case 'password_change_form':
         #         filled_form = CustomPasswordChangeForm(user=request.user, data=request.POST)
-        #         empty_form = password_change_form_EMPTY            
+        #         empty_form = password_change_form_EMPTY
         #     case 'username_change_form':
         #         filled_form = UsernameChangeForm(instance=request.user, data=request.POST)
-        #         empty_form = username_change_form_EMPTY            
+        #         empty_form = username_change_form_EMPTY
         #     case 'email_change_form':
         #         filled_form = EmailChangeForm(instance=request.user, data=request.POST)
-        #         empty_form = email_change_form_EMPTY             
-        context[form_name] = filled_form     
+        #         empty_form = email_change_form_EMPTY
+        context[form_name] = filled_form
         if filled_form and filled_form.is_valid():
             filled_form.save()
-            context[form_name] = empty_form  
+            context[form_name] = empty_form
     request.user.refresh_from_db()
     return render(request, "profile.html", context)
 
 @require_http_methods(["GET",])
 def generate_stuff_view(request):
     """
-    TODO""" 
-    if not DEBUG_MODE: return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'DEBUG mode is OFF'})}") 
-    if request.user.is_authenticated: LogoutView.as_view()(request)
+    TODO"""
+    if not DEBUG_MODE: return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'DEBUG mode is OFF'})}")
     
+    if request.user.is_authenticated: LogoutView.as_view()(request)
     staff_user_username = 'General_Kenobi'
     staff_user_password = 'staff_user_password'
     User.objects.get(username=staff_user_username).delete()
     staff_user = User.objects.create_user(username=staff_user_username, password=staff_user_password)
     user = authenticate(username=staff_user_username, password=staff_user_password)
     if user is not None: login(request, user)
-     
+
     return redirect(reverse('products'))
 
 class ProductsView(ListView):
@@ -386,14 +386,14 @@ class ProductDetailView(DetailView):
     template_name = 'product.html'
     context_object_name = 'product'
     extra_context={'no_image_url': DEFAULT_NO_IMAGE_URL}
-    
+
 class Home(TemplateView):
     http_method_names = ['get',]
     template_name = 'home.html'
-    
+
     # TODO finish home page
     # TODO add quickly-genarate-stuff-view
-    
+
 class SignUpView(CreateView):
     http_method_names = ['get', 'post']
     model = User
