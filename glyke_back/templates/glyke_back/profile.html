@@ -203,7 +203,13 @@
                                             {% endfor %}
                                             <input type="hidden" name="form_name" value="email_change_form">
                                             <input type="submit" value="Change Email" class="change-user-btn">
-                                            <div class="user-name-email-current">Current email: {{ user.email }}</div>
+                                            <div class="user-name-email-current">
+                                                {% if user.email %}
+                                                    Current email: {{ user.email }}
+                                                {% else %}
+                                                    You haven't set you email yet
+                                                {% endif %}
+                                            </div>
                                         </form>
                                     </div>
                                 </div>
