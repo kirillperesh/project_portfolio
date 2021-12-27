@@ -321,15 +321,22 @@ def generate_stuff_view(request):
     """
     TODO""" 
     if not DEBUG_MODE: return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'DEBUG mode is OFF'})}") 
-    if request.user.is_authenticated: LogoutView.as_view()(request)
-    
     staff_user_username = 'General_Kenobi'
     staff_user_password = 'staff_user_password'
-    User.objects.get(username=staff_user_username).delete()
-    staff_user = User.objects.create_user(username=staff_user_username, password=staff_user_password)
-    user = authenticate(username=staff_user_username, password=staff_user_password)
-    if user is not None: login(request, user)
-     
+    
+    # user creation block
+    if request.user.is_authenticated: LogoutView.as_view()(request)
+    User.objects.filter(username=staff_user_username).delete()
+    staff_user = User.objects.create_user(username=staff_user_username, password=staff_user_password, is_staff=True)
+    auth_staff_user = authenticate(username=staff_user_username, password=staff_user_password)
+    if auth_staff_user is not None: login(request, auth_staff_user)
+    
+    # products generation block
+    # https://stackoverflow.com/questions/64263748/how-download-image-from-url-to-django
+    
+    # orders generation block
+    
+    
     return redirect(reverse('products'))
 
 class ProductsView(ListView):
