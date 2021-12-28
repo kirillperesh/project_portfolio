@@ -1,3 +1,4 @@
+from os import name
 from django.db.models import query
 from django.shortcuts import render, redirect, get_object_or_404, resolve_url
 from django.urls import reverse, reverse_lazy
@@ -322,20 +323,57 @@ def generate_stuff_view(request):
     TODO"""
     if not DEBUG_MODE: return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'DEBUG mode is OFF'})}")
     staff_user_username = 'General_Kenobi'
-    staff_user_password = 'staff_user_password'
+    staff_user_password = 'staffpassword'
+    staff_user_email = 'hello@the.re'
 
     # user creation block
     if request.user.is_authenticated: LogoutView.as_view()(request)
     User.objects.filter(username=staff_user_username).delete()
-    staff_user = User.objects.create_user(username=staff_user_username, password=staff_user_password, is_staff=True)
+    staff_user = User.objects.create_user(username=staff_user_username, password=staff_user_password, email=staff_user_email, is_staff=True)
     auth_staff_user = authenticate(username=staff_user_username, password=staff_user_password)
-    if auth_staff_user is not None: login(request, auth_staff_user)
+    login(request, auth_staff_user)
+
+    # categories generation block
+    Category.objects.filter(name='test_generated_cat').delete()
+    parent_cat_1 = Category.objects.create(name='test_generated_cat', description='test description', bg_color='tomato')
+    parent_cat_1.filters.add('one', 'two', 'three')
 
     # products generation block
     # https://stackoverflow.com/questions/64263748/how-download-image-from-url-to-django
 
+    # new_product = Product.objects.create(name=product_form.cleaned_data['name'],
+    #                                     description=product_form.cleaned_data['description'],
+    #                                     created_by = request.user, # default django user, probably will be switched to custom class later
+    #                                     category=category,
+    #                                     # tags, (added later in this view)
+    #                                     stock=product_form.cleaned_data['stock'],
+    #                                     photos=create_gallery(title=product_form.cleaned_data['name']),
+    #                                     attributes=filters_form.cleaned_data,
+    #                                     cost_price=product_form.cleaned_data['cost_price'],
+    #                                     selling_price=product_form.cleaned_data['selling_price'],
+    #                                     discount_percent=product_form.cleaned_data['discount_percent'],
+    #                                     )
+    # # tags block
+    # new_product.tags.add(*product_form.cleaned_data['tags']) # using list as multiple positional arguments
+
+    # # new photos block
+    # if photos_form.is_valid():
+    #     for image in request.FILES.getlist('photos'):
+    #         image_name = image.name + f'_{new_product.name}' # product's name is appended for later filtering purposes
+    #         # TODO add any photologue filters down here
+    #         photo = photo_models.Photo.objects.create(image=image, title=image_name, slug=slugify(image_name)) #
+    #         new_product.photos.photos.add(photo)
+    # else:
+    #     return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'photos (or photos form)'})}")
+    # # success
+    # new_product.save()
+
     # orders generation block
 
+    # login as admin to test purposes
+    LogoutView.as_view()(request)
+    auth_admin = authenticate(username='admin', password='admin')
+    login(request, auth_admin)
 
     return redirect(reverse('products'))
 
