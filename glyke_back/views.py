@@ -334,9 +334,19 @@ def generate_stuff_view(request):
     login(request, auth_staff_user)
 
     # categories generation block
-    Category.objects.filter(name='test_generated_cat').delete()
-    parent_cat_1 = Category.objects.create(name='test_generated_cat', description='test description', bg_color='tomato')
-    parent_cat_1.filters.add('one', 'two', 'three')
+    Category.objects.filter(description__endswith='(demo)').delete()
+
+    Hats_category = Category.objects.create(name='Hats', description='Awesome handmade hats (demo)', bg_color='palegreen')
+    Hats_category.filters.add('Size', 'Color', 'Material')
+
+    Jewelry_category = Category.objects.create(name='Jewelry', description='Gorgeous handmade jewelry (demo)', bg_color='tomato')
+    Jewelry_category.filters.add('Size', 'Color', 'Material')
+
+    Necklaces_category = Category.objects.create(name='Necklaces', description='Beautiful handmade necklaces (demo)', bg_color='darkorange', parent=Jewelry_category)
+    Necklaces_category.filters.add('Size', 'Color', 'Material')
+
+    Rings_category = Category.objects.create(name='Rings', description='Shiny handmade rings (demo)', bg_color='orange', parent=Jewelry_category)
+    Rings_category.filters.add('Size', 'Color', 'Material')
 
     # products generation block
     # https://stackoverflow.com/questions/64263748/how-download-image-from-url-to-django
