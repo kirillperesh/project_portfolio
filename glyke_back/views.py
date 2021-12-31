@@ -1,5 +1,6 @@
-from os import name
-from django.db.models import query
+import random
+import decimal
+from urllib.parse import urlencode
 from django.shortcuts import render, redirect, get_object_or_404, resolve_url
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, Http404, request
@@ -12,7 +13,6 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.utils.text import slugify
-from urllib.parse import urlencode
 from django.views.generic import ListView, DetailView, TemplateView, CreateView
 from django.views.generic.base import RedirectView
 from proj_folio.defaults import DEFAULT_NO_IMAGE_URL
@@ -95,7 +95,7 @@ def add_product_dynamic_view(request):
         if all([filters_form.is_valid(), product_form.is_valid(),]):
             new_product = Product.objects.create(name=product_form.cleaned_data['name'],
                                                  description=product_form.cleaned_data['description'],
-                                                 created_by = request.user, # default django user, probably will be switched to custom class later
+                                                 created_by=request.user, # default django user, probably will be switched to custom class later
                                                  category=category,
                                                  # tags, (added later in this view)
                                                  stock=product_form.cleaned_data['stock'],
@@ -335,31 +335,34 @@ def generate_stuff_view(request):
 
     # categories generation block
     Category.objects.filter(description__endswith='(demo)').delete()
-
     Hats_category = Category.objects.create(name='Hats', description='Awesome handmade hats (demo)', bg_color='palegreen')
     Jewelry_category = Category.objects.create(name='Jewelry', description='Gorgeous handmade jewelry (demo)', bg_color='tomato')
     Necklaces_category = Category.objects.create(name='Necklaces', description='Beautiful handmade necklaces (demo)', bg_color='darkorange', parent=Jewelry_category)
     Rings_category = Category.objects.create(name='Rings', description='Shiny handmade rings (demo)', bg_color='orange', parent=Jewelry_category)
-
     category_filters = ('Size', 'Color', 'Material')
     for demo_category in Category.objects.filter(description__endswith='(demo)'):
         demo_category.filters.add(*category_filters)
 
     # products generation block
     # https://stackoverflow.com/questions/64263748/how-download-image-from-url-to-django
-
-    # new_product = Product.objects.create(name=product_form.cleaned_data['name'],
-    #                                     description=product_form.cleaned_data['description'],
-    #                                     created_by = request.user, # default django user, probably will be switched to custom class later
-    #                                     category=category,
-    #                                     # tags, (added later in this view)
-    #                                     stock=product_form.cleaned_data['stock'],
-    #                                     photos=create_gallery(title=product_form.cleaned_data['name']),
-    #                                     attributes=filters_form.cleaned_data,
-    #                                     cost_price=product_form.cleaned_data['cost_price'],
-    #                                     selling_price=product_form.cleaned_data['selling_price'],
-    #                                     discount_percent=product_form.cleaned_data['discount_percent'],
-    #                                     )
+    Product.objects.filter(description__endswith='(demo)').delete()
+    photo_models.Gallery.objects.filter(description__startswith='(demo)').delete()
+    rnd_stock = (3, 15)
+    rnd_discount = (0, 0, 10, 15)
+    rnd_cost_price = (5, 199)
+    rnd_selling_price = (200, 3500)
+    new_product = Product.objects.create(name='Little Blue Riding Hood',
+                                        description='A little blue hat, nice and pretty (demo)',
+                                        created_by=staff_user,
+                                        category=Hats_category,
+                                        # tags, (added later in this view)
+                                        stock=random.randint(*rnd_stock),
+                                        photos=create_gallery(title='(demo)Little Blue Riding Hood'),
+                                        attributes='',
+                                        cost_price=decimal.Decimal(random.randrange(*rnd_cost_price))/100,
+                                        selling_price=decimal.Decimal(random.randrange(*rnd_selling_price))/100,
+                                        discount_percent=random.choice(rnd_discount),
+                                        )
     # # tags block
     # new_product.tags.add(*product_form.cleaned_data['tags']) # using list as multiple positional arguments
 
