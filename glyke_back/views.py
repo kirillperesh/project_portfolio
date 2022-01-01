@@ -1,3 +1,4 @@
+from os import name
 import random
 import decimal
 from urllib.parse import urlencode
@@ -335,36 +336,62 @@ def generate_stuff_view(request):
 
     # categories generation block
     Category.objects.filter(description__endswith='(demo)').delete()
-    Hats_category = Category.objects.create(name='Hats', description='Awesome handmade hats (demo)', bg_color='palegreen')
+    Hats_category = Category.objects.create(name='Hats', description='Awesome handmade hats (demo)', bg_color='mediumturquoise')
     Jewelry_category = Category.objects.create(name='Jewelry', description='Gorgeous handmade jewelry (demo)', bg_color='tomato')
     Necklaces_category = Category.objects.create(name='Necklaces', description='Beautiful handmade necklaces (demo)', bg_color='darkorange', parent=Jewelry_category)
     Rings_category = Category.objects.create(name='Rings', description='Shiny handmade rings (demo)', bg_color='orange', parent=Jewelry_category)
-    category_filters = ('Size', 'Color', 'Material')
+    category_filters = ('Color', 'Size', 'Material')
     for demo_category in Category.objects.filter(description__endswith='(demo)'):
         demo_category.filters.add(*category_filters)
 
     # products generation block
     # https://stackoverflow.com/questions/64263748/how-download-image-from-url-to-django
     Product.objects.filter(description__endswith='(demo)').delete()
-    photo_models.Gallery.objects.filter(description__startswith='(demo)').delete()
+    photo_models.Gallery.objects.filter(title__startswith='(demo)').delete()
+
     rnd_stock = (3, 15)
     rnd_discount = (0, 0, 10, 15)
     rnd_cost_price = (5, 199)
     rnd_selling_price = (200, 3500)
-    new_product = Product.objects.create(name='Little Blue Riding Hood',
-                                        description='A little blue hat, nice and pretty (demo)',
-                                        created_by=staff_user,
-                                        category=Hats_category,
-                                        # tags, (added later in this view)
-                                        stock=random.randint(*rnd_stock),
-                                        photos=create_gallery(title='(demo)Little Blue Riding Hood'),
-                                        attributes='',
-                                        cost_price=decimal.Decimal(random.randrange(*rnd_cost_price))/100,
-                                        selling_price=decimal.Decimal(random.randrange(*rnd_selling_price))/100,
-                                        discount_percent=random.choice(rnd_discount),
-                                        )
-    # # tags block
-    # new_product.tags.add(*product_form.cleaned_data['tags']) # using list as multiple positional arguments
+
+    products_to_generate = {
+        'Little Blue Riding Hood (M)': {
+            'description': 'A knitted blue hat, nice and pretty (demo)',
+            'category': 'Hats',
+            'tags': ('blue', 'hat', 'wool', 'winter', 'cold'),
+            'attributes': {"Color": "Blue", "Size": "Medium", "Material":"Wool"},
+            'photos': '???'
+            },
+        'Little Red Riding Hood (S)': {
+            'description': 'A knitted red hat, nice and pretty (demo)',
+            'category': 'Hats',
+            'tags': ('red', 'hat', 'wool', 'winter', 'cold'),
+            'attributes': {"Color": "Red", "Size": "Small", "Material":"Wool"},
+            'photos': '???'
+            },
+        'Little Red Riding Hood (M)': {
+            'description': 'A knitted red hat, nice and pretty (demo)',
+            'category': 'Hats',
+            'tags': ('red', 'hat', 'wool', 'winter', 'cold'),
+            'attributes': {"Color": "Red", "Size": "Medium", "Material":"Wool"},
+            'photos': '???'
+            },
+    }
+
+    for title, rest in products_to_generate.items():
+        new_product = Product.objects.create(name=title,
+                                            description=rest['description'],
+                                            created_by=staff_user,
+                                            category=Category.objects.get(name=rest['category']),
+                                            # tags, (added later in this view)
+                                            stock=random.randint(*rnd_stock),
+                                            photos=create_gallery(title=f'(demo) {title}'),
+                                            attributes=rest['attributes'],
+                                            cost_price=decimal.Decimal(random.randrange(*rnd_cost_price))/100,
+                                            selling_price=decimal.Decimal(random.randrange(*rnd_selling_price))/100,
+                                            discount_percent=random.choice(rnd_discount),
+                                            )
+        new_product.tags.add(*rest['tags'])
 
     # # new photos block
     # if photos_form.is_valid():
