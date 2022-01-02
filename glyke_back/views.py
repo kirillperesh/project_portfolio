@@ -356,24 +356,38 @@ def generate_stuff_view(request):
 
     products_to_generate = {
         'Little Blue Riding Hood (M)': {
-            'description': 'A knitted blue hat, nice and pretty (demo)',
+            'description': 'A knitted blue hat, nice and pretty. M-size (demo)',
             'category': 'Hats',
             'tags': ('blue', 'hat', 'wool', 'winter', 'cold'),
             'attributes': {"Color": "Blue", "Size": "Medium", "Material":"Wool"},
             'photos': '???'
             },
         'Little Red Riding Hood (S)': {
-            'description': 'A knitted red hat, nice and pretty (demo)',
+            'description': 'A knitted red hat, nice and pretty. S-size (demo)',
             'category': 'Hats',
             'tags': ('red', 'hat', 'wool', 'winter', 'cold'),
             'attributes': {"Color": "Red", "Size": "Small", "Material":"Wool"},
             'photos': '???'
             },
         'Little Red Riding Hood (M)': {
-            'description': 'A knitted red hat, nice and pretty (demo)',
+            'description': 'A knitted red hat, nice and pretty. M-size (demo)',
             'category': 'Hats',
             'tags': ('red', 'hat', 'wool', 'winter', 'cold'),
             'attributes': {"Color": "Red", "Size": "Medium", "Material":"Wool"},
+            'photos': '???'
+            },
+        'Ruby Anklet': {
+            'description': 'Handcrafted Ruby Cluster Ankle Bracelet (demo)',
+            'category': 'Jewelry',
+            'tags': ('silver', 'ruby', 'anklet', 'foot', 'gemstone'),
+            'attributes': {"Color": "White, red", "Size": "Small", "Material":"Silver, ruby"},
+            'photos': '???'
+            },
+        'Silver Gemstone Flower Pendant Necklace': {
+            'description': 'Pendant necklace featuring a dainty cutout flower design with a floral cluster of genuine African amethyst stones set in high polished sterling silver (demo)',
+            'category': 'Necklaces',
+            'tags': ('silver', 'amethyst', 'gemstone', 'flower'),
+            'attributes': {"Color": "White, purple", "Size": "Medium", "Material":"Silver, amethyst"},
             'photos': '???'
             },
     }
