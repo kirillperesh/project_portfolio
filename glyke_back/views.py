@@ -339,7 +339,7 @@ def generate_stuff_view(request):
     Hats_category = Category.objects.create(name='Hats', description='Awesome handmade hats (demo)', bg_color='mediumturquoise')
     Jewelry_category = Category.objects.create(name='Jewelry', description='Gorgeous handmade jewelry (demo)', bg_color='tomato')
     Necklaces_category = Category.objects.create(name='Necklaces', description='Beautiful handmade necklaces (demo)', bg_color='darkorange', parent=Jewelry_category)
-    Rings_category = Category.objects.create(name='Rings', description='Shiny handmade rings (demo)', bg_color='orange', parent=Jewelry_category)
+    Rings_category = Category.objects.create(name='Rings', description='Shiny handmade rings (demo)', bg_color='peachpuff', parent=Jewelry_category)
     category_filters = ('Color', 'Size', 'Material')
     for demo_category in Category.objects.filter(description__endswith='(demo)'):
         demo_category.filters.add(*category_filters)
@@ -383,11 +383,25 @@ def generate_stuff_view(request):
             'attributes': {"Color": "White, red", "Size": "Small", "Material":"Silver, ruby"},
             'photos': '???'
             },
-        'Silver Gemstone Flower Pendant Necklace': {
+        'Silver Flower Pendant Necklace': {
             'description': 'Pendant necklace featuring a dainty cutout flower design with a floral cluster of genuine African amethyst stones set in high polished sterling silver (demo)',
             'category': 'Necklaces',
             'tags': ('silver', 'amethyst', 'gemstone', 'flower'),
-            'attributes': {"Color": "White, purple", "Size": "Medium", "Material":"Silver, amethyst"},
+            'attributes': {"Color": "Silver, purple", "Size": "Medium", "Material":"Silver, amethyst"},
+            'photos': '???'
+            },
+        'Stainless Steel Vampire Coffin Ring': {
+            'description': 'Solid Stainless Steel, Never Rust or Green Finger, Comfort Fit Strong and Solid, Hypoallergenic, Safe to Wear in Water (demo)',
+            'category': 'Rings',
+            'tags': ('steel', 'creepy', 'coffin', 'vampire'),
+            'attributes': {"Color": "Silver, black", "Size": "Small", "Material":"Stainless Steel"},
+            'photos': '???'
+            },
+        'Stainless Steel Eye of God Ring': {
+            'description': 'Hypoallergenic: Guaranteed to be Lead & Nickel free. Fade resistant (demo)',
+            'category': 'Rings',
+            'tags': ('steel', 'creepy', 'eye', 'scary'),
+            'attributes': {"Color": "Silver, black", "Size": "Medium", "Material":"Stainless Steel"},
             'photos': '???'
             },
     }
