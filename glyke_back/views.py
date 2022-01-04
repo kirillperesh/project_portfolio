@@ -1,4 +1,3 @@
-from os import name
 import random
 import decimal
 from urllib.parse import urlencode
@@ -16,7 +15,7 @@ from django.contrib.auth import authenticate, login
 from django.utils.text import slugify
 from django.views.generic import ListView, DetailView, TemplateView, CreateView
 from django.views.generic.base import RedirectView
-from proj_folio.defaults import DEFAULT_NO_IMAGE_URL
+from proj_folio.defaults import *
 from proj_folio.settings import DEBUG as DEBUG_MODE
 
 from photologue import models as photo_models
@@ -321,106 +320,46 @@ def profile_view(request):
 @require_http_methods(["GET",])
 def generate_stuff_view(request):
     """
+    Takes the initial demo data proj_folio.defaults.
     TODO"""
     if not DEBUG_MODE: return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'DEBUG mode is OFF'})}")
-    staff_user_username = 'General_Kenobi'
-    staff_user_password = 'staffpassword'
-    staff_user_email = 'hello@the.re'
-
-    # user creation block
-    if request.user.is_authenticated: LogoutView.as_view()(request)
-    User.objects.filter(username=staff_user_username).delete()
-    staff_user = User.objects.create_user(username=staff_user_username, password=staff_user_password, email=staff_user_email, is_staff=True)
-    auth_staff_user = authenticate(username=staff_user_username, password=staff_user_password)
-    login(request, auth_staff_user)
-
-    # categories generation block
+    # duplicates deletion block
+    photo_models.Gallery.objects.filter(title__startswith='(demo)').delete()
+    Product.objects.filter(description__endswith='(demo)').delete()
     Category.objects.filter(description__endswith='(demo)').delete()
+    User.objects.filter(username=staff_user_username_demo).delete()
+    # user generation block
+    if request.user.is_authenticated: LogoutView.as_view()(request)
+    staff_user = User.objects.create_user(username=staff_user_username_demo, password=staff_user_password_demo, email=staff_user_email_demo, is_staff=True)
+    auth_staff_user = authenticate(username=staff_user_username_demo, password=staff_user_password_demo)
+    login(request, auth_staff_user)
+    # categories generation block
     Hats_category = Category.objects.create(name='Hats', description='Awesome handmade hats (demo)', bg_color='mediumturquoise')
     Jewelry_category = Category.objects.create(name='Jewelry', description='Gorgeous handmade jewelry (demo)', bg_color='tomato')
     Necklaces_category = Category.objects.create(name='Necklaces', description='Beautiful handmade necklaces (demo)', bg_color='darkorange', parent=Jewelry_category)
     Rings_category = Category.objects.create(name='Rings', description='Shiny handmade rings (demo)', bg_color='peachpuff', parent=Jewelry_category)
-    category_filters = ('Color', 'Size', 'Material')
     for demo_category in Category.objects.filter(description__endswith='(demo)'):
-        demo_category.filters.add(*category_filters)
+        demo_category.filters.add(*category_filters_demo)
 
     # products generation block
-    # https://stackoverflow.com/questions/64263748/how-download-image-from-url-to-django
-    Product.objects.filter(description__endswith='(demo)').delete()
-    photo_models.Gallery.objects.filter(title__startswith='(demo)').delete()
-
-    rnd_stock = (3, 15)
-    rnd_discount = (0, 0, 10, 15)
-    rnd_cost_price = (5, 199)
-    rnd_selling_price = (200, 3500)
-
-    products_to_generate = {
-        'Little Blue Riding Hood (M)': {
-            'description': 'A knitted blue hat, nice and pretty. M-size (demo)',
-            'category': 'Hats',
-            'tags': ('blue', 'hat', 'wool', 'winter', 'cold'),
-            'attributes': {"Color": "Blue", "Size": "Medium", "Material":"Wool"},
-            'photos': '???'
-            },
-        'Little Red Riding Hood (S)': {
-            'description': 'A knitted red hat, nice and pretty. S-size (demo)',
-            'category': 'Hats',
-            'tags': ('red', 'hat', 'wool', 'winter', 'cold'),
-            'attributes': {"Color": "Red", "Size": "Small", "Material":"Wool"},
-            'photos': '???'
-            },
-        'Little Red Riding Hood (M)': {
-            'description': 'A knitted red hat, nice and pretty. M-size (demo)',
-            'category': 'Hats',
-            'tags': ('red', 'hat', 'wool', 'winter', 'cold'),
-            'attributes': {"Color": "Red", "Size": "Medium", "Material":"Wool"},
-            'photos': '???'
-            },
-        'Ruby Anklet': {
-            'description': 'Handcrafted Ruby Cluster Ankle Bracelet (demo)',
-            'category': 'Jewelry',
-            'tags': ('silver', 'ruby', 'anklet', 'foot', 'gemstone'),
-            'attributes': {"Color": "White, red", "Size": "Small", "Material":"Silver, ruby"},
-            'photos': '???'
-            },
-        'Silver Flower Pendant Necklace': {
-            'description': 'Pendant necklace featuring a dainty cutout flower design with a floral cluster of genuine African amethyst stones set in high polished sterling silver (demo)',
-            'category': 'Necklaces',
-            'tags': ('silver', 'amethyst', 'gemstone', 'flower'),
-            'attributes': {"Color": "Silver, purple", "Size": "Medium", "Material":"Silver, amethyst"},
-            'photos': '???'
-            },
-        'Stainless Steel Vampire Coffin Ring': {
-            'description': 'Solid Stainless Steel, Never Rust or Green Finger, Comfort Fit Strong and Solid, Hypoallergenic, Safe to Wear in Water (demo)',
-            'category': 'Rings',
-            'tags': ('steel', 'creepy', 'coffin', 'vampire'),
-            'attributes': {"Color": "Silver, black", "Size": "Small", "Material":"Stainless Steel"},
-            'photos': '???'
-            },
-        'Stainless Steel Eye of God Ring': {
-            'description': 'Hypoallergenic: Guaranteed to be Lead & Nickel free. Fade resistant (demo)',
-            'category': 'Rings',
-            'tags': ('steel', 'creepy', 'eye', 'scary'),
-            'attributes': {"Color": "Silver, black", "Size": "Medium", "Material":"Stainless Steel"},
-            'photos': '???'
-            },
-    }
-
-    for title, rest in products_to_generate.items():
+    for title, rest in products_to_generate_demo.items():
         new_product = Product.objects.create(name=title,
                                             description=rest['description'],
                                             created_by=staff_user,
                                             category=Category.objects.get(name=rest['category']),
                                             # tags, (added later in this view)
-                                            stock=random.randint(*rnd_stock),
+                                            stock=random.randint(*rnd_stock_demo),
                                             photos=create_gallery(title=f'(demo) {title}'),
                                             attributes=rest['attributes'],
-                                            cost_price=decimal.Decimal(random.randrange(*rnd_cost_price))/100,
-                                            selling_price=decimal.Decimal(random.randrange(*rnd_selling_price))/100,
-                                            discount_percent=random.choice(rnd_discount),
+                                            cost_price=decimal.Decimal(random.randrange(*rnd_cost_price_demo))/100,
+                                            selling_price=decimal.Decimal(random.randrange(*rnd_selling_price_demo))/100,
+                                            discount_percent=random.choice(rnd_discount_demo),
                                             )
         new_product.tags.add(*rest['tags'])
 
+
+    # https://stackoverflow.com/questions/64263748/how-download-image-from-url-to-django
+    
     # # new photos block
     # if photos_form.is_valid():
     #     for image in request.FILES.getlist('photos'):
