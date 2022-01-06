@@ -15,6 +15,7 @@ from django.contrib.auth import authenticate, login
 from django.utils.text import slugify
 from django.views.generic import ListView, DetailView, TemplateView, CreateView
 from django.views.generic.base import RedirectView
+
 from proj_folio.defaults import *
 from proj_folio.settings import DEBUG as DEBUG_MODE
 
@@ -61,6 +62,7 @@ def get_order(request, *, status, order_by='-created'):
     if not request.user.orders.filter(status=status).exists(): # check if there is a 'current' order
         return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'order (probably there is none)'})}")
     return request.user.orders.filter(status=status).order_by(order_by).first()
+
 
 @user_is_staff_or_404()
 @require_http_methods(["GET", "POST"])
@@ -340,7 +342,6 @@ def generate_stuff_view(request):
     Rings_category = Category.objects.create(name='Rings', description='Shiny handmade rings (demo)', bg_color='peachpuff', parent=Jewelry_category)
     for demo_category in Category.objects.filter(description__endswith='(demo)'):
         demo_category.filters.add(*category_filters_demo)
-
     # products generation block
     for title, rest in products_to_generate_demo.items():
         new_product = Product.objects.create(name=title,
@@ -356,25 +357,16 @@ def generate_stuff_view(request):
                                             discount_percent=random.choice(rnd_discount_demo),
                                             )
         new_product.tags.add(*rest['tags'])
+        new_product.add_images_from_url()
+        new_product.save()
 
 
     # https://stackoverflow.com/questions/64263748/how-download-image-from-url-to-django
-    
-    # # new photos block
-    # if photos_form.is_valid():
-    #     for image in request.FILES.getlist('photos'):
-    #         image_name = image.name + f'_{new_product.name}' # product's name is appended for later filtering purposes
-    #         # TODO add any photologue filters down here
-    #         photo = photo_models.Photo.objects.create(image=image, title=image_name, slug=slugify(image_name)) #
-    #         new_product.photos.photos.add(photo)
-    # else:
-    #     return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'photos (or photos form)'})}")
-    # # success
-    # new_product.save()
+
 
     # orders generation block
 
-    # login as admin to test purposes
+    # login as admin for testing purposes
     LogoutView.as_view()(request)
     auth_admin = authenticate(username='admin', password='admin')
     login(request, auth_admin)
