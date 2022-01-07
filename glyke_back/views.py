@@ -1,4 +1,7 @@
-from django.db.models import query
+from os import name
+import random
+import decimal
+from urllib.parse import urlencode
 from django.shortcuts import render, redirect, get_object_or_404, resolve_url
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, Http404, request
@@ -6,14 +9,15 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
-from django.utils.text import slugify
-from urllib.parse import urlencode
-from django.views.generic import ListView, DetailView, TemplateView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login
+from django.utils.text import slugify
+from django.views.generic import ListView, DetailView, TemplateView, CreateView
 from django.views.generic.base import RedirectView
 from proj_folio.defaults import DEFAULT_NO_IMAGE_URL
+from proj_folio.settings import DEBUG as DEBUG_MODE
 
 from photologue import models as photo_models
 from .forms import AddProductForm, PhotosForm, SelectCategoryProductForm, RegisterForm, SignInForm, CustomPasswordChangeForm, UsernameChangeForm, EmailChangeForm
@@ -92,7 +96,7 @@ def add_product_dynamic_view(request):
         if all([filters_form.is_valid(), product_form.is_valid(),]):
             new_product = Product.objects.create(name=product_form.cleaned_data['name'],
                                                  description=product_form.cleaned_data['description'],
-                                                 created_by = request.user, # default django user, probably will be switched to custom class later
+                                                 created_by=request.user, # default django user, probably will be switched to custom class later
                                                  category=category,
                                                  # tags, (added later in this view)
                                                  stock=product_form.cleaned_data['stock'],
@@ -269,16 +273,16 @@ def profile_view(request):
     """For python 3.10.0 or newer, there is a structural pattern matching option for form selection (instead fo 'elif's).
     Queries all of user's orders and sorts it by status.
     Profile management forms are separated from each other by hidden input 'form_name'"""
-    context = {}    
-    # basic queryset block    
+    context = {}
+    # basic queryset block
     queryset = Order.objects.filter(customer=request.user) if request.user.is_authenticated else None
-    context['orders'] = queryset    
+    context['orders'] = queryset
     # orders block
     orders_grouped_by_status = dict()
     if queryset:
         for status, verbose_status in Order.ORDER_STATUS_CHOICES: # uses statuses' short form only
             orders_grouped_by_status[str(status)] = queryset.filter(status=status)
-    context['orders_grouped_by_status'] = orders_grouped_by_status    
+    context['orders_grouped_by_status'] = orders_grouped_by_status
     # forms (user_change) block
     context['password_change_form'] = password_change_form_EMPTY = CustomPasswordChangeForm(user=request.user)
     context['username_change_form'] = username_change_form_EMPTY = UsernameChangeForm()
@@ -296,23 +300,119 @@ def profile_view(request):
             empty_form = username_change_form_EMPTY
         elif form_name == 'email_change_form':
             filled_form = EmailChangeForm(instance=request.user, data=request.POST)
-            empty_form = email_change_form_EMPTY                  
+            empty_form = email_change_form_EMPTY
         # match form_name:
         #     case 'password_change_form':
         #         filled_form = CustomPasswordChangeForm(user=request.user, data=request.POST)
-        #         empty_form = password_change_form_EMPTY            
+        #         empty_form = password_change_form_EMPTY
         #     case 'username_change_form':
         #         filled_form = UsernameChangeForm(instance=request.user, data=request.POST)
-        #         empty_form = username_change_form_EMPTY            
+        #         empty_form = username_change_form_EMPTY
         #     case 'email_change_form':
         #         filled_form = EmailChangeForm(instance=request.user, data=request.POST)
-        #         empty_form = email_change_form_EMPTY             
-        context[form_name] = filled_form     
+        #         empty_form = email_change_form_EMPTY
+        context[form_name] = filled_form
         if filled_form and filled_form.is_valid():
             filled_form.save()
-            context[form_name] = empty_form  
+            context[form_name] = empty_form
     request.user.refresh_from_db()
     return render(request, "profile.html", context)
+
+@require_http_methods(["GET",])
+def generate_stuff_view(request):
+    """
+    TODO"""
+    if not DEBUG_MODE: return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'DEBUG mode is OFF'})}")
+    staff_user_username = 'General_Kenobi'
+    staff_user_password = 'staffpassword'
+    staff_user_email = 'hello@the.re'
+
+    # user creation block
+    if request.user.is_authenticated: LogoutView.as_view()(request)
+    User.objects.filter(username=staff_user_username).delete()
+    staff_user = User.objects.create_user(username=staff_user_username, password=staff_user_password, email=staff_user_email, is_staff=True)
+    auth_staff_user = authenticate(username=staff_user_username, password=staff_user_password)
+    login(request, auth_staff_user)
+
+    # categories generation block
+    Category.objects.filter(description__endswith='(demo)').delete()
+    Hats_category = Category.objects.create(name='Hats', description='Awesome handmade hats (demo)', bg_color='mediumturquoise')
+    Jewelry_category = Category.objects.create(name='Jewelry', description='Gorgeous handmade jewelry (demo)', bg_color='tomato')
+    Necklaces_category = Category.objects.create(name='Necklaces', description='Beautiful handmade necklaces (demo)', bg_color='darkorange', parent=Jewelry_category)
+    Rings_category = Category.objects.create(name='Rings', description='Shiny handmade rings (demo)', bg_color='orange', parent=Jewelry_category)
+    category_filters = ('Color', 'Size', 'Material')
+    for demo_category in Category.objects.filter(description__endswith='(demo)'):
+        demo_category.filters.add(*category_filters)
+
+    # products generation block
+    # https://stackoverflow.com/questions/64263748/how-download-image-from-url-to-django
+    Product.objects.filter(description__endswith='(demo)').delete()
+    photo_models.Gallery.objects.filter(title__startswith='(demo)').delete()
+
+    rnd_stock = (3, 15)
+    rnd_discount = (0, 0, 10, 15)
+    rnd_cost_price = (5, 199)
+    rnd_selling_price = (200, 3500)
+
+    products_to_generate = {
+        'Little Blue Riding Hood (M)': {
+            'description': 'A knitted blue hat, nice and pretty (demo)',
+            'category': 'Hats',
+            'tags': ('blue', 'hat', 'wool', 'winter', 'cold'),
+            'attributes': {"Color": "Blue", "Size": "Medium", "Material":"Wool"},
+            'photos': '???'
+            },
+        'Little Red Riding Hood (S)': {
+            'description': 'A knitted red hat, nice and pretty (demo)',
+            'category': 'Hats',
+            'tags': ('red', 'hat', 'wool', 'winter', 'cold'),
+            'attributes': {"Color": "Red", "Size": "Small", "Material":"Wool"},
+            'photos': '???'
+            },
+        'Little Red Riding Hood (M)': {
+            'description': 'A knitted red hat, nice and pretty (demo)',
+            'category': 'Hats',
+            'tags': ('red', 'hat', 'wool', 'winter', 'cold'),
+            'attributes': {"Color": "Red", "Size": "Medium", "Material":"Wool"},
+            'photos': '???'
+            },
+    }
+
+    for title, rest in products_to_generate.items():
+        new_product = Product.objects.create(name=title,
+                                            description=rest['description'],
+                                            created_by=staff_user,
+                                            category=Category.objects.get(name=rest['category']),
+                                            # tags, (added later in this view)
+                                            stock=random.randint(*rnd_stock),
+                                            photos=create_gallery(title=f'(demo) {title}'),
+                                            attributes=rest['attributes'],
+                                            cost_price=decimal.Decimal(random.randrange(*rnd_cost_price))/100,
+                                            selling_price=decimal.Decimal(random.randrange(*rnd_selling_price))/100,
+                                            discount_percent=random.choice(rnd_discount),
+                                            )
+        new_product.tags.add(*rest['tags'])
+
+    # # new photos block
+    # if photos_form.is_valid():
+    #     for image in request.FILES.getlist('photos'):
+    #         image_name = image.name + f'_{new_product.name}' # product's name is appended for later filtering purposes
+    #         # TODO add any photologue filters down here
+    #         photo = photo_models.Photo.objects.create(image=image, title=image_name, slug=slugify(image_name)) #
+    #         new_product.photos.photos.add(photo)
+    # else:
+    #     return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'photos (or photos form)'})}")
+    # # success
+    # new_product.save()
+
+    # orders generation block
+
+    # login as admin to test purposes
+    LogoutView.as_view()(request)
+    auth_admin = authenticate(username='admin', password='admin')
+    login(request, auth_admin)
+
+    return redirect(reverse('products'))
 
 class ProductsView(ListView):
     http_method_names = ['get', ]
@@ -368,14 +468,14 @@ class ProductDetailView(DetailView):
     template_name = 'product.html'
     context_object_name = 'product'
     extra_context={'no_image_url': DEFAULT_NO_IMAGE_URL}
-    
+
 class Home(TemplateView):
     http_method_names = ['get',]
     template_name = 'home.html'
-    
+
     # TODO finish home page
     # TODO add quickly-genarate-stuff-view
-    
+
 class SignUpView(CreateView):
     http_method_names = ['get', 'post']
     model = User
@@ -406,5 +506,3 @@ class AddToCartView(LoginRequiredMixin, RedirectView):
                                  product=Product.objects.get(id=product_id),
                                  )
         return RedirectView.dispatch(self, request, *args, **kwargs)
-
-# TODO make parallax home page
