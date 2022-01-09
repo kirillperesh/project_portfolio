@@ -348,25 +348,22 @@ def generate_stuff_view(request):
     # products generation block
     for title, rest in products_to_generate_demo.items():
         new_product = Product.objects.create(name=title,
-                                            description=rest['description'],
-                                            created_by=staff_user,
-                                            category=Category.objects.get(name=rest['category']),
-                                            # tags, (added later in this view)
-                                            stock=random.randint(*rnd_stock_demo),
-                                            photos=create_gallery(title=f'(demo) {title}'),
-                                            attributes=rest['attributes'],
-                                            cost_price=decimal.Decimal(random.randrange(*rnd_cost_price_demo))/100,
-                                            selling_price=decimal.Decimal(random.randrange(*rnd_selling_price_demo))/100,
-                                            discount_percent=random.choice(rnd_discount_demo),
-                                            )
+                                             description=rest['description'],
+                                             created_by=staff_user,
+                                             category=Category.objects.get(name=rest['category']),
+                                             stock=random.randint(*rnd_stock_demo),
+                                             photos=create_gallery(title=f'(demo) {title}'),
+                                             attributes=rest['attributes'],
+                                             cost_price=decimal.Decimal(random.randrange(*rnd_cost_price_demo))/100,
+                                             selling_price=decimal.Decimal(random.randrange(*rnd_selling_price_demo))/100,
+                                             discount_percent=random.choice(rnd_discount_demo),
+                                             )
         new_product.tags.add(*rest['tags'])
         new_product.add_images_from_url(rest['photos'])
         new_product.save()
 
-
-    # https://stackoverflow.com/questions/64263748/how-download-image-from-url-to-django
-
     # orders generation block
+    # TODO
 
     # login as admin for testing purposes
     LogoutView.as_view()(request)
@@ -467,3 +464,5 @@ class AddToCartView(LoginRequiredMixin, RedirectView):
                                  product=Product.objects.get(id=product_id),
                                  )
         return RedirectView.dispatch(self, request, *args, **kwargs)
+
+# TODO add loading icon for demo generator view
