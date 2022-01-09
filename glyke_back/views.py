@@ -326,7 +326,10 @@ def generate_stuff_view(request):
     TODO"""
     if not DEBUG_MODE: return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'DEBUG mode is OFF'})}")
     # duplicates deletion block
-    photo_models.Gallery.objects.filter(title__startswith='(demo)').delete()
+    gallery_qs = photo_models.Gallery.objects.filter(title__startswith='(demo)')
+    for gallery in gallery_qs:
+        gallery.photos.all().delete()
+    gallery_qs.delete()
     Product.objects.filter(description__endswith='(demo)').delete()
     Category.objects.filter(description__endswith='(demo)').delete()
     User.objects.filter(username=staff_user_username_demo).delete()
@@ -357,12 +360,11 @@ def generate_stuff_view(request):
                                             discount_percent=random.choice(rnd_discount_demo),
                                             )
         new_product.tags.add(*rest['tags'])
-        new_product.add_images_from_url()
+        new_product.add_images_from_url(rest['photos'])
         new_product.save()
 
 
     # https://stackoverflow.com/questions/64263748/how-download-image-from-url-to-django
-
 
     # orders generation block
 
