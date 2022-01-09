@@ -1,3 +1,4 @@
+import os
 from django.db import models
 from django.utils import timezone, dateformat
 from django.utils.text import slugify
@@ -7,6 +8,10 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from taggit.managers import TaggableManager
 from django.contrib.auth.models import User
 from decimal import Decimal, ROUND_HALF_UP
+from urllib.request import urlopen
+from django.core.files import File
+from django.core.files.temp import NamedTemporaryFile
+from proj_folio.settings import MEDIA_ROOT
 
 from photologue import models as photo_models
 from .managers import OrderFiltersManager
@@ -203,8 +208,23 @@ class Product(Price, TimeStampedModel):
         super().save(*args, **kwargs)
         self.__original_name = self.name
 
+    def add_images_from_url(self, url_list):
+        """
+        TODO"""
+        for url in url_list:
+            img_extention = f".{str(url).split('.')[-1]}"
+            temp_img = NamedTemporaryFile(suffix=img_extention, dir=os.path.join(MEDIA_ROOT, 'photologue', 'photos'))
+            with urlopen(url) as uo:
+                if uo.status != 200: continue
+                temp_img.write(uo.read())
+                temp_img.flush()
+            image_file = File(temp_img)
+            image_name = str(url).split('/')[-1] + f'_{self.name}'
+            photo = photo_models.Photo.objects.create(image=image_file, title=image_name, slug=slugify(image_name))
+            self.photos.photos.add(photo)
+
 class Order(Price, TimeStampedModel):
-    """Prices represent the total value for an order
+    """Prices represent the total value of an order
     Discount is removed"""
     objects = OrderFiltersManager() # this manager adds get_latest_current method, which is needed for the order_panel template
 

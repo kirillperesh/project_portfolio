@@ -2,7 +2,7 @@
 .bg-default:before{color:#ffffff;background-color: grey;}
 .bg-tomato:before{color:#ffffff;background-color: tomato;}
 .bg-darkorange:before{color:#ffffff;background-color: darkorange;}
-.bg-darkorange:before{color:#ffffff;background-color: orange;}
+.bg-orange:before{color:#ffffff;background-color: orange;}
 .bg-palegreen:before{color:#ffffff;background-color: palegreen;}
 .bg-skyblue:before{color:#ffffff;background-color: skyblue;}
 .bg-mediumturquoise:before{color:#ffffff;background-color: mediumturquoise;}

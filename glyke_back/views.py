@@ -1,4 +1,3 @@
-from os import name
 import random
 import decimal
 from urllib.parse import urlencode
@@ -16,7 +15,8 @@ from django.contrib.auth import authenticate, login
 from django.utils.text import slugify
 from django.views.generic import ListView, DetailView, TemplateView, CreateView
 from django.views.generic.base import RedirectView
-from proj_folio.defaults import DEFAULT_NO_IMAGE_URL
+
+from proj_folio.defaults import *
 from proj_folio.settings import DEBUG as DEBUG_MODE
 
 from photologue import models as photo_models
@@ -62,6 +62,7 @@ def get_order(request, *, status, order_by='-created'):
     if not request.user.orders.filter(status=status).exists(): # check if there is a 'current' order
         return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'order (probably there is none)'})}")
     return request.user.orders.filter(status=status).order_by(order_by).first()
+
 
 @user_is_staff_or_404()
 @require_http_methods(["GET", "POST"])
@@ -321,93 +322,50 @@ def profile_view(request):
 @require_http_methods(["GET",])
 def generate_stuff_view(request):
     """
+    Takes the initial demo data proj_folio.defaults.
     TODO"""
     if not DEBUG_MODE: return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'DEBUG mode is OFF'})}")
-    staff_user_username = 'General_Kenobi'
-    staff_user_password = 'staffpassword'
-    staff_user_email = 'hello@the.re'
-
-    # user creation block
-    if request.user.is_authenticated: LogoutView.as_view()(request)
-    User.objects.filter(username=staff_user_username).delete()
-    staff_user = User.objects.create_user(username=staff_user_username, password=staff_user_password, email=staff_user_email, is_staff=True)
-    auth_staff_user = authenticate(username=staff_user_username, password=staff_user_password)
-    login(request, auth_staff_user)
-
-    # categories generation block
+    # duplicates deletion block
+    gallery_qs = photo_models.Gallery.objects.filter(title__startswith='(demo)')
+    for gallery in gallery_qs:
+        gallery.photos.all().delete()
+    gallery_qs.delete()
+    Product.objects.filter(description__endswith='(demo)').delete()
     Category.objects.filter(description__endswith='(demo)').delete()
+    User.objects.filter(username=staff_user_username_demo).delete()
+    # user generation block
+    if request.user.is_authenticated: LogoutView.as_view()(request)
+    staff_user = User.objects.create_user(username=staff_user_username_demo, password=staff_user_password_demo, email=staff_user_email_demo, is_staff=True)
+    auth_staff_user = authenticate(username=staff_user_username_demo, password=staff_user_password_demo)
+    login(request, auth_staff_user)
+    # categories generation block
     Hats_category = Category.objects.create(name='Hats', description='Awesome handmade hats (demo)', bg_color='mediumturquoise')
     Jewelry_category = Category.objects.create(name='Jewelry', description='Gorgeous handmade jewelry (demo)', bg_color='tomato')
     Necklaces_category = Category.objects.create(name='Necklaces', description='Beautiful handmade necklaces (demo)', bg_color='darkorange', parent=Jewelry_category)
-    Rings_category = Category.objects.create(name='Rings', description='Shiny handmade rings (demo)', bg_color='orange', parent=Jewelry_category)
-    category_filters = ('Color', 'Size', 'Material')
+    Rings_category = Category.objects.create(name='Rings', description='Shiny handmade rings (demo)', bg_color='peachpuff', parent=Jewelry_category)
     for demo_category in Category.objects.filter(description__endswith='(demo)'):
-        demo_category.filters.add(*category_filters)
-
+        demo_category.filters.add(*category_filters_demo)
     # products generation block
-    # https://stackoverflow.com/questions/64263748/how-download-image-from-url-to-django
-    Product.objects.filter(description__endswith='(demo)').delete()
-    photo_models.Gallery.objects.filter(title__startswith='(demo)').delete()
-
-    rnd_stock = (3, 15)
-    rnd_discount = (0, 0, 10, 15)
-    rnd_cost_price = (5, 199)
-    rnd_selling_price = (200, 3500)
-
-    products_to_generate = {
-        'Little Blue Riding Hood (M)': {
-            'description': 'A knitted blue hat, nice and pretty (demo)',
-            'category': 'Hats',
-            'tags': ('blue', 'hat', 'wool', 'winter', 'cold'),
-            'attributes': {"Color": "Blue", "Size": "Medium", "Material":"Wool"},
-            'photos': '???'
-            },
-        'Little Red Riding Hood (S)': {
-            'description': 'A knitted red hat, nice and pretty (demo)',
-            'category': 'Hats',
-            'tags': ('red', 'hat', 'wool', 'winter', 'cold'),
-            'attributes': {"Color": "Red", "Size": "Small", "Material":"Wool"},
-            'photos': '???'
-            },
-        'Little Red Riding Hood (M)': {
-            'description': 'A knitted red hat, nice and pretty (demo)',
-            'category': 'Hats',
-            'tags': ('red', 'hat', 'wool', 'winter', 'cold'),
-            'attributes': {"Color": "Red", "Size": "Medium", "Material":"Wool"},
-            'photos': '???'
-            },
-    }
-
-    for title, rest in products_to_generate.items():
+    for title, rest in products_to_generate_demo.items():
         new_product = Product.objects.create(name=title,
-                                            description=rest['description'],
-                                            created_by=staff_user,
-                                            category=Category.objects.get(name=rest['category']),
-                                            # tags, (added later in this view)
-                                            stock=random.randint(*rnd_stock),
-                                            photos=create_gallery(title=f'(demo) {title}'),
-                                            attributes=rest['attributes'],
-                                            cost_price=decimal.Decimal(random.randrange(*rnd_cost_price))/100,
-                                            selling_price=decimal.Decimal(random.randrange(*rnd_selling_price))/100,
-                                            discount_percent=random.choice(rnd_discount),
-                                            )
+                                             description=rest['description'],
+                                             created_by=staff_user,
+                                             category=Category.objects.get(name=rest['category']),
+                                             stock=random.randint(*rnd_stock_demo),
+                                             photos=create_gallery(title=f'(demo) {title}'),
+                                             attributes=rest['attributes'],
+                                             cost_price=decimal.Decimal(random.randrange(*rnd_cost_price_demo))/100,
+                                             selling_price=decimal.Decimal(random.randrange(*rnd_selling_price_demo))/100,
+                                             discount_percent=random.choice(rnd_discount_demo),
+                                             )
         new_product.tags.add(*rest['tags'])
-
-    # # new photos block
-    # if photos_form.is_valid():
-    #     for image in request.FILES.getlist('photos'):
-    #         image_name = image.name + f'_{new_product.name}' # product's name is appended for later filtering purposes
-    #         # TODO add any photologue filters down here
-    #         photo = photo_models.Photo.objects.create(image=image, title=image_name, slug=slugify(image_name)) #
-    #         new_product.photos.photos.add(photo)
-    # else:
-    #     return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'photos (or photos form)'})}")
-    # # success
-    # new_product.save()
+        new_product.add_images_from_url(rest['photos'])
+        new_product.save()
 
     # orders generation block
+    # TODO
 
-    # login as admin to test purposes
+    # login as admin for testing purposes
     LogoutView.as_view()(request)
     auth_admin = authenticate(username='admin', password='admin')
     login(request, auth_admin)
@@ -506,3 +464,5 @@ class AddToCartView(LoginRequiredMixin, RedirectView):
                                  product=Product.objects.get(id=product_id),
                                  )
         return RedirectView.dispatch(self, request, *args, **kwargs)
+
+# TODO add loading icon for demo generator view
