@@ -210,9 +210,8 @@ class Product(Price, TimeStampedModel):
         super().save(*args, **kwargs)
         self.__original_name = self.name
 
-    def add_images_from_url(self, url_list):
-        """
-        TODO"""
+    def add_images_from_url(self, *, url_list):
+        """Saves images from url_list to photologue/photos folder, then creates photologue photo instances of them and assignes them to the current product instance"""
         for url in url_list:
             img_extention = f".{str(url).split('.')[-1]}"
             temp_img = NamedTemporaryFile(suffix=img_extention, dir=os.path.join(MEDIA_ROOT, 'photologue', 'photos'))
@@ -221,9 +220,9 @@ class Product(Price, TimeStampedModel):
                     if uo.status != 200: continue
                     temp_img.write(uo.read())
                     temp_img.flush()
-            except HTTPError_fail_to_open_img: continue
+            except HTTPError_fail_to_open_img: continue # skips an image if it failed to open
             image_file = File(temp_img)
-            image_name = f"{get_random_string(length=5)}_{str(url).split('/')[-1]}_{self.name}"
+            image_name = f"{get_random_string(length=5)}_{str(url).split('/')[-1][-10:]}_{self.name}"
             photo = photo_models.Photo.objects.create(image=image_file, title=image_name, slug=slugify(image_name))
             self.photos.photos.add(photo)
 
