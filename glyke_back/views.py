@@ -359,7 +359,7 @@ def generate_stuff_view(request):
                                              discount_percent=random.choice(rnd_discount_demo),
                                              )
         new_product.tags.add(*rest['tags'])
-        new_product.add_images_from_url(rest['photos'])
+        new_product.add_images_from_url(url_list=rest['photos'])
         new_product.save()
 
     # orders generation block
