@@ -59,10 +59,10 @@
 						<div class="hero-copy">
 	                        <h1 class="hero-title mt-0 is-revealing">Welcome to my porfolio Web App</h1>
 	                        <p class="hero-paragraph is-revealing">This is a Django-based E-commerce app meant for a studio selling handcrafted stuff</p>
-	                        
+
 							{% comment %} add if debug mode check {% endcomment %}
 							<p class="hero-paragraph is-revealing generate-catalogue mb-0 mt-0"><a href="{% url 'generate_stuff_view'%}">To quickly generate a staff user and some products click here</a></p>
-							<p class="text-sm mt-0 generate-catalogue-details">[This will download a couple of images to your local repo]</p>
+							<p class="text-sm mt-0 generate-catalogue-details">[ This will download a dosen images to your local repo ]<br>[ takes about 30 seconds ]</p>
 
 						</div>
 						<div class="hero-illustration">
@@ -389,7 +389,7 @@
 											</svg>
 										</div>
 										<h4 class="feature-title m-0"><a href="{% url 'profile'%}">Profile</a> & <a href="{% url 'cart'%}">Cart</a></h4>
-									</div>									
+									</div>
 	                                <p class="text-sm mb-0">There're some other pages and features</p>
 	                            </div>
 	                        </div>
