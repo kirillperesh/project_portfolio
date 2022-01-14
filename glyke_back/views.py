@@ -363,12 +363,18 @@ def generate_stuff_view(request):
         new_product.save()
 
     # orders generation block
+    canceled_order = Order.objects.create(customer=staff_user,status='CAN')
+    confirmed_order = Order.objects.create(customer=staff_user,status='CON')
+    archived_order_1 = Order.objects.create(customer=staff_user,status='ARC')
+    archived_order_2 = Order.objects.create(customer=staff_user,status='ARC')
+    delivering_order = Order.objects.create(customer=staff_user,status='DNG')
+    OrderLine.objects.create(parent_order=archived_order_1, product=Product.objects.filter(description__endswith='(demo)').first())
     # TODO
 
     # login as admin for testing purposes
-    LogoutView.as_view()(request)
-    auth_admin = authenticate(username='admin', password='admin')
-    login(request, auth_admin)
+    # LogoutView.as_view()(request)
+    # auth_admin = authenticate(username='admin', password='admin')
+    # login(request, auth_admin)
 
     return redirect(reverse('products'))
 
