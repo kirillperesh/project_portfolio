@@ -359,16 +359,22 @@ def generate_stuff_view(request):
                                              discount_percent=random.choice(rnd_discount_demo),
                                              )
         new_product.tags.add(*rest['tags'])
-        new_product.add_images_from_url(rest['photos'])
+        new_product.add_images_from_url(url_list=rest['photos'])
         new_product.save()
 
     # orders generation block
+    canceled_order = Order.objects.create(customer=staff_user,status='CAN')
+    confirmed_order = Order.objects.create(customer=staff_user,status='CON')
+    archived_order_1 = Order.objects.create(customer=staff_user,status='ARC')
+    archived_order_2 = Order.objects.create(customer=staff_user,status='ARC')
+    delivering_order = Order.objects.create(customer=staff_user,status='DNG')
+    OrderLine.objects.create(parent_order=archived_order_1, product=Product.objects.filter(description__endswith='(demo)').first())
     # TODO
 
     # login as admin for testing purposes
-    LogoutView.as_view()(request)
-    auth_admin = authenticate(username='admin', password='admin')
-    login(request, auth_admin)
+    # LogoutView.as_view()(request)
+    # auth_admin = authenticate(username='admin', password='admin')
+    # login(request, auth_admin)
 
     return redirect(reverse('products'))
 

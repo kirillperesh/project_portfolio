@@ -3,6 +3,8 @@ from django.db import models
 from django.utils import timezone, dateformat
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from django.utils.crypto import get_random_string
+from urllib.error import HTTPError as HTTPError_fail_to_open_img
 from model_utils.models import TimeStampedModel
 from django.core.validators import MinValueValidator, MaxValueValidator
 from taggit.managers import TaggableManager
@@ -208,18 +210,19 @@ class Product(Price, TimeStampedModel):
         super().save(*args, **kwargs)
         self.__original_name = self.name
 
-    def add_images_from_url(self, url_list):
-        """
-        TODO"""
+    def add_images_from_url(self, *, url_list):
+        """Saves images from url_list to photologue/photos folder, then creates photologue photo instances of them and assignes them to the current product instance"""
         for url in url_list:
             img_extention = f".{str(url).split('.')[-1]}"
             temp_img = NamedTemporaryFile(suffix=img_extention, dir=os.path.join(MEDIA_ROOT, 'photologue', 'photos'))
-            with urlopen(url) as uo:
-                if uo.status != 200: continue
-                temp_img.write(uo.read())
-                temp_img.flush()
+            try:
+                with urlopen(url) as uo:
+                    if uo.status != 200: continue
+                    temp_img.write(uo.read())
+                    temp_img.flush()
+            except HTTPError_fail_to_open_img: continue # skips an image if it failed to open
             image_file = File(temp_img)
-            image_name = str(url).split('/')[-1] + f'_{self.name}'
+            image_name = f"{get_random_string(length=5)}_{str(url).split('/')[-1][-10:]}_{self.name}"
             photo = photo_models.Photo.objects.create(image=image_file, title=image_name, slug=slugify(image_name))
             self.photos.photos.add(photo)
 
