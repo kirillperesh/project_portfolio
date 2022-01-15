@@ -363,12 +363,17 @@ def generate_stuff_view(request):
         new_product.save()
 
     # orders generation block
-    canceled_order = Order.objects.create(customer=staff_user,status='CAN')
     confirmed_order = Order.objects.create(customer=staff_user,status='CON')
     archived_order_1 = Order.objects.create(customer=staff_user,status='ARC')
     archived_order_2 = Order.objects.create(customer=staff_user,status='ARC')
     delivering_order = Order.objects.create(customer=staff_user,status='DNG')
-    OrderLine.objects.create(parent_order=archived_order_1, product=Product.objects.filter(description__endswith='(demo)').first())
+    canceled_order = Order.objects.create(customer=staff_user,status='CAN')
+
+    all_orders = Order.objects.filter(customer=staff_user)
+    all_demo_products = Product.objects.filter(description__endswith='(demo)')
+    for order in all_orders:
+        for _ in range(random.randint(1, 6)):
+            OrderLine.objects.create(parent_order=order, product=random.choice(all_demo_products))
     # TODO
 
     # login as admin for testing purposes
