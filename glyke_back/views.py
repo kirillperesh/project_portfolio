@@ -24,6 +24,7 @@ from .forms import AddProductForm, PhotosForm, SelectCategoryProductForm, Regist
 from .models import Category, Order, OrderLine, Product
 from .decorators_mixins import user_is_staff_or_404, UserIsStaff_Or404_Mixin
 
+from time import perf_counter # TODO remove
 
 def create_gallery(*, title):
     """Creates and returns a photologue gallery by name
@@ -324,6 +325,7 @@ def generate_stuff_view(request):
     """
     Takes the initial demo data proj_folio.defaults.
     TODO"""
+    print(perf_counter())
     if not DEBUG_MODE: return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'DEBUG mode is OFF'})}")
     # duplicates deletion block
     gallery_qs = photo_models.Gallery.objects.filter(title__startswith='(demo)')
@@ -343,9 +345,11 @@ def generate_stuff_view(request):
     Jewelry_category = Category.objects.create(name='Jewelry', description='Gorgeous handmade jewelry (demo)', bg_color='tomato')
     Necklaces_category = Category.objects.create(name='Necklaces', description='Beautiful handmade necklaces (demo)', bg_color='darkorange', parent=Jewelry_category)
     Rings_category = Category.objects.create(name='Rings', description='Shiny handmade rings (demo)', bg_color='peachpuff', parent=Jewelry_category)
-    for demo_category in Category.objects.filter(description__endswith='(demo)'):
-        demo_category.filters.add(*category_filters_demo)
+    all_demo_categories = [Hats_category,Jewelry_category,Necklaces_category,Rings_category]
+    for demo_category in all_demo_categories:
+        demo_category.filters.add(*category_filters_demo) # from defaults
     # products generation block
+    all_demo_products = list()
     for title, rest in products_to_generate_demo.items():
         new_product = Product.objects.create(name=title,
                                              description=rest['description'],
@@ -361,21 +365,17 @@ def generate_stuff_view(request):
         new_product.tags.add(*rest['tags'])
         new_product.add_images_from_url(url_list=rest['photos'])
         new_product.save()
-
+        all_demo_products.append(new_product)
     # orders generation block
-    confirmed_order = Order.objects.create(customer=staff_user,status='CON')
-    archived_order_1 = Order.objects.create(customer=staff_user,status='ARC')
-    archived_order_2 = Order.objects.create(customer=staff_user,status='ARC')
-    delivering_order = Order.objects.create(customer=staff_user,status='DNG')
-    canceled_order = Order.objects.create(customer=staff_user,status='CAN')
-
-    all_orders = Order.objects.filter(customer=staff_user)
-    all_demo_products = Product.objects.filter(description__endswith='(demo)')
-    for order in all_orders:
+    all_demo_orders = list()
+    for status in ('CON','ARC','ARC','DNG','CAN'):
+        demo_order = Order.objects.create(customer=staff_user,status=status)
+        all_demo_orders.append(demo_order)
+    for order in all_demo_orders:
         for _ in range(random.randint(1, 6)):
             OrderLine.objects.create(parent_order=order, product=random.choice(all_demo_products))
     # TODO
-
+    print(perf_counter())
     # login as admin for testing purposes
     # LogoutView.as_view()(request)
     # auth_admin = authenticate(username='admin', password='admin')
