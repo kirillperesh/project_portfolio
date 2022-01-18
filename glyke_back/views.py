@@ -321,9 +321,12 @@ def profile_view(request):
 
 @require_http_methods(["GET",])
 def generate_stuff_view(request):
-    """
-    Takes the initial demo data proj_folio.defaults.
-    TODO"""
+    """The view can only be used in DEBUG mode, for demo purposes.
+    Takes the initial demo data from proj_folio.defaults.
+    Generates a demo staff_user, some categories, products (downloading images to the local repo) and orders.
+    All generated instances are marked with "(demo)" string.
+    Deletes all previously generated demo objects.
+    Does't delete local images, only model instances."""
     if not DEBUG_MODE: return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'DEBUG mode is OFF'})}")
     # duplicates deletion block
     gallery_qs = photo_models.Gallery.objects.filter(title__startswith='(demo)')
@@ -372,13 +375,10 @@ def generate_stuff_view(request):
     for order in all_demo_orders:
         for _ in range(random.randint(1, 6)):
             OrderLine.objects.create(parent_order=order, product=random.choice(all_demo_products))
-    # TODO
-
     # login as admin for testing purposes
     # LogoutView.as_view()(request)
     # auth_admin = authenticate(username='admin', password='admin')
     # login(request, auth_admin)
-
     return redirect(reverse('products'))
 
 class ProductsView(ListView):
