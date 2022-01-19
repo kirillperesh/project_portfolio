@@ -24,7 +24,6 @@ from .forms import AddProductForm, PhotosForm, SelectCategoryProductForm, Regist
 from .models import Category, Order, OrderLine, Product
 from .decorators_mixins import user_is_staff_or_404, UserIsStaff_Or404_Mixin
 
-from time import perf_counter # TODO remove
 
 def create_gallery(*, title):
     """Creates and returns a photologue gallery by name
@@ -325,7 +324,6 @@ def generate_stuff_view(request):
     """
     Takes the initial demo data proj_folio.defaults.
     TODO"""
-    print(perf_counter())
     if not DEBUG_MODE: return redirect(f"{reverse('smth_went_wrong')}?{urlencode({'error_suffix': 'DEBUG mode is OFF'})}")
     # duplicates deletion block
     gallery_qs = photo_models.Gallery.objects.filter(title__startswith='(demo)')
@@ -367,15 +365,15 @@ def generate_stuff_view(request):
         new_product.save()
         all_demo_products.append(new_product)
     # orders generation block
-    all_demo_orders = list()
+    all_demo_orders = [get_order(request, status='CUR')]
     for status in ('CON','ARC','ARC','DNG','CAN'):
-        demo_order = Order.objects.create(customer=staff_user,status=status)
+        demo_order = Order.objects.create(customer=staff_user, status=status)
         all_demo_orders.append(demo_order)
     for order in all_demo_orders:
         for _ in range(random.randint(1, 6)):
             OrderLine.objects.create(parent_order=order, product=random.choice(all_demo_products))
     # TODO
-    print(perf_counter())
+
     # login as admin for testing purposes
     # LogoutView.as_view()(request)
     # auth_admin = authenticate(username='admin', password='admin')
