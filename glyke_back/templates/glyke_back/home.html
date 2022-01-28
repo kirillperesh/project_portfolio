@@ -14,6 +14,10 @@
 {% block title %} Portfolio Web App {% endblock %}
 
 {% block content %}
+	<div id="generate-loading-bg" style="display: block;">
+		<div class="spinner-border text-secondary generate-loading-img" role="status" alt="Generating stuff..."></div>
+		<div class="hero-paragraph generate-loading-img generate-loading-txt">Generating stuff, please wait...</div>
+	</div>
     <div class="body-wrap boxed-container">
         <main>
             <section class="hero">
@@ -24,7 +28,9 @@
 	                        <p class="hero-paragraph is-revealing">This is a Django-based E-commerce app meant for a studio selling handcrafted stuff</p>
 
 							{% if debug_mode_on %}
-								<p class="hero-paragraph is-revealing generate-catalogue mb-0 mt-0"><a href="{% url 'generate_stuff_view'%}">To quickly generate a staff user and some products click here</a></p>
+								<p class="hero-paragraph is-revealing generate-catalogue mb-0 mt-0">
+									<a href="{% url 'generate_stuff_view'%}" onclick='show_loading_spinner()'>To quickly generate a staff user and some products click here</a>
+								</p>
 								<p class="text-sm mt-0 generate-catalogue-details">[ This will download a dosen images to your local repo ]<br>[ should take about 40 seconds ]</p>
 							{% endif %}
 
