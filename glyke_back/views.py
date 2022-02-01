@@ -439,6 +439,7 @@ class ProductDetailView(DetailView):
 class Home(TemplateView):
     http_method_names = ['get',]
     template_name = 'home.html'
+    extra_context = {'debug_mode_on': DEBUG_MODE}
 
     # TODO finish home page
     # TODO add quickly-genarate-stuff-view
@@ -474,4 +475,4 @@ class AddToCartView(LoginRequiredMixin, RedirectView):
                                  )
         return RedirectView.dispatch(self, request, *args, **kwargs)
 
-# TODO add loading icon for demo generator view
+# TODO add loading icon - spinner for demo generator view

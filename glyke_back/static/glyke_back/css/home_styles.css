@@ -35,3 +35,48 @@ body{
     color: #f5a52380;
     font-size: 16px;
 }
+
+#generate-loading-bg {
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0.3;
+    background-color: rgb(220, 220, 220);
+    z-index: 99;
+  }
+
+  .generate-loading-img {
+    z-index: 100;
+    position: fixed; /* or absolute */
+    top: calc(50% - 50px);
+    left: calc(50% - 50px);
+    width: 100px;
+    height: 100px;
+  }
+  .generate-loading-txt {
+    top: calc(50% + 100px);
+    left: calc(50% - 250px);
+    width: 500px;
+  }
+
+  .fade-in-2s-op03 {
+	opacity: 1;
+	animation-name: fadeInOpacity;
+	animation-iteration-count: 1;
+	animation-timing-function: ease-in;
+	animation-duration: 2s;
+}
+
+@keyframes fadeInOpacity {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: .3;
+	}
+}
